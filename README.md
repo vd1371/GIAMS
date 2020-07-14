@@ -1,2 +1,4 @@
-# Chiao Project
-Chiao Project - A modular framework for life-cycle optimization of infrastructure assets
+# GIAMS Project
+GIAMS - General Infrastructure Asset Maangement Systems
+
+A modular framework for life-cycle optimization and management of infrastructure assets
