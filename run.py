@@ -20,9 +20,9 @@ def lca():
 	mynetwork.load_network(n_assets = 1)
 
 	# mynetwork.assets[0].mrr_model.set_mrr(np.array([[1,1,1,1,1,0,0,0,1,0,1,0], [1,0,1,0,1,0,1,0,1,0,1,1], [0,0,0,0,1,1,0,0,0,1,1,1]]))
-	mynetwork.set_current_budget_limit(200)
-	mynetwork.set_budget_limit_model(Linear(X0 = 200, drift = 0))
-	mynetwork.set_npv_budget_limit(400)
+	mynetwork.set_current_budget_limit(10000)
+	mynetwork.set_budget_limit_model(Linear(X0 = 10000, drift = 0))
+	mynetwork.set_npv_budget_limit(100000)
 	
 	simulator = BridgeSimulator()
 	
@@ -30,7 +30,7 @@ def lca():
 			lca_name = session_name,
 			simulator = simulator,
 			random = False,
-			is_hazard = True)
+			is_hazard = False)
 
 	return lca
 
@@ -44,7 +44,7 @@ def GA_test(obj):
 							n_generations = 200,
 							n_elites = 5,
 							optimzition_type = 'max',
-							n_jobs = -1)
+							n_jobs = 1)
 	optimizer.optimize()
 
 def IUC_test(obj):
@@ -55,7 +55,7 @@ def IUC_test(obj):
 
 if __name__ == "__main__":
 
-	# GA_test(lca)
+	GA_test(lca)
 
 	# IUC_test()
 
@@ -83,7 +83,7 @@ if __name__ == "__main__":
 	# 	plt.pause(0.00001)
 
 	start = time.time()
-	my_lca.run(1000)
+	my_lca.run()
 	print (time.time()-start)
 	
 	print (my_lca.get_network_npv())

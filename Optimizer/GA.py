@@ -17,10 +17,48 @@ class Individual:
 
 	def evaluate(self):
 
+		self.lca_model = self.lca()
+		self.lca_model.network.set_network_mrr(self.get_chrom())
+		self.lca_model.run()
+
+		if self.is_in_budget():
+			self.value = self.lca_model.get_network_npv()[2]
+		else:
+			self.value = -1000
+
+	def is_valid(self):
+
 		lca = self.lca()
-		lca.network.set_network_mrr(self.get_chrom())
-		lca.run()
-		self.value = lca.get_network_npv()[2]
+		for asset in lca.network.assets:
+
+			if not asset.mrr_model.check_policy():
+				# To check whether the mrr meets certain policies
+				# For example only two reconstrcution for an element in the horizon
+				return False
+		return True
+
+	def is_in_budget(self):
+
+		def exceed_yearly_budget_against_costs(budgets, costs):
+
+			for budget, cost in zip(budgets, costs):
+				if cost > budget:
+					return True
+			return False
+
+		if self.lca_model.get_year_0()[1] > self.lca_model.network.current_budget_limit:
+			# To check whether the plan meets the current budget
+			return False
+
+		elif self.lca_model.get_network_npv()[1] > self.lca_model.network.npv_budget_limit:
+			# To put a cap on the npv of the MRR plan
+			return False
+
+		elif exceed_yearly_budget_against_costs(self.lca_model.network.budget_model.predict_series(random = False), self.lca_model.get_network_stepwise()[1]):
+			# To check whether the predicted costs and budget suits each other
+			return False
+
+		return True
 
 	def set_value(self, val):
 		self.value = val
@@ -79,38 +117,6 @@ class GA:
 	def _chrom_to_original_shape(self, chrom):
 		return np.array(chrom).reshape(self.chrom_shape)
 
-	def _check_preliminary_conditions(self, chrom):
-
-		# the chromosome of individual is a mrr_plan for a network, so we have to update the mrr_plans first
-		for i, asset in enumerate(self.lca_ref.network.assets):
-			asset.mrr_model.set_mrr(chrom[i])
-
-		def exceed_yearly_budget_against_costs(budget, costs):
-
-			for bud, cos in zip(budget, costs):
-				if cos > bud:
-					return True
-			return False
-
-		if not asset.mrr_model.check_policy(chrom):
-			# To check whether the mrr meets certain policies
-			# For example only two reconstrcution for an element in the horizon
-			return False
-
-		elif self.lca_ref.get_year_0()[1] > self.lca_ref.network.current_budget_limit:
-			# To check whether the plan meets the current budget
-			return False
-
-		elif self.lca_ref.get_network_npv()[1] > self.lca_ref.network.npv_budget_limit:
-			# To put a cap on the npv of the MRR plan
-			return False
-
-		elif exceed_yearly_budget_against_costs(self.lca_ref.network.budget_model.predict_series(random = False) ,self.lca_ref.get_network_stepwise()[2]):
-			# To check whether the predicted costs and budget suits each other
-			return False
-
-		return True
-
 	def set_ga_chars(self, crossver_prob = 0.75,
 							mutation_prob = 0.02,
 							population_size = 10,
@@ -157,14 +163,20 @@ class GA:
 		Genetic algorithm-based efficient feature selection for classification of pre-miRNAs. Genetics and molecular research, 10(2), pp.588-603.
 		'''
 		gener = []
-		for _ in range(int(self.population_size/5)):
+		while True:
 			for p in [0.1, 0.2, 0.3, 0.4, 0.5]:
 				chrom = np.random.choice([0,1], size = self.chrom_shape, p = [1-p, p])
 				new_ind = Individual(self.lca, chrom = chrom)
-				gener.append(new_ind)
+				if new_ind.is_valid():
+					gener.append(new_ind)
 				self._add_to_taboo_list(chrom)
 
-		return gener
+				print (len(gener))
+			
+			if len(gener) == self.population_size:
+				break
+
+		return gener[:self.population_size]
 
 	def mate(self, parent1, parent2):
 
@@ -206,22 +218,24 @@ class GA:
 			chrom1, chrom2 = self.mate(parent1, parent2)
 
 			# Adding offsprings to the next generation
-			if not self._is_in_taboo_list(chrom1) and self._check_preliminary_conditions(chrom1):
+			if not self._is_in_taboo_list(chrom1):
 
 				offspring1 = Individual(self.lca, chrom1)
-				next_gener.append(offspring1)
+				if offspring1.is_valid():
+					next_gener.append(offspring1)
 
-			if not self._is_in_taboo_list(chrom2) and self._check_preliminary_conditions(chrom2):
+			if not self._is_in_taboo_list(chrom2):
 				
 				offspring2 = Individual(self.lca, chrom2)
-				next_gener.append(offspring2)
+				if offspring2.is_valid():
+					next_gener.append(offspring2)
 
 			self._add_to_taboo_list(chrom1)
 			self._add_to_taboo_list(chrom2)
 
 			if (time.time()-start > 10):
 				start = time.time()
-				print("10 seconds has passed but no offspring could be generated given the conditions")
+				print("10 seconds has passed but no offspring could be generated given the conditions, something is wrong")
 
 		return next_gener[:self.population_size]
 
@@ -230,8 +244,11 @@ class GA:
 		idx = self.n_elites if n_gener != 0 else 0
 
 		# Evaluating the individuals
-		with mp.Pool(max(-self.n_jobs * mp.cpu_count(), self.n_jobs)) as P:
-			gener = P.map(_eval_ind, gener)
+		# with mp.Pool(max(-self.n_jobs * mp.cpu_count(), self.n_jobs)) as P:
+		# 	gener = P.map(_eval_ind, gener)
+
+		for ind in gener:
+			ind.evaluate()
 
 		return gener
 

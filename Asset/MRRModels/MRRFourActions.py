@@ -1,5 +1,8 @@
 import numpy as np
-from .BaseMRRPlan import BaseMRRPlan
+from collections import Counter
+
+from .BaseMRRPlan import *
+
 
 class MRRFourActions(BaseMRRPlan):
 	
@@ -43,5 +46,17 @@ class MRRFourActions(BaseMRRPlan):
 
 		return self.mrr
 
-	def check_policy(self, mrr = None):
+	def check_policy(self):
+		mrr_decimal = self.mrr_to_decimal()
+
+		for elem_mrr in mrr_decimal:
+			counts = Counter(elem_mrr)
+
+			if counts[self.RECON] > 2:
+				return False
+			elif counts[self.REHAB] > 4:
+				return False
+			elif counts[self.MAINT] > 5:
+				return False
+
 		return True

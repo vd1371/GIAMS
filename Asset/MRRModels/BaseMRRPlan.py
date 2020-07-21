@@ -1,4 +1,4 @@
-from utils.GeneralSettings import GenSet
+from utils.GeneralSettings import *
 
 class BaseMRRPlan(GenSet):
 	

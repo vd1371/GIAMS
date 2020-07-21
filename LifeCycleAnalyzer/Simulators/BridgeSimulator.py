@@ -103,6 +103,5 @@ class BridgeSimulator(BaseSimulator):
 					element.add_age(self.dt)
 
 				element.append_next_condition(next_condition)
-			input()
 
 		return user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise
