@@ -19,7 +19,7 @@ def lca():
 	mynetwork = IndianaNetwork("INDIANA2019")
 	mynetwork.load_network(n_assets = 1)
 
-	mynetwork.assets[0].mrr_model.set_mrr([[1,1,1,1,1,0,0,0,1,0,1,0], [1,0,1,0,1,0,1,0,1,0,1,1], [0,0,0,0,1,1,0,0,0,1,1,1]])
+	mynetwork.assets[0].mrr_model.set_mrr(np.array([[1,1,1,1,1,0,0,0,1,0,1,0], [1,0,1,0,1,0,1,0,1,0,1,1], [0,0,0,0,1,1,0,0,0,1,1,1]]))
 	mynetwork.set_current_budget_limit(200)
 	mynetwork.set_budget_limit_model(Linear(X0 = 200, drift = 0))
 	mynetwork.set_npv_budget_limit(400)
@@ -34,8 +34,7 @@ def lca():
 	return lca
 
 
-def GA_test():
-	obj = lca()
+def GA_test(obj):
 
 	optimizer = GA(obj)
 	optimizer.set_ga_chars(crossver_prob = 0.75,
@@ -56,11 +55,13 @@ def IUC_test():
 
 if __name__ == "__main__":
 
-	# GA_test()
+	my_lca = lca()
+
+
+	GA_test(lca)
 
 	# IUC_test()
 
-	my_lca = lca()
 
 	import matplotlib.pyplot as plt
 

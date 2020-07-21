@@ -28,17 +28,17 @@ def to_binary(actions):
 class IUC(GenSet):
 	def __init__(self, lca = None):
 
-		# Objective_function is an instance of lca
-		# lca has network, directory, log, and 
-		self.directory = lca.directory
-		self.log = lca.log
-
 		# Gettign the objective function
 		self.lca = lca
 
+		# Objective_function is an instance of lca
+		# lca has network, directory, log, and
+		self.lca_ref = lca()
+		self.directory = lca.directory
+		self.log = lca.log
 
-		n_assets = len(self.lca.network.assets)
-		self.asset_mrr_shape = self.lca.network.assets[0].mrr_model.mrr.shape
+		n_assets = len(self.lca_ref.network.assets)
+		self.asset_mrr_shape = self.lca_ref.network.assets[0].mrr_model.mrr.shape
 		self.network_mrr_shape = (n_assets, self.asset_mrr_shape[0], self.asset_mrr_shape[1])
 
 		self.possible_mrrs = list(product([0,1], repeat=8))
@@ -51,7 +51,7 @@ class IUC(GenSet):
 
 			start = time.time()
 			assessment_dic = {}
-			for asset_idx, asset in enumerate(self.lca.network.assets):
+			for asset_idx, asset in enumerate(self.lca_ref.network.assets):
 
 				print (f"Asset {asset_idx + 1} is about to be processed at step {step+1} / {self.n_steps}")
 
@@ -68,7 +68,8 @@ class IUC(GenSet):
 					asset.mrr_model.set_mrr(mrr)
 
 					# Running the simulation
-					self.lca.run_for_one_asset(asset)
+					obj = self.lca()
+					obj.run_for_one_asset(asset)
 
 					# Let's get the costs
 					user_costs = asset.accumulator.user_costs.at_year(step*self.dt)
@@ -87,7 +88,7 @@ class IUC(GenSet):
 			assessment_dic = {k: v for k, v in sorted(assessment_dic.items(), key=lambda item: item[1][1], reverse = True)}
 
 			# Finding the budget at the step
-			remaining_budget = self.lca.network.budget_model.predict_series(random = False)[step]
+			remaining_budget = self.lca_ref.network.budget_model.predict_series(random = False)[step]
 			planned_assets = []
 
 			# Update the network_mrr based on the budget and the assessment dic
@@ -114,7 +115,7 @@ class IUC(GenSet):
 			print (f"Step {step} is analyzed and optimized in {time.time() - start:.2f} seconds")
 
 
-		self.lca.log.info(f"\nThe network mrr as a result of IUC - Incremental utility-cost ratio\n{network_mrr}")
+		self.log.info(f"\nThe network mrr as a result of IUC - Incremental utility-cost ratio\n{network_mrr}")
 		print ("IUC optimization is done")
 
 

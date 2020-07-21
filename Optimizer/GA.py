@@ -3,13 +3,24 @@ import numpy as np
 from deap import tools
 import matplotlib.pyplot as plt
 
+import multiprocessing as mp
+
 
 class Individual:
 
-	def __init__(self, chrom = None, val = None, flag = 'Regular'):
+	def __init__(self, lca, chrom = None, val = None, flag = 'Regular'):
+		
+		self.lca = lca
 		self.chrom = chrom
 		self.value = val
 		self.flag = flag
+
+	def evalute(self):
+
+		lca = self.lca()
+		lca.network.set_network_mrr(self.get_chrom())
+		lca.run()
+		self.value = lca.get_network_npv()[2]
 
 	def set_value(self, val):
 		self.value = val
@@ -30,19 +41,20 @@ class GA:
 	def __init__(self, lca = None):
 
 		# Objective_function is an instance of lca
-		# lca has network, directory, log, and 
-		self.directory = lca.directory
-		self.log = lca.log
-
-		# Gettign the objective function
 		self.lca = lca
+
+		# Gettign one instance the objective function
+		self.lca_ref = lca()
+
+		# lca has network, directory, log, and 
+		self.directory = self.lca_ref.directory
+		self.log = self.lca_ref.log
 
 		# Initializing the GA characteristics
 		self.set_ga_chars()
 
-
-		asset_mrr_shape = self.lca.network.assets[0].mrr_model.mrr.shape
-		n_assets = len(self.lca.network.assets)
+		asset_mrr_shape = self.lca_ref.network.assets[0].mrr_model.mrr.shape
+		n_assets = len(self.lca_ref.network.assets)
 
 		# It will be used to reshape the chromosome to 1d and original shape
 		self.chrom_shape = (n_assets, asset_mrr_shape[0], asset_mrr_shape[1])
@@ -65,7 +77,7 @@ class GA:
 	def _check_preliminary_conditions(self, chrom):
 
 		# the chromosome of individual is a mrr_plan for a network, so we have to update the mrr_plans first
-		for i, asset in enumerate(self.lca.network.assets):
+		for i, asset in enumerate(self.lca_ref.network.assets):
 			asset.mrr_model.set_mrr(chrom[i])
 
 		def exceed_yearly_budget_against_costs(budget, costs):
@@ -80,15 +92,15 @@ class GA:
 			# For example only two reconstrcution for an element in the horizon
 			return False
 
-		elif self.lca.get_year_0()[1] > self.lca.network.current_budget_limit:
+		elif self.lca_ref.get_year_0()[1] > self.lca_ref.network.current_budget_limit:
 			# To check whether the plan meets the current budget
 			return False
 
-		elif self.lca.get_network_npv()[1] > self.lca.network.npv_budget_limit:
+		elif self.lca_ref.get_network_npv()[1] > self.lca_ref.network.npv_budget_limit:
 			# To put a cap on the npv of the MRR plan
 			return False
 
-		elif exceed_yearly_budget_against_costs(self.lca.network.budget_model.predict_series(random = False) ,self.lca.get_network_stepwise()[2]):
+		elif exceed_yearly_budget_against_costs(self.lca_ref.network.budget_model.predict_series(random = False) ,self.lca_ref.get_network_stepwise()[2]):
 			# To check whether the predicted costs and budget suits each other
 			return False
 
@@ -206,24 +218,22 @@ class GA:
 
 		return next_gener[:self.population_size]
 
-	def eval_gener(self, gener, n_gener):
-		# Evaluating the objective function of the problem
+	def eval_gener(self, gener, n_gener, n_jobs = 1):
+		# Evaluating the objective function of the problem except the elites
 		idx = self.n_elites if n_gener != 0 else 0
+
+		# Finding the number of computaional core
+		if n_jobs == -1:
+			n= mp.cpu_counts()
 
 		for counter, ind in enumerate(gener[idx:]):
 
-			start = time.time()
-			self.lca.network.set_network_mrr(ind.get_chrom())
+			ind.lca.network.set_network_mrr(ind.get_chrom())
 
 			# now let's find the expected objective
-			self.lca.run()
+			ind.evalute()
 
-			# This is the network utility
-			val = self.lca.get_network_npv()[2]
-			ind.set_value(val)
-
-			# ind.set_value(np.random.random())
-			# print (f"{counter} - {ind} is done in {time.time()-start:.2f}")
+			print (obj.network.assets[0].accumulator.user_costs.simulator_counter)
 
 		return gener
 
