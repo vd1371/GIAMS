@@ -244,11 +244,11 @@ class GA:
 		idx = self.n_elites if n_gener != 0 else 0
 
 		# Evaluating the individuals
-		# with mp.Pool(max(-self.n_jobs * mp.cpu_count(), self.n_jobs)) as P:
-		# 	gener = P.map(_eval_ind, gener)
+		with mp.Pool(max(-self.n_jobs * mp.cpu_count(), self.n_jobs)) as P:
+			gener = P.map(_eval_ind, gener)
 
-		for ind in gener:
-			ind.evaluate()
+		# for ind in gener:
+		# 	ind.evaluate()
 
 		return gener
 
