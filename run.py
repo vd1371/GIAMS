@@ -29,7 +29,8 @@ def lca():
 	lca = LCA(network = mynetwork,
 			lca_name = session_name,
 			simulator = simulator,
-			random = False)
+			random = False,
+			is_hazard = True)
 
 	return lca
 
@@ -42,29 +43,25 @@ def GA_test(obj):
 							population_size = 100,
 							n_generations = 200,
 							n_elites = 5,
-							optimzition_type = 'max')
+							optimzition_type = 'max',
+							n_jobs = -1)
 	optimizer.optimize()
 
-def IUC_test():
+def IUC_test(obj):
 
-	obj = lca()
 	optimizer = IUC(obj)
 	optimizer.optimize()
 
 
-
 if __name__ == "__main__":
 
-	my_lca = lca()
-
-
-	GA_test(lca)
+	# GA_test(lca)
 
 	# IUC_test()
 
 
+	my_lca = lca()
 	import matplotlib.pyplot as plt
-
 
 	sim_utils = []
 
@@ -86,7 +83,7 @@ if __name__ == "__main__":
 	# 	plt.pause(0.00001)
 
 	start = time.time()
-	my_lca.run(1000, is_hazard = True)
+	my_lca.run(100000)
 	print (time.time()-start)
 	
 	print (my_lca.get_network_npv())

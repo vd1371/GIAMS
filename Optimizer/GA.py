@@ -15,7 +15,7 @@ class Individual:
 		self.value = val
 		self.flag = flag
 
-	def evalute(self):
+	def evaluate(self):
 
 		lca = self.lca()
 		lca.network.set_network_mrr(self.get_chrom())
@@ -36,6 +36,11 @@ class Individual:
 	
 	def __str__(self):
 		return f"Ind {self.flag} - {hash(self.chrom.tostring())} - {self.chrom} - Val:{self.value}"
+
+# Creating a local function for to evaluate the individuals
+def _eval_ind(ind):
+	ind.evaluate()
+	return ind
 
 class GA:
 	def __init__(self, lca = None):
@@ -111,12 +116,14 @@ class GA:
 							population_size = 10,
 							n_generations = 200,
 							n_elites = 5,
-							optimzition_type = 'min'):
+							optimzition_type = 'min',
+							n_jobs = 1):
 		self.crossver_prob = crossver_prob
 		self.mutation_prob = mutation_prob
 		self.population_size = population_size
 		self.n_generations = n_generations
 		self.n_elites = n_elites
+		self.n_jobs = n_jobs
 
 		if optimzition_type == 'min':
 			self.sorting_order = False
@@ -153,7 +160,7 @@ class GA:
 		for _ in range(int(self.population_size/5)):
 			for p in [0.1, 0.2, 0.3, 0.4, 0.5]:
 				chrom = np.random.choice([0,1], size = self.chrom_shape, p = [1-p, p])
-				new_ind = Individual (chrom = chrom)
+				new_ind = Individual(self.lca, chrom = chrom)
 				gener.append(new_ind)
 				self._add_to_taboo_list(chrom)
 
@@ -186,7 +193,7 @@ class GA:
 
 		# Ellitism
 		for i in range(self.n_elites):
-			new_ind = Individual(gener[i].get_chrom(), gener[i].value, 'Elite')
+			new_ind = Individual(self.lca, gener[i].get_chrom(), gener[i].value, 'Elite')
 			next_gener.append(new_ind)
 
 		start = time.time()
@@ -201,12 +208,12 @@ class GA:
 			# Adding offsprings to the next generation
 			if not self._is_in_taboo_list(chrom1) and self._check_preliminary_conditions(chrom1):
 
-				offspring1 = Individual(chrom1)
+				offspring1 = Individual(self.lca, chrom1)
 				next_gener.append(offspring1)
 
 			if not self._is_in_taboo_list(chrom2) and self._check_preliminary_conditions(chrom2):
 				
-				offspring2 = Individual(chrom2)
+				offspring2 = Individual(self.lca, chrom2)
 				next_gener.append(offspring2)
 
 			self._add_to_taboo_list(chrom1)
@@ -218,22 +225,13 @@ class GA:
 
 		return next_gener[:self.population_size]
 
-	def eval_gener(self, gener, n_gener, n_jobs = 1):
+	def eval_gener(self, gener, n_gener):
 		# Evaluating the objective function of the problem except the elites
 		idx = self.n_elites if n_gener != 0 else 0
 
-		# Finding the number of computaional core
-		if n_jobs == -1:
-			n= mp.cpu_counts()
-
-		for counter, ind in enumerate(gener[idx:]):
-
-			ind.lca.network.set_network_mrr(ind.get_chrom())
-
-			# now let's find the expected objective
-			ind.evalute()
-
-			print (obj.network.assets[0].accumulator.user_costs.simulator_counter)
+		# Evaluating the individuals
+		with mp.Pool(max(-self.n_jobs * mp.cpu_count(), self.n_jobs)) as P:
+			gener = P.map(_eval_ind, gener)
 
 		return gener
 

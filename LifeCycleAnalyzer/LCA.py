@@ -16,12 +16,14 @@ class LCA(BaseLCA):
 						logger = None,
 						directory = None,
 						log_level = logging.DEBUG,
-						random = True):
+						random = True,
+						is_hazard = True):
 		super().__init__(network, lca_name, simulator, logger, directory, log_level)
 
 		self.random = random
+		self.is_hazard = is_hazard
 
-	def run(self, n_simulations = None, is_hazard = True, random = False):
+	def run(self, n_simulations = None, random = False):
 
 		N = self.n_simulations if n_simulations is None else n_simulations
 
@@ -32,7 +34,7 @@ class LCA(BaseLCA):
 			
 			for i in range(N):
 
-				user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise = self.simulator.get_one_instance(asset, is_hazard, random = self.random)
+				user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise = self.simulator.get_one_instance(asset, self.is_hazard, random = self.random)
 				asset.accumulator.update(user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise)
 
 	def run_for_one_asset(self, asset, n_simulations = None):
