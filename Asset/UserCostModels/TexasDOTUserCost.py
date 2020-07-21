@@ -34,7 +34,7 @@ class TexasDOTUserCost(BaseUserCostModel):
 
 		delay = self.asset.length/self.speed_after - self.asset.length/self.speed_before # In minutes
 		delay_cost = delay / 60 * (vehicles * vehicle_value_of_time + trucks * truck_value_of_time) # per hour
-		marginal_cost = (vehicles * vehicle_marginal_cost_per_mile + trucks * truck_marginal_cost_per_mile) * self.asset.length
+		marginal_cost = (vehicles * vehicle_marginal_cost_per_mile + trucks * truck_marginal_cost_per_mile) * self.asset.length / 1609 # meter to mile
 
 		# For those who uses the detour
 		trucks = int (self.asset.ADT * self.detour_usage_percentage * self.asset.truck_percentage) 

@@ -19,7 +19,7 @@ def lca():
 	mynetwork = IndianaNetwork("INDIANA2019")
 	mynetwork.load_network(n_assets = 1)
 
-	mynetwork.assets[0].mrr_model.set_mrr(np.array([[1,1,1,1,1,0,0,0,1,0,1,0], [1,0,1,0,1,0,1,0,1,0,1,1], [0,0,0,0,1,1,0,0,0,1,1,1]]))
+	# mynetwork.assets[0].mrr_model.set_mrr(np.array([[1,1,1,1,1,0,0,0,1,0,1,0], [1,0,1,0,1,0,1,0,1,0,1,1], [0,0,0,0,1,1,0,0,0,1,1,1]]))
 	mynetwork.set_current_budget_limit(200)
 	mynetwork.set_budget_limit_model(Linear(X0 = 200, drift = 0))
 	mynetwork.set_npv_budget_limit(400)
@@ -83,7 +83,7 @@ if __name__ == "__main__":
 	# 	plt.pause(0.00001)
 
 	start = time.time()
-	my_lca.run(100000)
+	my_lca.run(1000)
 	print (time.time()-start)
 	
 	print (my_lca.get_network_npv())

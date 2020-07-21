@@ -62,7 +62,7 @@ class BridgeSimulator(BaseSimulator):
 					if element_idx == self.n_elements - 1:
 						
 						# Adding the loss cost of the asset due to earthquake
-						user_costs_stepwise[step] += asset.hazard_model.loss.total_costs(ds, step, random)
+						user_costs_stepwise[step] += asset.hazard_model.loss.predict_series(ds, random)[step]
 
 					# print ('next_condition', next_condition, 'in hazard. Element_idx:', element_idx)
 							
@@ -103,5 +103,6 @@ class BridgeSimulator(BaseSimulator):
 					element.add_age(self.dt)
 
 				element.append_next_condition(next_condition)
+			input()
 
 		return user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise

@@ -24,11 +24,10 @@ class HazusLossModel(BaseHazardLossModel):
 		# Given the inadequacy of the models provided in the hazus, this section has been left blank
 		return 0
 
-	def total_costs(self, ds, step, random = True):
-		replacement_value = self.asset.replacement_value.predict_series(random, "total_costs in hazard loss")[step]
+	def predict_series(self, ds, random = True):
+		
+		replacement_value = self.asset.replacement_value.predict_series(random, "total_costs in hazard loss")
 		
 		direct = self.direct_economic_loss(ds, replacement_value)
-		indirect = self.indirect_costs(ds, replacement_value)
-		casualties = self.casualties_costs(ds, replacement_value)
 
-		return direct + indirect + casualties
+		return direct

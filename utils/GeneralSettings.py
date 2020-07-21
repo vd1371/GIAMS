@@ -22,7 +22,7 @@ LOCAL = 'Local'
 
 class GenSet(object):
 
-	n_simulations = 1000
+	n_simulations = 10000
 	n_elements = 3
 	n_states = 8
 	dt = 2
