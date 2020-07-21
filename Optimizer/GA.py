@@ -39,6 +39,8 @@ class GA:
 
 		# Initializing the GA characteristics
 		self.set_ga_chars()
+
+
 		asset_mrr_shape = self.lca.network.assets[0].mrr_model.mrr.shape
 		n_assets = len(self.lca.network.assets)
 
@@ -86,7 +88,7 @@ class GA:
 			# To put a cap on the npv of the MRR plan
 			return False
 
-		elif exceed_yearly_budget_against_costs(self.lca.network.budget_model.predict_series() ,self.lca.get_network_stepwise()[2]):
+		elif exceed_yearly_budget_against_costs(self.lca.network.budget_model.predict_series(random = False) ,self.lca.get_network_stepwise()[2]):
 			# To check whether the predicted costs and budget suits each other
 			return False
 
@@ -234,6 +236,7 @@ class GA:
 		n_gener = 0
 		best_values, gener_num_holder = [], []
 
+		start = time.time()
 		while n_gener < self.n_generations:
 			# If certain criteria is met, break the loop
 			### TODO: Write termination criteria
@@ -251,7 +254,7 @@ class GA:
 			best_values.append(gener[0].value)
 
 			self.log.info(log_str)
-			print (f"Gener: {n_gener} - {gener[0]} - TabooListLength: {len(self.taboo_list)}")
+			print (f"Gener: {n_gener} - {gener[0]} - TabooListLength: {len(self.taboo_list)} - Timme elapsed: {time.time()-start:.2f}")
 
 			# Plotting the value online
 			if should_plot:
@@ -272,6 +275,7 @@ class GA:
 
 		if should_plot:
 			plt.savefig(self.directory + "/GAValues.png")
+	
 
 
 

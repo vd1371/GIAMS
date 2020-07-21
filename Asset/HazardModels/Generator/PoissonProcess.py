@@ -3,10 +3,14 @@ from .BaseHazardModel import *
 
 class PoissonProcess(BaseHazardModel):
 
-	def __init__(self, occurrence_rate = 0.018):
+	def __init__(self, occurrence_rate = 0.018, dist = None):
 		super().__init__()
 
 		self.occurrence_rate = occurrence_rate
+		self.dist = dist
+
+	def set_occurrence_rate(self, val):
+		self.occurrence_rate = val
 
 	def set_magnitude_distribution(self, dist):
 		self.dist = dist

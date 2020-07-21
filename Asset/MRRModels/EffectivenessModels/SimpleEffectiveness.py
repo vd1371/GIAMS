@@ -2,11 +2,6 @@ import numpy as np
 
 from .BaseMRREffectivenessModel import BaseMRREffectivenessModel
 
-DONOT = 0
-MAINT = 1
-REHAB = 2
-RECON = 3
-
 class SimpleEffectiveness(BaseMRREffectivenessModel):
 	
 	def __init__(self):
@@ -39,9 +34,9 @@ class SimpleEffectiveness(BaseMRREffectivenessModel):
 											  		  [1, 0, 0, 0, 0, 0, 0, 0],
 											  		  [1, 0, 0, 0, 0, 0, 0, 0]])
 
-		self.effectiveness_dict = {MAINT: self.maintenance_effectiveness, REHAB: self.rehabilitation_effectiveness, RECON: self.reconstruction_effectiveness}
+		self.effectiveness_dict = {self.MAINT: self.maintenance_effectiveness, self.REHAB: self.rehabilitation_effectiveness, self.RECON: self.reconstruction_effectiveness}
 
-	def get_effectiveness(self, previous_state, action):
+	def get(self, previous_state, action):
 		
 		rand = np.random.random()
 

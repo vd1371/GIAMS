@@ -27,6 +27,7 @@ class FirstNetwork(BaseNetwork):
                                             maint_duration = maint_duration,
                                             rehab_duration = rehab_duration,
                                             recon_duration = recon_duration))
+        
         asset.set_mrr_effectiveness_model(SimpleEffectiveness())
 
         # User cost model
@@ -91,8 +92,46 @@ class FirstNetwork(BaseNetwork):
         self.assets = assets
         return assets
 
+    def set_current_budget_limit(self, val):
+        self.current_budget_limit = val
+
+    def set_budget_limit_model(self, model):
+        self.budget_model = model
+        
+    def set_npv_budget_limit(self, val):
+        self.npv_budget_limit = val
+
     def objective1(self):
         return np.random.random()
 
     def objective2(self):
         return np.random.random()
+
+
+def predictive_model(p_type, X0, first_param, second_param):
+    
+    if p_type == 'Linear':
+        return Linear(X0 = X0, drift = first_param)
+    elif p_type == 'WienerDrift':
+        return WienerDrift(X0 = X0, drift = first_param, volatility = second_param)
+    elif p_type == 'GBM':
+        return GBM(X0 = X0, drift = first_param, volatility = second_param)
+    else:
+        raise ValueError (f"({p_type}) predictive model is not implemented yet in the loader")
+
+def distribution(d_type, first_param, second_param):
+    if d_type == 'LogNormal':
+        return LogNormal(first_param, second_param)
+    elif d_type == 'Normal':
+        return Normal(first_param, second_param)
+    elif d_type == 'Exponential':
+        return Exponential(first_param)
+    elif d_type == 'Binomial':
+        return Binomial(first_param, second_param)
+    elif d_type == 'Gamma':
+        return Gamma(first_param, second_param)
+    elif d_type == 'Binomial':
+        return Binomial(first_param, second_param)
+
+    else:
+        raise ValueError (f"{d_type} distribution model is not implemented yet in the loader")

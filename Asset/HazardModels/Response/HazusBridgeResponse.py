@@ -9,15 +9,12 @@ BETA = 1 # It's just an index, to make it more clear to read
 
 class HazusBridgeResponse(BaseResponseModel):
 
-	def __init__(self, bridge_type = 'HWB1', skew_angle = 0, n_spans = 3):
-		super().__init__()
-		self.skew_angle = skew_angle
-		self.bridge_type = bridge_type
-		self.n_spans = n_spans
+	def __init__(self, asset):
+		super().__init__(asset)
 		
-		self.damage_state_dic = damage_state_dic_generator(self.bridge_type)
-		self.k_skew = np.sqrt(np.sin((90-self.skew_angle)*np.pi/180))
-		self.k_3d = k3d_calculator(self.bridge_type, self.n_spans)
+		self.damage_state_dic = damage_state_dic_generator(self.asset.hazus_class)
+		self.k_skew = np.sqrt(np.sin((90-self.asset.skew_angle)*np.pi/180))
+		self.k_3d = k3d_calculator(self.asset.hazus_class, self.asset.n_spans)
 
 		self.mapped_conditions = []
 		for key, val in self.damage_state_dic.items():
@@ -28,9 +25,8 @@ class HazusBridgeResponse(BaseResponseModel):
 		self.damage_state_dic['Extensive'][MEDIAN] = self.damage_state_dic['Extensive'][MEDIAN] * self.k_skew * self.k_3d
 		self.damage_state_dic['Collapse'][MEDIAN] = self.damage_state_dic['Collapse'][MEDIAN] * self.k_skew * self.k_3d
 
-	def get_response(self, previous_condition = -1, soil_type = 'A', pga=None, pgd=0, sa_long=0.5, sa_short = 0.1):
+	def get(self, previous_condition = -1, soil_type = 'A', pga=None, pgd=0, sa_long=0.5, sa_short = 0.1):
 
-	
 		# Reference: HAZUS Manual
 		sa_long = sa_long * long_period_modifier(sa_long, soil_type)
 
@@ -54,7 +50,7 @@ class HazusBridgeResponse(BaseResponseModel):
 		idx = conds.index(mapped_condition)
 		ds = ['ds1', 'ds2', 'ds3', 'ds4', 'ds5'][idx]
 			
-		return mapped_condition, ds
+		return max(mapped_condition, previous_condition), ds
 
 
 def long_period_modifier(sa_long, soil_type):
@@ -129,7 +125,7 @@ def k3d_calculator(bridge_type, n_spans):
 	elif bridge_type in ['HWB27']:
 		A, B = 0.1, 0
 
-	return 1 + A / (n_spans - B)
+	return 1 + A / max(n_spans - B, 1)
 
 def i_shape_calculator(bridge_type):
 	if bridge_type in ['HWB3', 'HWB4', 'HWB10', 'HWB11', 'HWB15', 'HWB16', 'HWB22', 'HWB23', 'HWB26', 'HWB27']:

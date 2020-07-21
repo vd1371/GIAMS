@@ -1,4 +1,4 @@
-
+from utils.GeneralSettings import *
 
 class BaseElement(object):
 
@@ -16,26 +16,11 @@ class BaseElement(object):
 	def set_age(self, new_age):
 		self.age = new_age
 
+	def add_age(self, incremenet):
+		self.age += incremenet
+
 	def append_next_condition(self, con):
 		self.conditions_in_horizon.append(con)
-
-	def set_condition_rating_model(self, model):
-		self.conditon_rating_model = model
-
-	def set_deterioration_model(self, model):
-		self.deterioration_model = model
-
-	def set_maintenance_cost_model(self, model):
-		self.maintenance_cost_model = model
-
-	def set_rehabilitation_cost_model(self, model):
-		self.rehabilitation_cost_model = model
-
-	def set_reconstruction_cost_model(self, model):
-		self.reconstruction_cost_model = model
-
-	def set_utility_model(self, model):
-		self.set_utility_model = model
 	
 	def __repr__(self):
 		return f"{self.name}-CR:{self.initial_condition}-Age:{self.age}"

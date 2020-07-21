@@ -6,6 +6,9 @@ class BaseHazardLossModel(GenSet):
 	def __init__(self):
 		super().__init__()
 
+	def set_asset(self, asset):
+		self.asset = asset
+
 	def direct_costs(self):
 		raise NotImplementedError ("direct_costs is not implemented yet")
 

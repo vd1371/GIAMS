@@ -27,7 +27,7 @@ class SuperstructureUtility(BaseUtility):
 	def utility_function(self, x):
 		return 119.13 * (1 - np.exp(-0.203 * x))
 
-class SubstructureUtiliy(BaseUtility):
+class SubstructureUtility(BaseUtility):
 
 	def __init(self):
 		super().__init__()

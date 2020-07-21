@@ -23,3 +23,6 @@ class BaseMRRPlan(GenSet):
 
 	def check_policy(self, mrr):
 		raise NotImplementedError ("check_policy of mrr is not implemented yet")
+
+	def set_effectiveness(self, model):
+		self.effectiveness = model

@@ -15,10 +15,16 @@ class Exponential(BasePredictiveModel):
 		'''
 		self.growth_rate = growth_rate
 
+		self.x = self.predict_series(random = True)
+
 	def predict(self, t = None):
 		return self.X0 * np.exp(t*self.growth_rate)
 
-	def predict_series(self):
-		T = np.linspace(0, self.horizon, self.n_steps)
-		x = self.X0 * np.exp(T*self.growth_rate)
-		return x
+	def predict_series(self, random = True):
+
+		if random:
+			T = np.linspace(0, self.horizon, self.n_steps)
+			x = self.X0 * np.exp(T*self.growth_rate)
+			return x
+		else:
+			return self.x

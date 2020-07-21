@@ -7,15 +7,12 @@ from .BaseResponseModel import BaseResponseModel
 
 class HazusBridgeResponseAccurate(BaseResponseModel):
 
-	def __init__(self, bridge_type = 'HWB1', skew_angle = 0, n_spans = 3):
-		super().__init__()
-		self.skew_angle = skew_angle
-		self.bridge_type = bridge_type
-		self.n_spans = n_spans
+	def __init__(self, asset):
+		super().__init__(asset)
 		
-		self.damage_state_dic = damage_state_dic_generator(self.bridge_type)
-		self.k_skew = np.sqrt(np.sin((90-self.skew_angle)*np.pi/180))
-		self.k_3d = k3d_calculator(self.bridge_type, self.n_spans)
+		self.damage_state_dic = damage_state_dic_generator(self.asset.hazus_class)
+		self.k_skew = np.sqrt(np.sin((90-self.asset.skew_angle)*np.pi/180))
+		self.k_3d = k3d_calculator(self.asset.hazus_class, self.asset.n_spans)
 
 		self.mapped_conditions = []
 		for key, val in self.damage_state_dic.items():

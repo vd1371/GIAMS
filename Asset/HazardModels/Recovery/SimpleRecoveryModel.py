@@ -5,7 +5,11 @@ class SimpleRecoveryModel(BaseRecoveryModel):
 	def __init__(self):
 		super().__init__()
 
-	def get_effectiveness(self, next_condition):
+	def get(self, after_hazard_condition):
 
-		actions = {2: self.MAINT, 3: self.REHAB, 4: self.RECON, 5: self.RECON}
-		return 0, actions[next_condition]
+		actions = {1: self.DONOT, 2: self.DONOT, 3: self.MAINT, 4: self.MAINT, 5: self.REHAB, 6: self.RECON, 7: self.RECON}
+
+		if not actions[after_hazard_condition] == self.RECON:
+			return 1, actions[after_hazard_condition]
+		else:
+			return 0, actions[self.RECON]

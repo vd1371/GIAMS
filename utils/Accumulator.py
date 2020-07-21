@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from .GeneralSettings import GenSet, NPV
+from .GeneralSettings import *
+from .NPV import NPV
 
 class Container(GenSet):
 	
@@ -11,9 +12,9 @@ class Container(GenSet):
 		self.stepwise = np.zeros(self.n_steps)
 		self.simulator_counter = 0
 
-	def add_to_stepwise(self, stepwise_vals):
-		for idx in range(self.n_steps):
-			self.stepwise[idx] = (self.stepwise[idx] * self.simulator_counter + stepwise_vals[idx]) / (self.simulator_counter + 1)
+	def update_stepwise(self, stepwise_vals):
+
+		self.stepwise = (self.stepwise * self.simulator_counter + stepwise_vals) / (self.simulator_counter + 1)
 		self.simulator_counter += 1
 
 	def add_to_npv_samples(self, val):
@@ -32,7 +33,7 @@ class Container(GenSet):
 	def get_stepwise(self):
 		return self.stepwise
 
-class Accum(GenSet):
+class Accumulator(GenSet):
 	'''
 	This class stores the simulation results, draw figures based on them, and possibly store the contents
 	'''
@@ -57,7 +58,7 @@ class Accum(GenSet):
 
 		# Updating other costs
 		self.user_costs.add_to_npv_samples(NPV(user_costs_stepwise, self.dt, self.discount_rate))
-		self.user_costs.add_to_stepwise(user_costs_stepwise)
+		self.user_costs.update_stepwise(user_costs_stepwise)
 
 		# Updating elements, agency and asset info
 		cost_holder, util_holder = 0, 0
@@ -71,14 +72,14 @@ class Accum(GenSet):
 			self.elements_costs[idx].add_to_npv_samples(npv_cost)
 			self.elements_utils[idx].add_to_npv_samples(npv_util)
 
-			self.elements_costs[idx].add_to_stepwise(costs)
-			self.elements_utils[idx].add_to_stepwise(utils)
+			self.elements_costs[idx].update_stepwise(costs)
+			self.elements_utils[idx].update_stepwise(utils)
 
 		self.agency_costs.add_to_npv_samples(cost_holder)
 		self.asset_utils.add_to_npv_samples(util_holder)
 
-		self.agency_costs.add_to_stepwise(np.sum(elements_costs_stepwise, axis = 0))
-		self.asset_utils.add_to_stepwise(np.dot(self.elements_util_weight, elements_utils_stepwise))
+		self.agency_costs.update_stepwise(np.sum(elements_costs_stepwise, axis = 0))
+		self.asset_utils.update_stepwise(np.dot(self.elements_util_weight, elements_utils_stepwise))
 
 
 	def log_results(self, logger, directory):

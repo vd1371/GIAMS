@@ -15,7 +15,7 @@ class Markovian(BaseDeteriorationModel):
 
 	def predict_condition(self, previous_condition = 0, t = None):
 
-		if np.random.rand() > self.probs_dics[previous_condition]:
+		if np.random.rand() > self.probs_list[previous_condition]:
 			return previous_condition + 1
 		else:
 			return previous_condition

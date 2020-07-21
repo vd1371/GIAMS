@@ -9,4 +9,4 @@ class BaseSimulator(GenSet):
 		super().__init__()
 
 	def get_one_instance():
-		return 0
+		raise NotImplementedErrors

@@ -15,10 +15,16 @@ class Power(BasePredictiveModel):
 		'''
 		self.growth_rate = growth_rate
 
+		self.x = self.predict_series(random = True)
+
 	def predict(self, T = None):
 		return self.X0 * (1+self.growth_rate) ** t
 
-	def predict_series(self):
-		T = np.linspace(0, self.horizon, self.n_steps)
-		x = self.X0 * (1+self.growth_rate) ** T
-		return x
+	def predict_series(self, random = True):
+
+		if random:
+			T = np.linspace(0, self.horizon, self.n_steps)
+			x = self.X0 * (1+self.growth_rate) ** T
+			return x
+		else:
+			return self.x

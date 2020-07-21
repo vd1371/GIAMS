@@ -87,7 +87,7 @@ class IUC(GenSet):
 			assessment_dic = {k: v for k, v in sorted(assessment_dic.items(), key=lambda item: item[1][1], reverse = True)}
 
 			# Finding the budget at the step
-			remaining_budget = self.lca.network.budget_model.predict_series()[step]
+			remaining_budget = self.lca.network.budget_model.predict_series(random = False)[step]
 			planned_assets = []
 
 			# Update the network_mrr based on the budget and the assessment dic

@@ -6,7 +6,7 @@ class MRRFourActions(BaseMRRPlan):
 	def __init__(self, start = 0, maint_duration = 0, rehab_duration = 0, recon_duration = 0):
 		super().__init__()
 
-		self.start = start
+		self.start = 0
 		self.mrr_duration = {self.MAINT: maint_duration, self.REHAB: rehab_duration, self.RECON: recon_duration}
 		
 		self.randomize_mrr()
