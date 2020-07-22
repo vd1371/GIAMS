@@ -22,11 +22,10 @@ LOCAL = 'Local'
 
 class GenSet(object):
 
-	n_simulations = 100
 	n_elements = 3
 	n_states = 8
 	dt = 2
-	horizon = 20
+	horizon = 0
 	discount_rate = 0.0
 
 	init_year = 0

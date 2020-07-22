@@ -34,19 +34,6 @@ def lca():
 
 	return lca
 
-
-def GA_test(obj):
-
-	optimizer = GA(obj)
-	optimizer.set_ga_chars(crossver_prob = 0.75,
-							mutation_prob = 0.02,
-							population_size = 100,
-							n_generations = 200,
-							n_elites = 5,
-							optimzition_type = 'max',
-							n_jobs = -1)
-	optimizer.optimize()
-
 @timeit
 def IUC_test(obj):
 
@@ -55,32 +42,6 @@ def IUC_test(obj):
 
 
 if __name__ == "__main__":
-
-	# GA_test(lca)
-
+	
 	IUC_test(lca)
-
-
-	# my_lca = lca()
-	# import matplotlib.pyplot as plt
-
-	# sim_utils = []
-
-	# plt.ion()
-	# for i in range(1000):
-
-	# 	my_lca.run(1000)
-	# 	sim_utils.append(my_lca.get_network_npv()[2])
-	# 	plt.clf()
-	# 	plt.xlabel('Simulations')
-	# 	plt.ylabel('Utility')
-	# 	plt.plot([i for i in range(len(sim_utils))], sim_utils)
-	# 	plt.legend()
-	# 	plt.grid(True, which = 'both')
-	# 	plt.draw()
-	# 	plt.pause(0.00001)
-
-	# my_lca.run()
-	# print (my_lca.get_network_npv())
-	# my_lca.log_results()
 

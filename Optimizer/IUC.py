@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from copy import deepcopy
 from itertools import permutations, product
@@ -29,16 +30,10 @@ class IUC(GenSet):
 	def __init__(self, lca = None):
 
 		# Gettign the objective function
-		self.lca = lca
+		self.lca = lca()
 
-		# Objective_function is an instance of lca
-		# lca has network, directory, log, and
-		self.lca_ref = lca()
-		self.directory = lca.directory
-		self.log = lca.log
-
-		n_assets = len(self.lca_ref.network.assets)
-		self.asset_mrr_shape = self.lca_ref.network.assets[0].mrr_model.mrr.shape
+		n_assets = len(self.lca.network.assets)
+		self.asset_mrr_shape = self.lca.network.assets[0].mrr_model.mrr.shape
 		self.network_mrr_shape = (n_assets, self.asset_mrr_shape[0], self.asset_mrr_shape[1])
 
 		self.possible_mrrs = list(product([0,1], repeat=8))
@@ -51,7 +46,7 @@ class IUC(GenSet):
 
 			start = time.time()
 			assessment_dic = {}
-			for asset_idx, asset in enumerate(self.lca_ref.network.assets):
+			for asset_idx, asset in enumerate(self.lca.network.assets):
 
 				print (f"Asset {asset_idx + 1} is about to be processed at step {step+1} / {self.n_steps}")
 
@@ -68,8 +63,7 @@ class IUC(GenSet):
 					asset.mrr_model.set_mrr(mrr)
 
 					# Running the simulation
-					obj = self.lca()
-					obj.run_for_one_asset(asset)
+					self.lca.run_for_one_asset(asset)
 
 					# Let's get the costs
 					user_costs = asset.accumulator.user_costs.at_year(step*self.dt)
@@ -81,20 +75,21 @@ class IUC(GenSet):
 
 					# Adding the results to the assessment dic
 					hash_key = hash(str(asset_idx) + str(step) + str(mrr))
-					assessment_dic[hash_key] = [asset_idx, U_C, agency_costs, np.copy(possible_mrr)]
+					assessment_dic[hash_key] = [asset_idx, U_C, agency_costs, np.copy(possible_mrr), user_costs]
 
 			# Sorting the actions based on U/C
 			# item [1][1] refers to the values of the dictionary and U_C
 			assessment_dic = {k: v for k, v in sorted(assessment_dic.items(), key=lambda item: item[1][1], reverse = True)}
 
 			# Finding the budget at the step
-			remaining_budget = self.lca_ref.network.budget_model.predict_series(random = False)[step]
+			remaining_budget = self.lca.network.budget_model.predict_series(random = False)[step]
 			planned_assets = []
 
 			# Update the network_mrr based on the budget and the assessment dic
+			temp_dic = {}
 			for k, v in assessment_dic.items():
 
-				asset_idx, U_C, agency_costs, temp_mrr = v
+				asset_idx, U_C, agency_costs, temp_mrr, user_costs = v
 
 				# If the asset is not in the planned_assets
 				# and if its agency costs is less than the remaining budget (to meet the budget limitations)
@@ -112,10 +107,15 @@ class IUC(GenSet):
 						network_mrr[asset_idx][elem_idx][step*self.dt] = temp_mrr[elem_idx*self.dt]
 						network_mrr[asset_idx][elem_idx][step*self.dt + 1] = temp_mrr[elem_idx*self.dt + 1]
 
+					temp_dic[asset_idx] = list(network_mrr[asset_idx].reshape(1, -1)[0]) + [U_C, agency_costs, user_costs]
+
 			print (f"Step {step} is analyzed and optimized in {time.time() - start:.2f} seconds")
 
+		# Turning temp_dic to a dataframe
+		df = pd.DataFrame.from_dict(temp_dic, orient='index')
+		df = df.astype(int)
+		df.to_csv(self.lca.directory + f"/{self.lca.lca_name}.csv")
 
-		self.log.info(f"\nThe network mrr as a result of IUC - Incremental utility-cost ratio\n{network_mrr}")
 		print ("IUC optimization is done")
 
 

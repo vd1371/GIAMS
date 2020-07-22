@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 
 from .BaseLCA import BaseLCA
 
-
-
 class LCA(BaseLCA):
 
 	def __init__(self, network = None,
@@ -17,11 +15,13 @@ class LCA(BaseLCA):
 						directory = None,
 						log_level = logging.DEBUG,
 						random = True,
-						is_hazard = True):
+						is_hazard = True,
+						n_simulations = 100):
 		super().__init__(network, lca_name, simulator, logger, directory, log_level)
 
 		self.random = random
 		self.is_hazard = is_hazard
+		self.n_simulations = n_simulations
 
 	def run(self, n_simulations = None, random = False):
 

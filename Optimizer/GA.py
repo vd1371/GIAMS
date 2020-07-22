@@ -163,6 +163,7 @@ class GA:
 		Genetic algorithm-based efficient feature selection for classification of pre-miRNAs. Genetics and molecular research, 10(2), pp.588-603.
 		'''
 		gener = []
+		start = time.time()
 		while True:
 			for p in [0.1, 0.2, 0.3, 0.4, 0.5]:
 				chrom = np.random.choice([0,1], size = self.chrom_shape, p = [1-p, p])
@@ -170,11 +171,15 @@ class GA:
 				if new_ind.is_valid():
 					gener.append(new_ind)
 				self._add_to_taboo_list(chrom)
-
-				print (len(gener))
 			
 			if len(gener) == self.population_size:
 				break
+
+			if (time.time()-start > 60):
+				start = time.time()
+				print("60 seconds has passed but no offspring could be generated given the conditions, something could be wrong")
+
+		print ("First generation is initiated")
 
 		return gener[:self.population_size]
 
@@ -233,9 +238,11 @@ class GA:
 			self._add_to_taboo_list(chrom1)
 			self._add_to_taboo_list(chrom2)
 
-			if (time.time()-start > 10):
+			if (time.time()-start > 60):
 				start = time.time()
-				print("10 seconds has passed but no offspring could be generated given the conditions, something is wrong")
+				print("60 seconds has passed but no offspring could be generated given the conditions, something could be wrong")
+
+		# print ("creating the next_gener\n", next_gener)
 
 		return next_gener[:self.population_size]
 
@@ -245,18 +252,16 @@ class GA:
 
 		# Evaluating the individuals
 		with mp.Pool(max(-self.n_jobs * mp.cpu_count(), self.n_jobs)) as P:
-			gener = P.map(_eval_ind, gener)
+			eval_gener = P.map(_eval_ind, gener[idx:])
+		eval_gener = gener[:idx] + eval_gener
 
 		# for ind in gener:
 		# 	ind.evaluate()
 
-		return gener
+		return eval_gener
 
 
 	def optimize(self, should_plot = True):
-
-		# Initialize the first generation
-		gener = self.init_gener()
 
 		n_gener = 0
 		best_values, gener_num_holder = [], []
@@ -266,17 +271,21 @@ class GA:
 			# If certain criteria is met, break the loop
 			### TODO: Write termination criteria
 
-			# Evaluate the generation
-			gener = self.eval_gener(gener, n_gener = 0)
+			if n_gener == 0:
+				# CReating the first generation
+				gener = self.init_gener()
+			else:
+				# Creating the new generation
+				gener = self.next_gener(gener)
 
-			# Creating the new generation
-			gener = self.next_gener(gener)
+			# Evaluate the generation
+			gener = self.eval_gener(gener, n_gener = n_gener)
 
 			# Logging the results
 			log_str = "\n"
 			for i in range (self.population_size):
 				log_str += f"Gener: {n_gener} - {gener[i]} - TabooListLength: {len(self.taboo_list)} \n"
-			best_values.append(gener[0].value)
+			best_values.append(max(gener[0].value, 0))
 
 			self.log.info(log_str)
 			print (f"Gener: {n_gener} - {gener[0]} - TabooListLength: {len(self.taboo_list)} - Timme elapsed: {time.time()-start:.2f}")

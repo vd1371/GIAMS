@@ -4,12 +4,12 @@ from .BaseNetwork import *
 
 class IndianaNetwork(BaseNetwork):
     
-    def __init__(self, file_name):
-        super().__init__(file_name)
+    def __init__(self, file_name, n_assets):
+        super().__init__(file_name, n_assets)
         
     def load_asset(self, idx = 0):
         
-        asset_info = self.assets_df.iloc[idx, :]
+        asset_info = self.assets_df.loc[idx, :]
         
         id_, length, width, material, design = asset_info[0:5]
         vertical_clearance = asset_info[21]
@@ -90,10 +90,10 @@ class IndianaNetwork(BaseNetwork):
  
         return [asset]
     
-    def load_network(self, n_assets = 1):
+    def load_network(self):
         
         assets = []
-        for idx in self.assets_df.index[:n_assets]:
+        for idx in self.assets_df.index:
             assets += self.load_asset(idx)
         
         self.assets = assets

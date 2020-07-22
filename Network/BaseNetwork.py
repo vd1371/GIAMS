@@ -36,12 +36,14 @@ from utils.Distributions.Gamma import Gamma
 from utils.Distributions.Binomial import Binomial
 
 class BaseNetwork(GenSet):
-    def __init__(self, file_name = None):
+    def __init__(self, file_name = None, n_assets = 0):
         super().__init__()
         
         self.file_name = file_name
+        self.n_assets = n_assets
+        
         dir = f'./Network/Networks/{file_name}.csv'
-        self.assets_df = pd.read_csv(dir, index_col = 0)
+        self.assets_df = pd.read_csv(dir, index_col = 0).iloc[:self.n_assets, :]
         
     def load_asset(self, *args, **kwargs):
         raise NotImplementedError ("load_asset in Loader is not implemented yet")
