@@ -25,8 +25,8 @@ class GenSet(object):
 	n_elements = 3
 	n_states = 8
 	dt = 2
-	horizon = 0
-	discount_rate = 0.0
+	horizon = 20
+	discount_rate = 0.03
 
 	init_year = 0
 	n_steps = int(horizon/dt) + 1

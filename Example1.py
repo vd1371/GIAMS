@@ -20,7 +20,9 @@ def lca():
 	mynetwork = IndianaNetwork("INDIANA2019", n_assets = 1)
 	mynetwork.load_network()
 
-	# mynetwork.assets[0].mrr_model.set_mrr(np.array([[1,1,1,1,1,0,0,0,1,0,1,0], [1,0,1,0,1,0,1,0,1,0,1,1], [0,0,0,0,1,1,0,0,0,1,1,1]]))
+	# mynetwork.assets[0].mrr_model.set_mrr(np.array([[1,1,1,1,1,0,0,0,1,0,1,0],
+	# 												[1,0,1,0,1,0,1,0,1,0,1,1],
+	# 												[0,0,0,0,1,1,0,0,0,1,1,1]]))
 	mynetwork.set_current_budget_limit(10000)
 	mynetwork.set_budget_limit_model(Linear(X0 = 10000, drift = 0))
 	mynetwork.set_npv_budget_limit(100000)

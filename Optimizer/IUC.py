@@ -113,7 +113,7 @@ class IUC(GenSet):
 
 		# Turning temp_dic to a dataframe
 		df = pd.DataFrame.from_dict(temp_dic, orient='index')
-		df = df.astype(int)
+		df.iloc[:, :6] = df.iloc[:, :6].astype(int)
 		df.to_csv(self.lca.directory + f"/{self.lca.lca_name}.csv")
 
 		print ("IUC optimization is done")

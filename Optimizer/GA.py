@@ -307,6 +307,11 @@ class GA:
 
 			n_gener += 1
 
+		df = pd.DataFrame()
+		df['index'] = [i for i in range(len(best_values))]
+		df['value'] = best_values
+		df.to_csv(self.directory + "/GAValues.csv")
+
 		if should_plot:
 			plt.savefig(self.directory + "/GAValues.png")
 	
