@@ -20,9 +20,12 @@ def lca():
 	mynetwork = IndianaNetwork("INDIANA2019", n_assets = 1)
 	mynetwork.load_network()
 
-	# mynetwork.assets[0].mrr_model.set_mrr(np.array([[1,1,1,1,1,0,0,0,1,0,1,0],
-	# 												[1,0,1,0,1,0,1,0,1,0,1,1],
-	# 												[0,0,0,0,1,1,0,0,0,1,1,1]]))
+ #	mynetwork.assets[0].mrr_model.set_mrr(np.array([[0, 0,  1, 0,  1, 1,  0, 0,  1, 0,  0, 1,  0, 0,  1, 0,  0, 0,  0, 0,  0, 0],
+ #  												[0, 0,  0, 1,  1, 0,  0, 1,  0, 0,  1, 1,  1, 0,  0, 1,  1, 0,  1, 0,  0, 0],
+ #  												[0, 0,  0, 0,  0, 0,  0, 0,  1, 0,  0, 0,  0, 0,  0, 1,  0, 0,  0, 0,  0, 0]]))
+	mynetwork.assets[0].mrr_model.set_mrr(np.array([[1, 0,  0, 0,  1, 1,  0, 1,  0, 0,  0, 1,  0, 0,  0, 0,  1, 0,  0, 0,  0, 0],
+  													[0, 0,  1, 0,  0, 0,  0, 1,  0, 0,  1, 1,  0, 0,  0, 0,  0, 0,  1, 0,  0, 0],
+  													[0, 0,  0, 0,  0, 0,  1, 0,  0, 0,  0, 0,  0, 1,  0, 1,  0, 0,  0, 1,  0, 0]]))
 	mynetwork.set_current_budget_limit(10000)
 	mynetwork.set_budget_limit_model(Linear(X0 = 10000, drift = 0))
 	mynetwork.set_npv_budget_limit(100000)
@@ -33,7 +36,7 @@ def lca():
 			simulator = simulator,
 			random = False,
 			is_hazard = False,
-			n_simulations = 10)
+			n_simulations = 100000)
 
 	return lca
 
@@ -42,7 +45,7 @@ def GA_test(obj):
 
 	optimizer = GA(obj)
 	optimizer.set_ga_chars(crossver_prob = 0.75,
-							mutation_prob = 0.02,
+							mutation_prob = 0.03,
 							population_size = 100,
 							n_generations = 200,
 							n_elites = 5,
@@ -52,5 +55,13 @@ def GA_test(obj):
 
 if __name__ == "__main__":
 
-	GA_test(lca)
+	# GA_test(lca)
+
+	mylca = lca()
+
+	mylca.run()
+	print (mylca.get_network_npv())
+
+
+
 

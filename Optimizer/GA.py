@@ -94,9 +94,6 @@ class GA:
 		self.directory = self.lca_ref.directory
 		self.log = self.lca_ref.log
 
-		# Initializing the GA characteristics
-		self.set_ga_chars()
-
 		asset_mrr_shape = self.lca_ref.network.assets[0].mrr_model.mrr.shape
 		n_assets = len(self.lca_ref.network.assets)
 
@@ -173,12 +170,14 @@ class GA:
 					gener.append(new_ind)
 				self._add_to_taboo_list(chrom)
 			
-			if len(gener) == self.population_size:
+			if len(gener) >= self.population_size:
 				break
 
-			if (time.time()-start > 60):
+			thresh = 10
+			if (time.time()-start > thresh):
 				start = time.time()
-				print("60 seconds has passed but no offspring could be generated given the conditions, something could be wrong")
+				print (f"{thresh} seconds has passed but not enough offsprings could be generated given the conditions")
+				print (f"{len(gener)} offsprings have been created so far")
 
 		print ("First generation is initiated")
 
@@ -205,9 +204,6 @@ class GA:
 
 		# Initating the next_gener holder
 		next_gener = []
-		
-		# Sorting the generation based on their value and the optimization type
-		gener = sorted(gener, key=lambda x: x.value, reverse = self.sorting_order)
 
 		# Ellitism
 		for i in range(self.n_elites):
@@ -250,16 +246,23 @@ class GA:
 	def eval_gener(self, gener, n_gener):
 		# Evaluating the objective function of the problem except the elites
 		idx = self.n_elites if n_gener != 0 else 0
+		elites, to_be_eval = gener[:idx], gener[idx:]
 
 		# Evaluating the individuals
 		with mp.Pool(max(-self.n_jobs * mp.cpu_count(), self.n_jobs)) as P:
-			eval_gener = P.map(_eval_ind, gener[idx:])
-		eval_gener = gener[:idx] + eval_gener
+			gener = P.map(_eval_ind, to_be_eval)
+
+		# To prevent double calculating the elites values
+		if not idx == 0:
+			gener = elites + gener
+
+		# Sorting the generation based on their value and the optimization type
+		gener = sorted(gener, key=lambda x: x.value, reverse = self.sorting_order)
 
 		# for ind in gener:
 		# 	ind.evaluate()
 
-		return eval_gener
+		return gener
 
 
 	def optimize(self, should_plot = True):
@@ -284,12 +287,13 @@ class GA:
 
 			# Logging the results
 			log_str = "\n"
-			for i in range (self.population_size):
-				log_str += f"Gener: {n_gener} - {gener[i]} - TabooListLength: {len(self.taboo_list)} \n"
-			best_values.append(max(gener[0].value, 0))
-
-			self.log.info(log_str)
+			# for i in range (self.population_size):
+			# 	log_str += f"Gener: {n_gener} - {gener[i]} - TabooListLength: {len(self.taboo_list)} \n"
+			log_str += f"Gener: {n_gener} - {gener[0]} - TabooListLength: {len(self.taboo_list)} \n"
 			print (f"Gener: {n_gener} - {gener[0]} - TabooListLength: {len(self.taboo_list)} - Timme elapsed: {time.time()-start:.2f}")
+			self.log.info(log_str)
+
+			best_values.append(max(gener[0].value, 0))
 
 			# Plotting the value online
 			if should_plot:

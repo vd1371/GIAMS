@@ -12,7 +12,6 @@ class BaseLCA(GenSet):
 	def __init__(self, network = None,
 						lca_name = 'Unknown',
 						simulator = None,
-						logger = None,
 						directory = None,
 						log_level = logging.DEBUG):
 		super().__init__()
@@ -22,7 +21,6 @@ class BaseLCA(GenSet):
 		self.simulator = simulator
 
 		self.directory = directory
-		self.log = logger
 		
 		self.directory = f"reports/{lca_name}"
 		if not os.path.exists(self.directory):
@@ -34,5 +32,5 @@ class BaseLCA(GenSet):
 			                level = log_level,
 			                console_level = logging.ERROR,
 			                file_level = logging.DEBUG,
-			                mode = 'w')
+			                mode = 'a')
 
