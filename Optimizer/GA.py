@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import pandas as pd
 from deap import tools
 import matplotlib.pyplot as plt
 
