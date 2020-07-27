@@ -40,7 +40,7 @@ def GA_test(obj):
 	optimizer = GA(obj)
 	optimizer.set_ga_chars(crossver_prob = 0.75,
 							mutation_prob = 0.02,
-							population_size = 100,
+							population_size = 20,
 							n_generations = 200,
 							n_elites = 5,
 							optimzition_type = 'max',

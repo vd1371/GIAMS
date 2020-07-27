@@ -5,32 +5,29 @@ from deap import tools
 import matplotlib.pyplot as plt
 
 import multiprocessing as mp
-
+import ast
 
 class Individual:
 
 	def __init__(self, lca, chrom = None, val = None, flag = 'Regular'):
-		
-		self.lca = lca
+
+		self.lca_instance = lca()
+		self.lca_instance.network.set_network_mrr(chrom)
 		self.chrom = chrom
 		self.value = val
 		self.flag = flag
 
 	def evaluate(self):
 
-		self.lca_model = self.lca()
-		self.lca_model.network.set_network_mrr(self.get_chrom())
-		self.lca_model.run()
-
+		self.lca_instance.run()
 		if self.is_in_budget():
-			self.value = self.lca_model.get_network_npv()[2]
+			self.value = self.lca_instance.get_network_npv()[2]
 		else:
 			self.value = -1000
 
 	def is_valid(self):
 
-		lca = self.lca()
-		for asset in lca.network.assets:
+		for asset in self.lca_instance.network.assets:
 
 			if not asset.mrr_model.check_policy():
 				# To check whether the mrr meets certain policies
@@ -47,15 +44,15 @@ class Individual:
 					return True
 			return False
 
-		if self.lca_model.get_year_0()[1] > self.lca_model.network.current_budget_limit:
+		if self.lca_instance.get_year_0()[1] > self.lca_instance.network.current_budget_limit:
 			# To check whether the plan meets the current budget
 			return False
 
-		elif self.lca_model.get_network_npv()[1] > self.lca_model.network.npv_budget_limit:
+		elif self.lca_instance.get_network_npv()[1] > self.lca_instance.network.npv_budget_limit:
 			# To put a cap on the npv of the MRR plan
 			return False
 
-		elif exceed_yearly_budget_against_costs(self.lca_model.network.budget_model.predict_series(random = False), self.lca_model.get_network_stepwise()[1]):
+		elif exceed_yearly_budget_against_costs(self.lca_instance.network.budget_model.predict_series(random = False), self.lca_instance.get_network_stepwise()[1]):
 			# To check whether the predicted costs and budget suits each other
 			return False
 
@@ -222,13 +219,13 @@ class GA:
 			# Adding offsprings to the next generation
 			if not self._is_in_taboo_list(chrom1):
 
-				offspring1 = Individual(self.lca, chrom1)
+				offspring1 = Individual(self.lca, np.copy(chrom1))
 				if offspring1.is_valid():
 					next_gener.append(offspring1)
 
 			if not self._is_in_taboo_list(chrom2):
 				
-				offspring2 = Individual(self.lca, chrom2)
+				offspring2 = Individual(self.lca, np.copy(chrom2))
 				if offspring2.is_valid():
 					next_gener.append(offspring2)
 
@@ -252,15 +249,15 @@ class GA:
 		with mp.Pool(max(-self.n_jobs * mp.cpu_count(), self.n_jobs)) as P:
 			gener = P.map(_eval_ind, to_be_eval)
 
+		# for i, ind in enumerate(gener):
+		# 	ind.evaluate()
+
 		# To prevent double calculating the elites values
 		if not idx == 0:
 			gener = elites + gener
 
 		# Sorting the generation based on their value and the optimization type
 		gener = sorted(gener, key=lambda x: x.value, reverse = self.sorting_order)
-
-		# for ind in gener:
-		# 	ind.evaluate()
 
 		return gener
 

@@ -54,7 +54,7 @@ class MRRFourActions(BaseMRRPlan):
 
 			if counts[self.RECON] > 2:
 				return False
-			elif counts[self.REHAB] > 4:
+			elif counts[self.REHAB] > 3:
 				return False
 			elif counts[self.MAINT] > 5:
 				return False

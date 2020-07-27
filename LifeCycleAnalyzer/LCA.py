@@ -22,16 +22,16 @@ class LCA(BaseLCA):
 		self.is_hazard = is_hazard
 		self.n_simulations = n_simulations
 
-	def run(self, n_simulations = None, random = False):
+	def run(self, n_simulations = None, random = False, verbose = False):
 
 		N = self.n_simulations if n_simulations is None else n_simulations
 
 		for asset in self.network.assets:
-
-			# Making sure that there is nothing in the memory
-			asset.refresh()
 			
 			for i in range(N):
+
+				if verbose and i % 1000 == 0:
+					print (f"Simulation {i} is done")
 
 				user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise = self.simulator.get_one_instance(asset, self.is_hazard, random = self.random)
 				asset.accumulator.update(user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise)
@@ -41,7 +41,6 @@ class LCA(BaseLCA):
 
 		asset.accumulator.refresh()
 		for i in range(N):
-			asset.refresh()
 			user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise = self.simulator.get_one_instance(asset, is_hazard= False, random = self.random)
 			asset.accumulator.update(user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise)
 

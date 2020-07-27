@@ -1,4 +1,5 @@
 import time
+import ast
 
 
 from Network.IndianaNetwork import IndianaNetwork
@@ -20,15 +21,14 @@ def lca():
 	mynetwork = IndianaNetwork("INDIANA2019", n_assets = 1)
 	mynetwork.load_network()
 
- #	mynetwork.assets[0].mrr_model.set_mrr(np.array([[0, 0,  1, 0,  1, 1,  0, 0,  1, 0,  0, 1,  0, 0,  1, 0,  0, 0,  0, 0,  0, 0],
- #  												[0, 0,  0, 1,  1, 0,  0, 1,  0, 0,  1, 1,  1, 0,  0, 1,  1, 0,  1, 0,  0, 0],
- #  												[0, 0,  0, 0,  0, 0,  0, 0,  1, 0,  0, 0,  0, 0,  0, 1,  0, 0,  0, 0,  0, 0]]))
-	mynetwork.assets[0].mrr_model.set_mrr(np.array([[1, 0,  0, 0,  1, 1,  0, 1,  0, 0,  0, 1,  0, 0,  0, 0,  1, 0,  0, 0,  0, 0],
-  													[0, 0,  1, 0,  0, 0,  0, 1,  0, 0,  1, 1,  0, 0,  0, 0,  0, 0,  1, 0,  0, 0],
-  													[0, 0,  0, 0,  0, 0,  1, 0,  0, 0,  0, 0,  0, 1,  0, 1,  0, 0,  0, 1,  0, 0]]))
-	mynetwork.set_current_budget_limit(10000)
-	mynetwork.set_budget_limit_model(Linear(X0 = 10000, drift = 0))
-	mynetwork.set_npv_budget_limit(100000)
+	# The old one with 42
+	# mrr_str = "[[1 0 0 0 1 1 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1] [0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0] [0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1]]"
+	# mrr_str = np.array(ast.literal_eval(mrr_str.replace(" ", ",")))
+	# mynetwork.assets[0].mrr_model.set_mrr(mrr_str)
+
+	mynetwork.set_current_budget_limit(100000)
+	mynetwork.set_budget_limit_model(Linear(X0 = 100000, drift = 0))
+	mynetwork.set_npv_budget_limit(10000)
 
 	simulator = BridgeSimulator()
 	lca = LCA(network = mynetwork,
@@ -36,7 +36,7 @@ def lca():
 			simulator = simulator,
 			random = False,
 			is_hazard = False,
-			n_simulations = 100000)
+			n_simulations = 10000)
 
 	return lca
 
@@ -46,8 +46,8 @@ def GA_test(obj):
 	optimizer = GA(obj)
 	optimizer.set_ga_chars(crossver_prob = 0.75,
 							mutation_prob = 0.03,
-							population_size = 100,
-							n_generations = 200,
+							population_size = 200,
+							n_generations = 100,
 							n_elites = 5,
 							optimzition_type = 'max',
 							n_jobs = -1)
@@ -55,12 +55,30 @@ def GA_test(obj):
 
 if __name__ == "__main__":
 
-	# GA_test(lca)
+	GA_test(lca)
 
-	mylca = lca()
+	# mylca = lca()
+	# print (mylca.network.assets[0].mrr_model.mrr)
 
-	mylca.run()
-	print (mylca.get_network_npv())
+	# import matplotlib.pyplot as plt
+	# all_utils = []
+	# plt.ion()
+	# for _ in range (100):
+
+	# 	mylca.run()
+	# 	_, _, new_util = mylca.get_network_npv()
+	# 	all_utils.append(new_util)
+
+	# 	plt.clf()
+	# 	plt.plot([i for i in range(len(all_utils))], all_utils)
+	# 	plt.legend()
+	# 	plt.grid(True, which = 'both')
+	# 	plt.draw()
+	# 	plt.pause(0.00001)
+
+
+	# mylca.run(verbose = False)
+	# print (mylca.get_network_npv())
 
 
 

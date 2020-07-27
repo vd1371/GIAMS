@@ -13,6 +13,9 @@ class BridgeSimulator(BaseSimulator):
 
 	def get_one_instance(self, asset, is_hazard = True, random = True):
 
+		# Refereshing the conditions in the horizon of the asset
+		asset.refresh()
+
 		user_costs_stepwise = np.zeros(self.n_steps)
 		elements_costs_stepwise = [np.zeros(self.n_steps) for _ in range(asset.n_elements)]
 		elements_utils_stepwise = [np.zeros(self.n_steps) for _ in range(asset.n_elements)]
