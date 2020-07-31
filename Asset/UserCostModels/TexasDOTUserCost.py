@@ -1,8 +1,8 @@
-from .BaseUserCostModel import BaseUserCostModel
+from .BaseUserCost import BaseUserCost
 
 from utils.PredictiveModels.Linear import Linear
 
-class TexasDOTUserCost(BaseUserCostModel):
+class TexasDOTUserCost(BaseUserCost):
 
 	def __init__(self, speed_before = 60,
 						speed_after = 30):

@@ -2,7 +2,7 @@ import numpy as np
 from .BaseResponse import BaseResponse
 
 
-class BridgeEarthQuakeResponse(BaseResponseModel):
+class BridgeEarthQuakeResponse(BaseResponse):
 
 	def __init__(self, damage_state_dic = {'Slight': [0.5*1, 0.6, 2],
 											'Moderate': [0.8*1*1.125, 0.6, 3],

@@ -14,8 +14,8 @@ from Asset.Elements.AgencyCost.AgencyCostSinha2009 import *
 from Asset.HazardModels.HazardModel import HazardModel
 from Asset.HazardModels.Generator.PoissonProcess import PoissonProcess
 from Asset.HazardModels.Response.HazusBridgeResponse import HazusBridgeResponse
-from Asset.HazardModels.Loss.HazusLossModel import HazusLossModel
-from Asset.HazardModels.Recovery.SimpleRecoveryModel import SimpleRecoveryModel
+from Asset.HazardModels.Loss.HazusLoss import HazusLoss
+from Asset.HazardModels.Recovery.SimpleRecovery import SimpleRecovery
 
 from Asset.MRRModels.MRRFourActions import MRRFourActions
 from Asset.MRRModels.EffectivenessModels.SimpleEffectiveness import SimpleEffectiveness

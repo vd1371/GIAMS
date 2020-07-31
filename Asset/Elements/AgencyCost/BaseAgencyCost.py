@@ -1,6 +1,6 @@
 from utils.GeneralSettings import *
 
-class BaseAgencyCostModel(GenSet):
+class BaseAgencyCost(GenSet):
 
 	def __init__(self):
 		pass

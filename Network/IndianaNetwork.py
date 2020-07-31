@@ -43,8 +43,8 @@ class IndianaNetwork(BaseNetwork):
         "Only earthquakes with magnitude of 4 or higher and based on historical data from USGS"
         hazard_model.set_generator_model(PoissonProcess(occurrence_rate = 0.3, dist = Exponential(2.1739, 4))) 
         hazard_model.set_response_model(HazusBridgeResponse(asset))
-        hazard_model.set_loss_model(HazusLossModel())
-        hazard_model.set_recovery_model(SimpleRecoveryModel())
+        hazard_model.set_loss_model(HazusLoss())
+        hazard_model.set_recovery_model(SimpleRecovery())
         asset.set_hazard_model(hazard_model)
         asset.set_replacement_value_model(hazus_default = True)
         

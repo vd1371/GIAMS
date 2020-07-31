@@ -5,7 +5,7 @@ from copy import deepcopy
 from .BaseResponse import BaseResponse
 
 
-class HazusBridgeResponseAccurate(BaseResponseModel):
+class HazusBridgeResponseAccurate(BaseResponse):
 
 	def __init__(self, asset):
 		super().__init__(asset)

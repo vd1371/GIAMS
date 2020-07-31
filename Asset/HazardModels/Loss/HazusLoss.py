@@ -1,7 +1,7 @@
 import numpy as np
 from .BaseHazardLoss import BaseHazardLoss
 
-class HazusLossModel(BaseHazardLoss):
+class HazusLoss(BaseHazardLoss):
 
 	def __init__(self):
 		super().__init__()

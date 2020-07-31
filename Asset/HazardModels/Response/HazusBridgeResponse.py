@@ -7,7 +7,7 @@ from .BaseResponse import BaseResponse
 MEDIAN = 0 # It's just an index, to make it more clear to read
 BETA = 1 # It's just an index, to make it more clear to read
 
-class HazusBridgeResponse(BaseResponseModel):
+class HazusBridgeResponse(BaseResponse):
 
 	def __init__(self, asset):
 		super().__init__(asset)

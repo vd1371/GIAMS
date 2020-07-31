@@ -33,7 +33,7 @@ class DeckCosts(BaseAgencyCost):
 	def reconstruction_costs(self, random):
 		return self.element.asset.length * self.element.asset.width * 35/1000 * self.linear_model.predict_series(random, "deck_recon")
 
-class SubstructureCosts(BaseAgencyCostModel):
+class SubstructureCosts(BaseAgencyCost):
 
 	def __init__(self):
 		self.linear_model = Linear(1, 0)
@@ -59,7 +59,7 @@ class SubstructureCosts(BaseAgencyCostModel):
 					 self.element.asset.vertical_clearance ** D * self.linear_model.predict_series(random, "sub_recon")
 
 
-class SuperstructureCosts(BaseAgencyCostModel):
+class SuperstructureCosts(BaseAgencyCost):
 
 	def __init__(self):
 		self.linear_model = Linear(1, 0)

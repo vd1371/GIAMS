@@ -1,8 +1,8 @@
 import numpy as np
 
-from .BaseMRREffectivenessModel import BaseMRREffectivenessModel
+from .BaseMRREffectiveness import BaseMRREffectiveness
 
-class SimpleEffectiveness(BaseMRREffectivenessModel):
+class SimpleEffectiveness(BaseMRREffectiveness):
 	
 	def __init__(self):
 		super().__init__()
