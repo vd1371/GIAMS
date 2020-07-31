@@ -1,6 +1,6 @@
 
 
-class BaseResponseModel(object):
+class BaseResponse(object):
 
 	def __init__(self, asset):
 		super().__init__()

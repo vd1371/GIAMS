@@ -1,6 +1,6 @@
 import numpy as np
 
-from .BaseDeteriorationModel import BaseDeteriorationModel
+from .BaseDeterioration import BaseDeterioration
 
 class Markovian(BaseDeteriorationModel):
 

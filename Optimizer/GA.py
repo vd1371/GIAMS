@@ -246,15 +246,17 @@ class GA:
 		elites, to_be_eval = gener[:idx], gener[idx:]
 
 		# Evaluating the individuals
-		with mp.Pool(max(-self.n_jobs * mp.cpu_count(), self.n_jobs)) as P:
-			gener = P.map(_eval_ind, to_be_eval)
+		# with mp.Pool(max(-self.n_jobs * mp.cpu_count(), self.n_jobs)) as P:
+		# 	gener = P.map(_eval_ind, to_be_eval)
 
-		# for i, ind in enumerate(gener):
-		# 	ind.evaluate()
+		for i, ind in enumerate(to_be_eval):
+			start = time.time()
+			ind.evaluate()
+			print (f"Ind {i} in {time.time()-start:.2f}")
 
 		# To prevent double calculating the elites values
 		if not idx == 0:
-			gener = elites + gener
+			gener = elites + to_be_eval
 
 		# Sorting the generation based on their value and the optimization type
 		gener = sorted(gener, key=lambda x: x.value, reverse = self.sorting_order)

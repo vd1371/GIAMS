@@ -1,5 +1,5 @@
 import numpy as np
-from .BaseResponseModel import BaseResponseModel
+from .BaseResponse import BaseResponse
 
 
 class BridgeEarthQuakeResponse(BaseResponseModel):

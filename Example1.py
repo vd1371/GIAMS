@@ -22,9 +22,9 @@ def lca():
 	mynetwork.load_network()
 
 	# The old one with 42
-	# mrr_str = "[[1 0 0 0 1 1 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1] [0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0] [0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1]]"
-	# mrr_str = np.array(ast.literal_eval(mrr_str.replace(" ", ",")))
-	# mynetwork.assets[0].mrr_model.set_mrr(mrr_str)
+	mrr_str = "[[1 1 0 0 0 0 0 0 1 0 1 0 0 0 0 0 0 0 0 0 1 1] [0 1 0 1 0 0 0 1 0 0 1 0 0 0 0 1 1 0 0 0 0 1] [0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0]]"
+	mrr_str = np.array(ast.literal_eval(mrr_str.replace(" ", ",")))
+	mynetwork.assets[0].mrr_model.set_mrr(mrr_str)
 
 	mynetwork.set_current_budget_limit(100000)
 	mynetwork.set_budget_limit_model(Linear(X0 = 100000, drift = 0))
@@ -36,7 +36,7 @@ def lca():
 			simulator = simulator,
 			random = False,
 			is_hazard = False,
-			n_simulations = 10000)
+			n_simulations = 1000)
 
 	return lca
 
@@ -55,9 +55,9 @@ def GA_test(obj):
 
 if __name__ == "__main__":
 
-	GA_test(lca)
+	# GA_test(lca)
 
-	# mylca = lca()
+	mylca = lca()
 	# print (mylca.network.assets[0].mrr_model.mrr)
 
 	# import matplotlib.pyplot as plt
@@ -77,8 +77,8 @@ if __name__ == "__main__":
 	# 	plt.pause(0.00001)
 
 
-	# mylca.run(verbose = False)
-	# print (mylca.get_network_npv())
+	mylca.run(verbose = False)
+	print (mylca.get_network_npv())
 
 
 

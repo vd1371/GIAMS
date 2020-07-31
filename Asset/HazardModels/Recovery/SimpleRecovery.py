@@ -1,6 +1,6 @@
-from .BaseRecoveryModel import BaseRecoveryModel
+from .BaseRecovery import BaseRecovery
 
-class SimpleRecoveryModel(BaseRecoveryModel):
+class SimpleRecovery(BaseRecovery):
 	
 	def __init__(self):
 		super().__init__()

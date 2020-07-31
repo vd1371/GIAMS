@@ -1,8 +1,8 @@
 import numpy as np
 
-from .BaseDeteriorationModel import *
+from .BaseDeterioration import *
 
-class Markovian(BaseDeteriorationModel):
+class Markovian(BaseDeterioration):
 
 	def __init__(self):
 		super().__init__()

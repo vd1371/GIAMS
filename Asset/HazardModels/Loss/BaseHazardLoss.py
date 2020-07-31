@@ -1,7 +1,7 @@
 import numpy as np
 from utils.GeneralSettings import GenSet
 
-class BaseHazardLossModel(GenSet):
+class BaseHazardLoss(GenSet):
 
 	def __init__(self):
 		super().__init__()

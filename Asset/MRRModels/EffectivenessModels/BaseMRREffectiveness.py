@@ -1,6 +1,6 @@
 from utils.GeneralSettings import *
 
-class BaseMRREffectivenessModel(GenSet):
+class BaseMRREffectiveness(GenSet):
 	
 	def __init__(self):
 		super().__init__()

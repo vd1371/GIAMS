@@ -1,7 +1,7 @@
-from .BaseDeteriorationModel import BaseDeteriorationModel
+from .BaseDeterioration import BaseDeterioration
 import numpy as np
 
-class ContinuousYang2020(BaseDeteriorationModel):
+class ContinuousYang2020(BaseDeterioration):
 
 	def __init__(self, initial_condition = 1,
 						lambda_ = 0.02,

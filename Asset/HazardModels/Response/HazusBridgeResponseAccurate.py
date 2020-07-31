@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import norm
 from copy import deepcopy
 
-from .BaseResponseModel import BaseResponseModel
+from .BaseResponse import BaseResponse
 
 
 class HazusBridgeResponseAccurate(BaseResponseModel):

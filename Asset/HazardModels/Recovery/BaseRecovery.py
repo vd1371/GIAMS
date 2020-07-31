@@ -1,6 +1,6 @@
 from utils.GeneralSettings import GenSet
 
-class BaseRecoveryModel(GenSet):
+class BaseRecovery(GenSet):
 	
 	def __init__(self):
 		super().__init__()

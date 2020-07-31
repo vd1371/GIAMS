@@ -1,7 +1,7 @@
 from utils.GeneralSettings import GenSet
 
 
-class BaseUserCostModel(GenSet):
+class BaseUserCost(GenSet):
 
 	def __init__(self):
 		super().__init__()

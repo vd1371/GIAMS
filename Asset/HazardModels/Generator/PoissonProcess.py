@@ -1,7 +1,7 @@
 import numpy as np
-from .BaseHazardModel import *
+from .BaseHazard import *
 
-class PoissonProcess(BaseHazardModel):
+class PoissonProcess(BaseHazard):
 
 	def __init__(self, occurrence_rate = 0.018, dist = None):
 		super().__init__()

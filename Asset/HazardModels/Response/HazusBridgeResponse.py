@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import norm
 from copy import deepcopy
 
-from .BaseResponseModel import BaseResponseModel
+from .BaseResponse import BaseResponse
 
 MEDIAN = 0 # It's just an index, to make it more clear to read
 BETA = 1 # It's just an index, to make it more clear to read

@@ -1,7 +1,7 @@
-from .BaseDeteriorationModel import BaseDeteriorationModel
+from .BaseDeterioration import BaseDeterioration
 import numpy as np
 
-class ContinuousEllingwood2005(BaseDeteriorationModel):
+class ContinuousEllingwood2005(BaseDeterioration):
 
 	def __init__(self, 	a = 0.02,
 						b = 1)

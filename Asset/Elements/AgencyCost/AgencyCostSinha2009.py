@@ -1,8 +1,8 @@
-from .BaseAgencyCostModel import BaseAgencyCostModel
+from .BaseAgencyCost import BaseAgencyCost
 from utils.PredictiveModels.Linear import Linear
 from utils.GeneralSettings import *
 
-class DeckCosts(BaseAgencyCostModel):
+class DeckCosts(BaseAgencyCost):
 
 	def __init__(self):
 		self.linear_model = Linear(1, 0)
