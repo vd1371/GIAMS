@@ -11,12 +11,12 @@ class LCA(BaseLCA):
 	def __init__(self, network = None,
 						lca_name = 'Unknown',
 						simulator = None,
-						directory = None,
 						log_level = logging.DEBUG,
 						random = True,
 						is_hazard = True,
-						n_simulations = 100):
-		super().__init__(network, lca_name, simulator, directory, log_level)
+						n_simulations = 100,
+						should_report = True):
+		super().__init__(network, lca_name, simulator, log_level, should_report)
 
 		self.random = random
 		self.is_hazard = is_hazard

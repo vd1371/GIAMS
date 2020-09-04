@@ -21,7 +21,7 @@ class WienerDrift(BasePredictiveModel):
 	def predict(self, t = None):
 		return self.predict_series(t)[t//self.dt]
 
-	def predict_series(self, random = True):
+	def predict_series(self, random = True, *args):
 
 		if random:
 			T = np.linspace(0, self.horizon, self.n_steps)

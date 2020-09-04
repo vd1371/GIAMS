@@ -21,6 +21,7 @@ from Asset.MRRModels.MRRFourActions import MRRFourActions
 from Asset.MRRModels.EffectivenessModels.SimpleEffectiveness import SimpleEffectiveness
 
 from Asset.UserCostModels.TexasDOTUserCost import TexasDOTUserCost
+from Asset.UserCostModels.TexasDOTUserCostWithVolatility import TexasDOTUserCostWithVolatility
 
 from utils.Accumulator import Accumulator
 
