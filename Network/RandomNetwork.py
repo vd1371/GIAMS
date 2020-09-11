@@ -28,12 +28,12 @@ class RandomNetwork(BaseNetwork):
                     'recon_duration': np.random.random_integers(300, 540),
                     'speed_before': np.random.random_integers(40, 90),
                     'speed_after': np.random.random_integers(15, 35),
-                    'drift': np.random.uniform(0.01, 0.2),
+                    'drift': np.random.uniform(0.01, 0.1),
                     'volatility': np.random.uniform(0.01, 0.1),
                     'detour_usage_percentage': np.random.uniform(0, 0.99),
                     'occurrence_rate': np.random.uniform(0.001, 0.1),
-                    'dist_first_param': np.random.uniform(3, 6),
-                    'dist_second_param': np.random.uniform(0.01, 3),
+                    'dist_first_param': np.random.uniform(3, 5),
+                    'dist_second_param': np.random.uniform(0.01, 2),
                     'deck_cond': np.random.choice([9, 8, 7, 6, 5, 4]),
                     'deck_age': np.random.random_integers(1, 90),
                     'deck_material': np.random.choice([1, 2, 3, 8]),
@@ -66,6 +66,12 @@ class RandomNetwork(BaseNetwork):
         mrr = MRRFourActions(maint_duration = maint_duration, rehab_duration = rehab_duration, recon_duration = recon_duration)
         mrr.set_effectiveness(SimpleEffectiveness())
         asset.set_mrr_model(mrr)
+
+        # Randomizing the mrr model
+        p = np.random.choice([0.1, 0.2, 0.3, 0.4, 0.5])
+        random_mrr = np.random.choice([0, 1], size = [self.n_elements, self.n_steps*self.dt], p = [1-p, p])
+        asset.mrr_model.set_mrr(random_mrr)
+
 
         # User cost model
         speed_before, speed_after, drift,\
