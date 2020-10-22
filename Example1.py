@@ -36,7 +36,7 @@ def lca():
 			simulator = simulator,
 			random = False,
 			is_hazard = False,
-			n_simulations = 1000)
+			n_simulations = 2000)
 
 	return lca
 
@@ -76,8 +76,9 @@ if __name__ == "__main__":
 	# 	plt.draw()
 	# 	plt.pause(0.00001)
 
-
+	start = time.time()
 	mylca.run(verbose = False)
+	print (time.time() - start)
 	print (mylca.get_network_npv())
 
 

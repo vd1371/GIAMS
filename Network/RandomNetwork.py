@@ -17,8 +17,8 @@ class RandomNetwork(BaseNetwork):
                     'vertical_clearance': np.random.uniform(4, 7),
                     'road_class': np.random.choice(['Local', 'Major', 'Minor', 'NHS']),
                     'ADT': np.random.random_integers(100, 400000),
-                    'truck_percentage': np.random.uniform(0, 0.99),
-                    'detour_length': np.random.random_integers(1, 200),
+                    'truck_percentage': np.random.uniform(0, 0.5),
+                    'detour_length': np.random.random_integers(1, 100),
                     'hazus_class': 'HWB' + str(np.random.choice([1, 3, 5, 8, 10, 12, 15, 17, 22])),
                     'site_class': np.random.choice(['A', 'B', 'C']),
                     'skew_angle': np.random.random_integers(0, 45),
@@ -68,8 +68,12 @@ class RandomNetwork(BaseNetwork):
         asset.set_mrr_model(mrr)
 
         # Randomizing the mrr model
-        p = np.random.choice([0.1, 0.2, 0.3, 0.4, 0.5])
-        random_mrr = np.random.choice([0, 1], size = [self.n_elements, self.n_steps*self.dt], p = [1-p, p])
+        found = False
+        while not found:
+            p = np.random.choice([0.1, 0.2, 0.3, 0.4, 0.5])
+            random_mrr = np.random.choice([0, 1], size = [self.n_elements, self.n_steps*self.dt], p = [1-p, p])
+            if np.sum(random_mrr) > 3 and np.sum(random_mrr) < 34:
+                found = True
         asset.mrr_model.set_mrr(random_mrr)
 
 

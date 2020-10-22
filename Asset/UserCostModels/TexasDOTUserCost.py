@@ -44,3 +44,4 @@ class TexasDOTUserCost(BaseUserCost):
 		travel_cost = self.asset.detour_length / self.speed_before * (vehicles * vehicle_value_of_time + trucks * truck_value_of_time)
 
 		return (delay_cost + marginal_cost + operating_cost + travel_cost) * project_duration / 1000
+		# The out put will be 1000 dollars
