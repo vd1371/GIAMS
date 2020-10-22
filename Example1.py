@@ -36,7 +36,7 @@ def lca():
 			simulator = simulator,
 			random = False,
 			is_hazard = False,
-			n_simulations = 1000)
+			n_simulations = 10)
 
 	return lca
 

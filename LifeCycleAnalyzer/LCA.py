@@ -65,6 +65,7 @@ class LCA(BaseLCA):
 		network_util = np.zeros(self.n_steps)
 
 		for asset in self.network.assets:
+			
 			network_user_costs += asset.accumulator.user_costs.get_stepwise()
 			network_agency_costs += asset.accumulator.agency_costs.get_stepwise()
 			network_util += asset.accumulator.asset_utils.get_stepwise()

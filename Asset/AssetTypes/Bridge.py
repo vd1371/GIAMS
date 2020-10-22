@@ -18,10 +18,6 @@ class Bridge(GenSet):
 		self.elements = []
 		self.elements_util_weight = np.array([1/self.n_elements for _ in range(self.n_elements)])
 
-	def refresh(self):
-		for elem in self.elements:
-			elem.refresh()
-
 	def set_accumulator(self, accumulator):
 		self.accumulator = accumulator(self.ID, self.elements, self.elements_util_weight)
 
