@@ -52,9 +52,13 @@ class Accumulator(GenSet):
 
 		self.elements_costs = [Container() for _ in range(self.n_elements)]
 		self.elements_utils = [Container() for _ in range(self.n_elements)]
+		self.elements_conds = [Container() for _ in range(self.n_elements)]
 
 
-	def update(self, user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise):
+	def update(self, user_costs_stepwise,
+					elements_costs_stepwise,
+					elements_utils_stepwise,
+					elements_conds_stepwise):
 
 		# Updating other costs
 		self.user_costs.add_to_npv_samples(NPV(user_costs_stepwise, self.dt, self.discount_rate))
@@ -62,18 +66,21 @@ class Accumulator(GenSet):
 
 		# Updating elements, agency and asset info
 		cost_holder, util_holder = 0, 0
-		for idx, (costs, utils) in enumerate(zip(elements_costs_stepwise, elements_utils_stepwise)):
+		for elem_idx, (costs, utils, conds) in enumerate(zip(elements_costs_stepwise,
+															elements_utils_stepwise,
+															elements_conds_stepwise)):
 			
 			npv_cost = NPV(costs, self.dt, self.discount_rate)
 			npv_util = NPV(utils, self.dt, self.discount_rate)
 			cost_holder += npv_cost
-			util_holder += npv_util * self.elements_util_weight[idx]
+			util_holder += npv_util * self.elements_util_weight[elem_idx]
 
-			self.elements_costs[idx].add_to_npv_samples(npv_cost)
-			self.elements_utils[idx].add_to_npv_samples(npv_util)
+			self.elements_costs[elem_idx].add_to_npv_samples(npv_cost)
+			self.elements_utils[elem_idx].add_to_npv_samples(npv_util)
 
-			self.elements_costs[idx].update_stepwise(costs)
-			self.elements_utils[idx].update_stepwise(utils)
+			self.elements_costs[elem_idx].update_stepwise(costs)
+			self.elements_utils[elem_idx].update_stepwise(utils)
+			self.elements_conds[elem_idx].update_stepwise(conds)
 
 		self.agency_costs.add_to_npv_samples(cost_holder)
 		self.asset_utils.add_to_npv_samples(util_holder)

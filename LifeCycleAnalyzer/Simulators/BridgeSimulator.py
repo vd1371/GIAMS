@@ -13,28 +13,27 @@ class BridgeSimulator(BaseSimulator):
 
 	def get_one_instance(self, asset, is_hazard = True, random = True):
 
-		# Refereshing the conditions in the horizon of the asset
-		asset.refresh()
-
 		user_costs_stepwise = np.zeros(self.n_steps)
 		elements_costs_stepwise = [np.zeros(self.n_steps) for _ in range(asset.n_elements)]
 		elements_utils_stepwise = [np.zeros(self.n_steps) for _ in range(asset.n_elements)]
+		elements_conds_stepwise = [np.zeros(self.n_steps, dtype = int) for _ in range(asset.n_elements)]
 
 		# Generate hazards
 		hazard = asset.hazard_model.generator.generate_one_lifecycle(horizon = self.horizon, dt = self.dt)
 
 		# Finding an instance of replcement value in the horizon
-		replacement_value = asset.replacement_value.predict_series(random, "replacement_value in simulator")
+		replacement_value = asset.replacement_value.predict_series(random)
 
 		# Find the MRR costs to be used later, for each element in the horizon
 		mrr_costs = []
 		for element_idx, element in enumerate (asset.elements):
 			mrr_costs.append(element.agency_cost_model.predict_series(random))
 
+		# Refreshing the asset
+		asset.refresh()
+
 		mrr = asset.mrr_model.mrr_to_decimal()
 		for step in range(self.n_steps):
-
-			# print (step, "Step counter in simulator")
 			
 			# Max duration will be used for the user cost
 			max_duration = 0
@@ -42,7 +41,14 @@ class BridgeSimulator(BaseSimulator):
 			for element_idx, element in enumerate (asset.elements):
 				
 				# Finding the current condition, before taking any actions
-				previous_condition = element.initial_condition if step == 0 else element.conditions_in_horizon[step-1]
+				if step == 0:
+					previous_condition = element.initial_condition
+				else:
+					previous_condition = elements_conds_stepwise[element_idx][step-1]
+
+
+				# if element_idx == 0:
+				# 	print (step, previous_condition, 'previous_condition')
 
 				# Finding the action
 				action = mrr[element_idx][step]
@@ -67,7 +73,8 @@ class BridgeSimulator(BaseSimulator):
 						# Adding the loss cost of the asset due to earthquake
 						user_costs_stepwise[step] += asset.hazard_model.loss.predict_series(ds, random)[step]
 
-					# print ('next_condition', next_condition, 'in hazard. Element_idx:', element_idx)
+					# if element_idx == 0:
+					# 	print ('next_condition', next_condition, 'in hazard. Element_idx:', element_idx)
 							
 				# If there is a planned MRR action
 				else:
@@ -85,13 +92,15 @@ class BridgeSimulator(BaseSimulator):
 						# Adding the utility of the action on the element at the year
 						elements_utils_stepwise[element_idx][step] += element.utility_model.get(previous_condition, next_condition)
 
-						# print ('next_condition', next_condition, 'in mrr. Element_idx:', element_idx)
+						# if element_idx == 0:
+						# 	print ('next_condition', next_condition, 'in mrr. Element_idx:', element_idx)
 
 					# If none of the above, then simple degradation
 					elif action == self.DONOT:
 						next_condition = element.deterioration_model.predict_condition(previous_condition = previous_condition, age = element.age)
 
-						# print ('next_condition', next_condition, 'in deterioration. Element_idx:', element_idx)
+						# if element_idx == 0:
+						# 	print ('next_condition', next_condition, 'in deterioration. Element_idx:', element_idx)
 
 				# If it's the latest element (This is done to ensure the user cost is added only once)
 				if element_idx == self.n_elements - 1:
@@ -105,6 +114,7 @@ class BridgeSimulator(BaseSimulator):
 				else:
 					element.add_age(self.dt)
 
-				element.append_next_condition(next_condition)
+				# adding the condition to the element_condition_stepwise
+				elements_conds_stepwise[element_idx][step] = next_condition
 
-		return user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise
+		return user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise, elements_conds_stepwise

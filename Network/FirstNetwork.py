@@ -23,8 +23,7 @@ class FirstNetwork(BaseNetwork):
         
         # MRR Chars
         maint_duration, rehab_duration, recon_duration = asset_info [5:8]
-        asset.set_mrr_model(MRRFourActions(start = 0,
-                                            maint_duration = maint_duration,
+        asset.set_mrr_model(MRRFourActions( maint_duration = maint_duration,
                                             rehab_duration = rehab_duration,
                                             recon_duration = recon_duration))
         

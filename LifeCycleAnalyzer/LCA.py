@@ -33,15 +33,20 @@ class LCA(BaseLCA):
 				if verbose and i % 1000 == 0:
 					print (f"Simulation {i} is done")
 
-				user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise = self.simulator.get_one_instance(asset, self.is_hazard, random = self.random)
-				asset.accumulator.update(user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise)
+				user_costs_stepwise, elements_costs_stepwise, \
+					elements_utils_stepwise, elements_conds_stepwise = \
+						self.simulator.get_one_instance(asset, self.is_hazard, random = self.random)
+				
+				asset.accumulator.update(user_costs_stepwise, elements_costs_stepwise,
+										elements_utils_stepwise, elements_conds_stepwise)
 
 	def run_for_one_asset(self, asset, n_simulations = None):
 		N = self.n_simulations if n_simulations is None else n_simulations
 
 		asset.accumulator.refresh()
 		for i in range(N):
-			user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise = self.simulator.get_one_instance(asset, is_hazard= False, random = self.random)
+			user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise = \
+				self.simulator.get_one_instance(asset, is_hazard= False, random = self.random)
 			asset.accumulator.update(user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise)
 
 	def get_network_npv(self):
@@ -58,6 +63,26 @@ class LCA(BaseLCA):
 
 		return network_user_costs, network_agency_costs, network_util
 
+	def get_network_util_holism(self):
+
+		network_util_stepwise = np.zeros((self.n_elements, self.n_steps))
+
+		# Summation of the conditions of the condition ratings
+		for asset in self.network.assets:
+			for element_idx, element_conds in enumerate (asset.accumulator.elements_conds):
+				network_util_stepwise[element_idx] += element_conds.get_stepwise()
+
+		# Getting the average by dividing by the number of assets
+		network_util_stepwise = network_util_stepwise / self.network.n_assets
+
+		# Converting the conditions to utility
+		for element_idx, element in enumerate(self.network.assets[0].elements):
+			network_util_stepwise[element_idx] = \
+				element.utility_model.utility_function(network_util_stepwise[element_idx])
+
+		network_util_holism = np.sum(network_util_stepwise)
+		return network_util_holism
+
 	def get_network_stepwise(self):
 
 		network_user_costs = np.zeros(self.n_steps)
@@ -65,6 +90,7 @@ class LCA(BaseLCA):
 		network_util = np.zeros(self.n_steps)
 
 		for asset in self.network.assets:
+			
 			network_user_costs += asset.accumulator.user_costs.get_stepwise()
 			network_agency_costs += asset.accumulator.agency_costs.get_stepwise()
 			network_util += asset.accumulator.asset_utils.get_stepwise()
@@ -83,8 +109,10 @@ class LCA(BaseLCA):
 			# To make sure the accumulator does not contatin previous results
 			asset.accumulator.refresh()
 
-			user_costs_stepwise_1, elements_costs_stepwise_1, elements_utils_stepwise_1 = self.simulator.get_one_instance(asset, random = self.random)
-			user_costs_stepwise_2, elements_costs_stepwise_2, elements_utils_stepwise_2 = self.simulator.get_one_instance(asset, random = self.random)
+			user_costs_stepwise_1, elements_costs_stepwise_1, elements_utils_stepwise_1 = \
+				self.simulator.get_one_instance(asset, random = self.random)
+			user_costs_stepwise_2, elements_costs_stepwise_2, elements_utils_stepwise_2 = \
+				self.simulator.get_one_instance(asset, random = self.random)
 
 			asset.accumulator.update(user_costs_stepwise_1, elements_costs_stepwise_1, elements_utils_stepwise_1)
 
