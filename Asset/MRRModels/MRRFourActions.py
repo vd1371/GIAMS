@@ -6,16 +6,15 @@ from .BaseMRRPlan import *
 
 class MRRFourActions(BaseMRRPlan):
 	
-	def __init__(self, start = 0, maint_duration = 0, rehab_duration = 0, recon_duration = 0):
+	def __init__(self, maint_duration = 0, rehab_duration = 0, recon_duration = 0):
 		super().__init__()
 
-		self.start = 0
 		self.mrr_duration = {self.MAINT: maint_duration, self.REHAB: rehab_duration, self.RECON: recon_duration}
 		
 		self.randomize_mrr()
 
 	def randomize_mrr(self):
-		self.mrr = np.random.randint(2, size=(self.n_elements, int((self.horizon-self.start)/self.dt)*2 + 2))
+		self.mrr = np.random.randint(2, size=(self.n_elements, 2*self.dt))
 		return self.mrr
 
 	def mrr_to_decimal(self, mrr_binary = None):
