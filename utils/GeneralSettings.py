@@ -35,4 +35,5 @@ class GenSet(object):
 	MAINT = 1
 	REHAB = 2
 	RECON = 3
+	BINAR = 1
 	
