@@ -29,8 +29,8 @@ class GenSet(object):
 	discount_rate = 0.03
 
 	init_year = 0
-	n_steps = int(horizon/dt) + 1
-
+	n_steps = int(horizon/dt)
+	
 	DONOT = 0
 	MAINT = 1
 	REHAB = 2

@@ -8,6 +8,10 @@ class BaseElement(object):
 		self.name = name
 		self.initial_condition = int(initial_condition)
 		self.age = age
+		self.initial_age = age
+
+	def refresh(self):
+		self.age = self.initial_age
 
 	def set_age(self, new_age):
 		self.age = new_age

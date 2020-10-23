@@ -21,6 +21,10 @@ class Bridge(GenSet):
 	def set_accumulator(self, accumulator):
 		self.accumulator = accumulator(self.ID, self.elements, self.elements_util_weight)
 
+	def refresh(self):
+		for element in self.elements:
+			element.refresh()
+
 	def set_traffic_info(self, road_class = 'NHS',
 								ADT = 1000,
 								truck_percentage = 4,
