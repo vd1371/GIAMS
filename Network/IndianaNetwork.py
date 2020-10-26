@@ -4,7 +4,12 @@ from .BaseNetwork import *
 
 class IndianaNetwork(BaseNetwork):
     
-    def __init__(self, file_name, n_assets):
+    def __init__(self,
+                file_name,
+                n_assets,
+                is_deck = True,
+                is_superstructure = True,
+                is_substructure = True):
         super().__init__(file_name, n_assets)
         
     def load_asset(self, idx = 0):
@@ -51,53 +56,55 @@ class IndianaNetwork(BaseNetwork):
         # Finding the age
         age = asset_info [16]
 
-        # Adding the deck to the asset
-        deck_material, deck_cond = asset_info [17:19]
-        deck = BridgeElement(name = DECK,
-                            initial_condition = min(9-deck_cond, 7),
-                            age = age,
-                            material = deck_material)
-        deck.set_asset(asset)
-        deck.set_condition_rating_model(NBI())
-        deck.set_deterioration_model(Markovian())
-        deck.set_utility_model(DeckUtility())
-        deck.set_agency_costs_model(DeckCosts())
-        asset.add_element(deck)
+        if is_deck:
+            # Adding the deck to the asset
+            deck_material, deck_cond = asset_info [17:19]
+            deck = BridgeElement(name = DECK,
+                                initial_condition = min(9-deck_cond, 7),
+                                age = age,
+                                material = deck_material)
+            deck.set_asset(asset)
+            deck.set_condition_rating_model(NBI())
+            deck.set_deterioration_model(Markovian())
+            deck.set_utility_model(DeckUtility())
+            deck.set_agency_costs_model(DeckCosts())
+            asset.add_element(deck)
 
-        # Adding the superstructure to the asset
-        superstructure_cond = asset_info [19]
-        superstructure = BridgeElement(name = SUPERSTRUCTURE,
-                                        initial_condition = min(9-superstructure_cond, 7),
+        if is_superstructure:
+            # Adding the superstructure to the asset
+            superstructure_cond = asset_info [19]
+            superstructure = BridgeElement(name = SUPERSTRUCTURE,
+                                            initial_condition = min(9-superstructure_cond, 7),
+                                            age = age)
+            superstructure.set_asset(asset)
+            superstructure.set_condition_rating_model(NBI())
+            superstructure.set_deterioration_model(Markovian())
+            superstructure.set_utility_model(SuperstructureUtility())
+            superstructure.set_agency_costs_model(SuperstructureCosts())
+            asset.add_element(superstructure)
+
+        if is_substructure:
+            # Adding the substruture to the asset
+            substructure_cond = asset_info[20]
+            substructure = BridgeElement(name = SUBSTRUCTURE,
+                                        initial_condition = min(9-substructure_cond,7),
                                         age = age)
-        superstructure.set_asset(asset)
-        superstructure.set_condition_rating_model(NBI())
-        superstructure.set_deterioration_model(Markovian())
-        superstructure.set_utility_model(SuperstructureUtility())
-        superstructure.set_agency_costs_model(SuperstructureCosts())
-        asset.add_element(superstructure)
-
-        # Adding the substruture to the asset
-        substructure_cond = asset_info[20]
-        substructure = BridgeElement(name = SUBSTRUCTURE,
-                                    initial_condition = min(9-substructure_cond,7),
-                                    age = age)
-        substructure.set_asset(asset)
-        substructure.set_condition_rating_model(NBI())
-        substructure.set_deterioration_model(Markovian())
-        substructure.set_utility_model(SubstructureUtility())
-        substructure.set_agency_costs_model(SubstructureCosts())
-        asset.add_element(substructure)
+            substructure.set_asset(asset)
+            substructure.set_condition_rating_model(NBI())
+            substructure.set_deterioration_model(Markovian())
+            substructure.set_utility_model(SubstructureUtility())
+            substructure.set_agency_costs_model(SubstructureCosts())
+            asset.add_element(substructure)
  
-        return [asset]
+        return asset
     
     def load_network(self):
         
-        assets = []
+        self.assets = []
         for idx in self.assets_df.index:
-            assets += self.load_asset(idx)
-        
-        self.assets = assets
-        return assets
+            assets.append(self.load_asset(idx))
+
+        return self.assets
 
     def set_current_budget_limit(self, val):
         self.current_budget_limit = val

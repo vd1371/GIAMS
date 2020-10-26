@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
 	# GA_test(lca)
 
-	IUC_test(lca)
+	# IUC_test(lca)
 
 
 	# my_lca = lca()
@@ -83,4 +83,9 @@ if __name__ == "__main__":
 	# my_lca.run()
 	# print (my_lca.get_network_npv())
 	# my_lca.log_results()
+
+
+	from Examples.Example1 import example1
+
+	example1()
 

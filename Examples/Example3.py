@@ -1,6 +1,11 @@
+# -------------------------------------------------------------------- #
+# This eexample was designed to show the GA can produce near optimal solutions
+# It was used as a response to reviewers of AUTCON journal
+# -------------------------------------------------------------------- #
+
+
 import time
 import ast
-
 
 from Network.IndianaNetwork import IndianaNetwork
 from LifeCycleAnalyzer.Simulators.BridgeSimulator import BridgeSimulator
@@ -36,7 +41,7 @@ def lca():
 			simulator = simulator,
 			random = False,
 			is_hazard = False,
-			n_simulations = 2000)
+			n_simulations = 1000)
 
 	return lca
 
@@ -53,7 +58,8 @@ def GA_test(obj):
 							n_jobs = -1)
 	optimizer.optimize()
 
-if __name__ == "__main__":
+
+def example1():
 
 	# GA_test(lca)
 
@@ -79,7 +85,14 @@ if __name__ == "__main__":
 	start = time.time()
 	mylca.run(verbose = False)
 	print (time.time() - start)
+	print (mylca.get_network_util_holism())
 	print (mylca.get_network_npv())
+
+
+
+if __name__ == "__main__":
+
+	example1()
 
 
 

@@ -1,3 +1,10 @@
+# -------------------------------------------------------------------- #
+# This example was designed to show the IUC optimization option in GIAMS
+# This example was used in the original paper as well
+# -------------------------------------------------------------------- #
+
+
+
 import time
 
 
