@@ -11,6 +11,9 @@ class IndianaNetwork(BaseNetwork):
                 is_superstructure = True,
                 is_substructure = True):
         super().__init__(file_name, n_assets)
+        self.is_deck = is_deck
+        self.is_substructure = is_substructure
+        self.is_superstructure = is_superstructure
         
     def load_asset(self, idx = 0):
         
@@ -56,7 +59,7 @@ class IndianaNetwork(BaseNetwork):
         # Finding the age
         age = asset_info [16]
 
-        if is_deck:
+        if self.is_deck:
             # Adding the deck to the asset
             deck_material, deck_cond = asset_info [17:19]
             deck = BridgeElement(name = DECK,
@@ -70,7 +73,7 @@ class IndianaNetwork(BaseNetwork):
             deck.set_agency_costs_model(DeckCosts())
             asset.add_element(deck)
 
-        if is_superstructure:
+        if self.is_superstructure:
             # Adding the superstructure to the asset
             superstructure_cond = asset_info [19]
             superstructure = BridgeElement(name = SUPERSTRUCTURE,
@@ -83,7 +86,7 @@ class IndianaNetwork(BaseNetwork):
             superstructure.set_agency_costs_model(SuperstructureCosts())
             asset.add_element(superstructure)
 
-        if is_substructure:
+        if self.is_substructure:
             # Adding the substruture to the asset
             substructure_cond = asset_info[20]
             substructure = BridgeElement(name = SUBSTRUCTURE,
@@ -102,7 +105,7 @@ class IndianaNetwork(BaseNetwork):
         
         self.assets = []
         for idx in self.assets_df.index:
-            assets.append(self.load_asset(idx))
+            self.assets.append(self.load_asset(idx))
 
         return self.assets
 

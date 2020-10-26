@@ -119,12 +119,15 @@ class LCA(BaseLCA):
 			# To make sure the accumulator does not contatin previous results
 			asset.accumulator.refresh()
 
-			user_costs_stepwise_1, elements_costs_stepwise_1, elements_utils_stepwise_1 = \
+			user_costs_stepwise_1, elements_costs_stepwise_1, elements_utils_stepwise_1, elements_conds_stepwise1 = \
 				self.simulator.get_one_instance(asset, random = self.random)
-			user_costs_stepwise_2, elements_costs_stepwise_2, elements_utils_stepwise_2 = \
+			user_costs_stepwise_2, elements_costs_stepwise_2, elements_utils_stepwise_2, elements_conds_stepwise2 = \
 				self.simulator.get_one_instance(asset, random = self.random)
 
-			asset.accumulator.update(user_costs_stepwise_1, elements_costs_stepwise_1, elements_utils_stepwise_1)
+			asset.accumulator.update(user_costs_stepwise_1,
+									elements_costs_stepwise_1,
+									elements_utils_stepwise_1,
+									elements_conds_stepwise1)
 
 			year0_user_costs += min(user_costs_stepwise_1[0], user_costs_stepwise_2[0])
 			year0_agency_costs += asset.accumulator.agency_costs.at_year(0)

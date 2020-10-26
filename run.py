@@ -57,35 +57,13 @@ def IUC_test(obj):
 if __name__ == "__main__":
 
 	# GA_test(lca)
-
 	# IUC_test(lca)
-
-
 	# my_lca = lca()
-	# import matplotlib.pyplot as plt
 
-	# sim_utils = []
+	from Examples.Example3 import example
+	from Examples.Example3 import validate_ga
 
-	# plt.ion()
-	# for i in range(1000):
+	# example()
 
-	# 	my_lca.run(1000)
-	# 	sim_utils.append(my_lca.get_network_npv()[2])
-	# 	plt.clf()
-	# 	plt.xlabel('Simulations')
-	# 	plt.ylabel('Utility')
-	# 	plt.plot([i for i in range(len(sim_utils))], sim_utils)
-	# 	plt.legend()
-	# 	plt.grid(True, which = 'both')
-	# 	plt.draw()
-	# 	plt.pause(0.00001)
-
-	# my_lca.run()
-	# print (my_lca.get_network_npv())
-	# my_lca.log_results()
-
-
-	from Examples.Example1 import example1
-
-	example1()
+	validate_ga(100)
 

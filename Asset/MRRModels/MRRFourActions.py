@@ -13,6 +13,12 @@ class MRRFourActions(BaseMRRPlan):
 		
 		self.randomize_mrr()
 
+	def set_mrr(self, new_mrr):
+		if np.shape(new_mrr) != (self.n_elements, self.n_steps*self.dt):
+			raise ValueError(f"Expected shape of mrr is {(self.n_elements, self.n_steps*self.dt)}"\
+								f"But {new_mrr.shape} was given")
+		self.mrr = new_mrr
+
 	def randomize_mrr(self):
 		self.mrr = np.random.randint(2, size=(self.n_elements, self.dt*self.n_steps))
 		return self.mrr
