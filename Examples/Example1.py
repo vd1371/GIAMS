@@ -41,11 +41,7 @@ def lca():
 			simulator = simulator,
 			random = False,
 			is_hazard = False,
-<<<<<<< HEAD:Example1.py
 			n_simulations = 2000)
-=======
-			n_simulations = 1000)
->>>>>>> adding examples folder:Examples/Example1.py
 
 	return lca
 
