@@ -65,22 +65,32 @@ class LCA(BaseLCA):
 
 	def get_network_util_holism(self):
 
-		network_util_stepwise = np.zeros((self.n_elements, self.n_steps))
+		network_cond_after = np.zeros((self.n_elements, self.n_steps))
+		network_cond_before = np.zeros(self.n_elements).reshape(-1, 1)
 
 		# Summation of the conditions of the condition ratings
 		for asset in self.network.assets:
 			for element_idx, element_conds in enumerate (asset.accumulator.elements_conds):
-				network_util_stepwise[element_idx] += element_conds.get_stepwise()
+				network_cond_after[element_idx] += element_conds.get_stepwise()
+
+			for element_idx, element in enumerate (asset.elements):
+				network_cond_before[element_idx][0] += element.initial_condition
 
 		# Getting the average by dividing by the number of assets
-		network_util_stepwise = network_util_stepwise / self.network.n_assets
+		network_cond_after = network_cond_after / self.network.n_assets
+		network_cond_before = network_cond_before / self.network.n_assets
+		network_cond_before = np.concatenate((network_cond_before, network_cond_after), axis = 1)
+		network_cond_before = network_cond_before[:, :-1]
 
+		network_util_stepwise = np.zeros((self.n_elements, self.n_steps))
 		# Converting the conditions to utility
 		for element_idx, element in enumerate(self.network.assets[0].elements):
 			network_util_stepwise[element_idx] = \
-				element.utility_model.utility_function(network_util_stepwise[element_idx])
+				element.utility_model.get(network_cond_before[element_idx], network_cond_after[element_idx])
 
-		network_util_holism = np.sum(network_util_stepwise)
+		network_util_holism = np.sum(network_util_stepwise, axis = 1)
+		network_util_holism = np.dot(self.network.assets[0].elements_util_weight, network_util_holism) * \
+									self.network.n_assets
 		return network_util_holism
 
 	def get_network_stepwise(self):

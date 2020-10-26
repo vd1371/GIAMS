@@ -56,7 +56,8 @@ class BridgeSimulator(BaseSimulator):
 				# If there is an earthquake in that year
 				iter_year = step*self.dt
 				if iter_year in hazard and is_hazard:
-					next_condition, ds = asset.hazard_model.response.get(previous_condition = previous_condition, pga = hazard[iter_year])
+					next_condition, ds = asset.hazard_model.response.get(previous_condition = previous_condition,
+																			pga = hazard[iter_year])
 					
 					# The earthquake has had severe effects and the state has changes
 					if not next_condition == previous_condition:
@@ -90,14 +91,14 @@ class BridgeSimulator(BaseSimulator):
 						elements_costs_stepwise[element_idx][step] += mrr_costs[element_idx][action][step]
 
 						# Adding the utility of the action on the element at the year
-						elements_utils_stepwise[element_idx][step] += element.utility_model.get(previous_condition, next_condition)
-
-						# if element_idx == 0:
-						# 	print ('next_condition', next_condition, 'in mrr. Element_idx:', element_idx)
+						elements_utils_stepwise[element_idx][step] += element.utility_model.get(previous_condition,
+																								next_condition)
 
 					# If none of the above, then simple degradation
 					elif action == self.DONOT:
-						next_condition = element.deterioration_model.predict_condition(previous_condition = previous_condition, age = element.age)
+						next_condition = \
+							element.deterioration_model.predict_condition(previous_condition = previous_condition,
+																			age = element.age)
 
 						# if element_idx == 0:
 						# 	print ('next_condition', next_condition, 'in deterioration. Element_idx:', element_idx)

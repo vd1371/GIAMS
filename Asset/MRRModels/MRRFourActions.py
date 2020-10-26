@@ -14,7 +14,7 @@ class MRRFourActions(BaseMRRPlan):
 		self.randomize_mrr()
 
 	def randomize_mrr(self):
-		self.mrr = np.random.randint(2, size=(self.n_elements, 2*self.dt))
+		self.mrr = np.random.randint(2, size=(self.n_elements, self.dt*self.n_steps))
 		return self.mrr
 
 	def mrr_to_decimal(self, mrr_binary = None):
