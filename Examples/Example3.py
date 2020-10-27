@@ -75,18 +75,21 @@ def example():
 # ---------------------------- #
 # For the parallel section     #
 def lca_for_validation(mrrs, q_out):
-	session_name = 'Indiana'
-	mynetwork = IndianaNetwork("INDIANA2019",
-								n_assets = 1,
-								is_deck = False,
-				                is_superstructure = True,
-				                is_substructure = False)
-	mynetwork.load_network()
-	mynetwork.set_current_budget_limit(100000)
-	mynetwork.set_budget_limit_model(Linear(X0 = 100000, drift = 0))
-	mynetwork.set_npv_budget_limit(10000)
+	
 
 	for mrr in mrrs:
+
+		session_name = 'Indiana'
+		mynetwork = IndianaNetwork("INDIANA2019",
+									n_assets = 1,
+									is_deck = False,
+					                is_superstructure = True,
+					                is_substructure = False)
+		mynetwork.load_network()
+		mynetwork.set_current_budget_limit(100000)
+		mynetwork.set_budget_limit_model(Linear(X0 = 100000, drift = 0))
+		mynetwork.set_npv_budget_limit(10000)
+
 		mynetwork.assets[0].mrr_model.set_mrr(np.atleast_2d(mrr))
 
 		simulator = BridgeSimulator()
@@ -103,7 +106,7 @@ def lca_for_validation(mrrs, q_out):
 		q_out.put(mrr + results)
 
 
-def validate_ga(N = None):
+def validate_ga(N = None, batch_size = 20000):
 
 	results_queue = Queue()
 	n_cores = mp.cpu_count()-2
@@ -131,6 +134,23 @@ def validate_ga(N = None):
 	done_workers = 0
 	batch_number = 0
 
+
+	cols = []
+	for elem_number in range(genset.n_elements):
+		for i in range (genset.dt*genset.n_steps):
+			cols.append(f'Eelem{elem_number}-{i}')
+	cols += ['UserCost', 'AgencyCost', 'Utility']
+
+	def save_batch(all_samples, cols, batch_number, batch_size = batch_size):
+		
+		batch_number += 1
+		df = pd.DataFrame(all_samples[:batch_size], columns = cols)
+		df.to_csv(f"./reports/GA-Validation-{batch_number}.csv")
+		print (f'Batch number {batch_number} is done')
+
+		return batch_number, all_samples[batch_size:]
+
+
 	while any(worker.is_alive() for worker in pool):
 
 		while not results_queue.empty():
@@ -140,21 +160,20 @@ def validate_ga(N = None):
 			if not sample is None:
 				all_samples.append(sample)
 
+			if len(all_samples) > batch_size:
+				batch_number, all_samples = save_batch(all_samples, cols, batch_number)
+
+				
+
 	print('waiting for workers to join...')
 	for worker in pool:
 		worker.join()
 	print('all workers are joined.\n')
 
-	cols = []
-	for elem_number in range(genset.n_elements):
-		for i in range (genset.dt*genset.n_steps):
-			cols.append(f'Eelem{elem_number}-{i}')
-	cols += ['UserCost', 'AgencyCost', 'Utility']
+	if len(all_samples) > 0:
+		batch_number, all_samples = save_batch(all_samples, cols, batch_number)
 
-	df = pd.DataFrame(all_samples, columns = cols)
-
-	df.to_csv(f"./reports/GA-Validation.csv")
-	print (f'Data is saved now')
+	print (f'Done')
 
 
 if __name__ == "__main__":

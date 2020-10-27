@@ -65,5 +65,5 @@ if __name__ == "__main__":
 
 	# example()
 
-	validate_ga(100)
+	validate_ga(N = 1000, batch_size = 20)
 
