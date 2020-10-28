@@ -2,6 +2,12 @@ from .BaseAgencyCost import BaseAgencyCost
 from utils.PredictiveModels.Linear import Linear
 from utils.GeneralSettings import *
 
+# All of the formulas are based on imperial system
+# The conversions are made to turn them to metric system
+
+def meter_to_feet(val):
+	return val * 3.28
+
 class DeckCosts(BaseAgencyCost):
 
 	def __init__(self):
@@ -9,12 +15,12 @@ class DeckCosts(BaseAgencyCost):
 		pass
 
 	def maintenance_costs(self, random):
-		cost = 540 + 12.15 * self.element.asset.length * self.element.asset.width
-		return cost * self.linear_model.predict_series(random, "deck_maint")
+		cost = 540 + 12.15 * meter_to_feet(self.element.asset.length) * meter_to_feet(self.element.asset.width)
+		return cost * self.linear_model.predict_series(random, "deck_maint") / 1000
 
 	def rehabilitation_costs(self, random):
 
-		deck_area = self.element.asset.length * self.element.asset.width / 9
+		deck_area = meter_to_feet(self.element.asset.length) * meter_to_feet(self.element.asset.width) / 9
 		# Assumption: patchin is more than 15%
 		if deck_area < 500:
 			unit_cost_1 = 16.09
@@ -23,15 +29,15 @@ class DeckCosts(BaseAgencyCost):
 		elif deck_area >= 2000:
 			unit_cost_1 = 8.11
 
-		if unit_cost_1 * self.element.asset.length * self.element.asset.width / 1000 < 100:
+		if unit_cost_1 * meter_to_feet(self.element.asset.length) * meter_to_feet(self.element.asset.width) / 1000 < 100:
 			unit_cost_2 = 1.2331
-		elif unit_cost_1 * self.element.asset.length * self.element.asset.width / 1000 >= 100:
+		elif unit_cost_1 * meter_to_feet(self.element.asset.length) * meter_to_feet(self.element.asset.width) / 1000 >= 100:
 			unit_cost_2 = 0.9311
 
-		return (unit_cost_1 * self.element.asset.length * self.element.asset.width / 1000) * (1 + unit_cost_2 ) * self.linear_model.predict_series(random, "deck_rehab")
+		return (unit_cost_1 * meter_to_feet(self.element.asset.length) * meter_to_feet(self.element.asset.width) / 1000) * (1 + unit_cost_2 ) * self.linear_model.predict_series(random, "deck_rehab")
 
 	def reconstruction_costs(self, random):
-		return self.element.asset.length * self.element.asset.width * 35/1000 * self.linear_model.predict_series(random, "deck_recon")
+		return meter_to_feet(self.element.asset.length) * meter_to_feet(self.element.asset.width) * 35/1000 * self.linear_model.predict_series(random, "deck_recon")
 
 class SubstructureCosts(BaseAgencyCost):
 
@@ -44,10 +50,12 @@ class SubstructureCosts(BaseAgencyCost):
 			unit_cost = 378
 		else:
 			unit_cost = 337.7
-		return unit_cost * self.linear_model.predict_series(random, "sub_maint")
+		return unit_cost * self.linear_model.predict_series(random, "sub_maint") / 1000
 
 	def rehabilitation_costs(self, random):
-		return 10 * self.element.asset.length * self.element.asset.width * self.linear_model.predict_series(random, "sub_rehab")
+		return 10 * meter_to_feet(self.element.asset.length) * \
+					meter_to_feet(self.element.asset.width) * \
+					self.linear_model.predict_series(random, "sub_rehab")
 
 	def reconstruction_costs(self, random):
 		# If RC Slab
@@ -55,7 +63,7 @@ class SubstructureCosts(BaseAgencyCost):
 			A, B, C, D = [0.12, 0.727, 0.602, 0.221]
 		else:
 			A, B, C, D = [0.028, 0.936, 0.983, -0.013]
-		return A * self.element.asset.length**B * self.element.asset.width **C *\
+		return A * meter_to_feet(self.element.asset.length)**B * meter_to_feet(self.element.asset.width) **C *\
 					 self.element.asset.vertical_clearance ** D * self.linear_model.predict_series(random, "sub_recon")
 
 
@@ -70,7 +78,7 @@ class SuperstructureCosts(BaseAgencyCost):
 			unit_cost = 378
 		else:
 			unit_cost = 337.7
-		return unit_cost * self.linear_model.predict_series(random, "super_maint")
+		return unit_cost * self.linear_model.predict_series(random, "super_maint") / 1000
 
 	def rehabilitation_costs(self, random):
 		return self.linear_model.predict_series(random, "super_rehab")
@@ -86,4 +94,4 @@ class SuperstructureCosts(BaseAgencyCost):
 		elif self.element.asset.material in [4]:
 			A, B, C = [0.0885, 0.906, 0.747]
 
-		return A * self.element.asset.length**B * self.element.asset.width **C * self.linear_model.predict_series(random, "super_recon")
+		return A * meter_to_feet(self.element.asset.length)**B * meter_to_feet(self.element.asset.width) **C * self.linear_model.predict_series(random, "super_recon")
