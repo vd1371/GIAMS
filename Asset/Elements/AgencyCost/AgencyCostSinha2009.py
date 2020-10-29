@@ -4,6 +4,7 @@ from utils.GeneralSettings import *
 
 # All of the formulas are based on imperial system
 # The conversions are made to turn them to metric system
+# The maintenance costs are assumed based on the IBMS information
 
 def meter_to_feet(val):
 	return val * 3.28
@@ -50,12 +51,12 @@ class SubstructureCosts(BaseAgencyCost):
 			unit_cost = 378
 		else:
 			unit_cost = 337.7
-		return unit_cost * self.linear_model.predict_series(random, "sub_maint") / 1000
+		return unit_cost * self.linear_model.predict_series(random, "sub_maint") / 1000 * 10
 
 	def rehabilitation_costs(self, random):
 		return 10 * meter_to_feet(self.element.asset.length) * \
-					meter_to_feet(self.element.asset.width) * \
-					self.linear_model.predict_series(random, "sub_rehab")
+						meter_to_feet(self.element.asset.width) * \
+							self.linear_model.predict_series(random, "sub_rehab") / 1000
 
 	def reconstruction_costs(self, random):
 		# If RC Slab
@@ -63,9 +64,10 @@ class SubstructureCosts(BaseAgencyCost):
 			A, B, C, D = [0.12, 0.727, 0.602, 0.221]
 		else:
 			A, B, C, D = [0.028, 0.936, 0.983, -0.013]
-		return A * meter_to_feet(self.element.asset.length)**B * meter_to_feet(self.element.asset.width) **C *\
-					 self.element.asset.vertical_clearance ** D * self.linear_model.predict_series(random, "sub_recon")
-
+		return A * meter_to_feet(self.element.asset.length)**B *\
+					 meter_to_feet(self.element.asset.width) **C *\
+					 	meter_to_feet(self.element.asset.vertical_clearance) ** D *\
+					 	 self.linear_model.predict_series(random, "sub_recon")
 
 class SuperstructureCosts(BaseAgencyCost):
 
@@ -78,10 +80,14 @@ class SuperstructureCosts(BaseAgencyCost):
 			unit_cost = 378
 		else:
 			unit_cost = 337.7
-		return unit_cost * self.linear_model.predict_series(random, "super_maint") / 1000
+		return unit_cost * self.linear_model.predict_series(random, "super_maint") / 1000 * 10
 
 	def rehabilitation_costs(self, random):
-		return self.linear_model.predict_series(random, "super_rehab")
+		A, B, C, D = 1, 1, 30, 0.0001
+		L, W = meter_to_feet(self.element.asset.length), meter_to_feet(self.element.asset.width)
+
+		return L**A * W**B * (C - D*L*W) * \
+					self.linear_model.predict_series(random, "super_rehab") / 1000
 
 	def reconstruction_costs(self, random):
 		# If RC Slab
@@ -90,8 +96,10 @@ class SuperstructureCosts(BaseAgencyCost):
 		elif self.element.asset.material in [1, 2]:
 			A, B, C = [0.0513, 0.979, 0.828]
 		elif self.element.asset.material in [3]:
-			A, B, C = [0.13, 1.00, 0.519]
+			A, B, C = [0.123, 1.00, 0.519]
 		elif self.element.asset.material in [4]:
 			A, B, C = [0.0885, 0.906, 0.747]
 
-		return A * meter_to_feet(self.element.asset.length)**B * meter_to_feet(self.element.asset.width) **C * self.linear_model.predict_series(random, "super_recon")
+		return A * meter_to_feet(self.element.asset.length)**B * \
+						meter_to_feet(self.element.asset.width) **C * \
+							self.linear_model.predict_series(random, "super_recon")

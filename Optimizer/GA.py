@@ -16,12 +16,13 @@ class Individual:
 		self.chrom = chrom
 		self.value = val
 		self.flag = flag
+		self.hash_ = hash(self.chrom.tostring())
 
 	def evaluate(self):
 
 		self.lca_instance.run()
-		if self.is_in_budget():
-			self.value = self.lca_instance.get_network_npv()[2]
+		if self.is_in_budget() and self.lca_instance.get_network_npv()[1] > 0:
+			self.value = self.lca_instance.get_network_npv()[2] / self.lca_instance.get_network_npv()[0]**0.1
 		else:
 			self.value = -1000
 
@@ -68,10 +69,10 @@ class Individual:
 		return np.copy(self.chrom)
 
 	def __repr__(self):
-		return f"Ind {self.flag} - {hash(self.chrom.tostring())} - {self.chrom} - Val:{self.value}"
+		return f"Ind {self.flag} - {self.hash_} - {self.chrom} - Val:{self.value}"
 	
 	def __str__(self):
-		return f"Ind {self.flag} - {hash(self.chrom.tostring())} - {self.chrom} - Val:{self.value}"
+		return f"Ind {self.flag} - {self.hash_} - {self.chrom} - Val:{self.value}"
 
 # Creating a local function for to evaluate the individuals
 def _eval_ind(ind):
@@ -246,17 +247,19 @@ class GA:
 		elites, to_be_eval = gener[:idx], gener[idx:]
 
 		# Evaluating the individuals
-		# with mp.Pool(max(-self.n_jobs * mp.cpu_count(), self.n_jobs)) as P:
-		# 	gener = P.map(_eval_ind, to_be_eval)
+		if self.n_jobs == 1:
+			for i, ind in enumerate(to_be_eval):
+				start = time.time()
+				ind.evaluate()
+				print (f"Ind {i} in {time.time()-start:.2f}")
 
-		for i, ind in enumerate(to_be_eval):
-			start = time.time()
-			ind.evaluate()
-			print (f"Ind {i} in {time.time()-start:.2f}")
+		else:
+			with mp.Pool(max(-self.n_jobs * mp.cpu_count(), self.n_jobs)) as P:
+				to_be_eval = P.map(_eval_ind, to_be_eval)
+			
 
 		# To prevent double calculating the elites values
-		if not idx == 0:
-			gener = elites + to_be_eval
+		gener = to_be_eval if idx == 0 else elites + to_be_eval
 
 		# Sorting the generation based on their value and the optimization type
 		gener = sorted(gener, key=lambda x: x.value, reverse = self.sorting_order)

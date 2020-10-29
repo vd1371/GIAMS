@@ -69,6 +69,7 @@ class LCA(BaseLCA):
 		network_cond_before = np.zeros(self.n_elements).reshape(-1, 1)
 
 		# Summation of the conditions of the condition ratings
+		# TODO: Consider not assessing the effect of recovery
 		for asset in self.network.assets:
 			for element_idx, element_conds in enumerate (asset.accumulator.elements_conds):
 				network_cond_after[element_idx] += element_conds.get_stepwise()
@@ -109,27 +110,11 @@ class LCA(BaseLCA):
 
 	def get_year_0(self):
 
-		# Since there is a slight possibility that an earthquake happens in the year = 0, we do it 2 times and choose the minimum
-		# In this way, it is almot impossible to see earthquakes in both of samplings
-
 		year0_user_costs, year0_agency_costs, year0_utils = 0, 0, 0
 
 		for asset in self.network.assets:
 
-			# To make sure the accumulator does not contatin previous results
-			asset.accumulator.refresh()
-
-			user_costs_stepwise_1, elements_costs_stepwise_1, elements_utils_stepwise_1, elements_conds_stepwise1 = \
-				self.simulator.get_one_instance(asset, random = self.random)
-			user_costs_stepwise_2, elements_costs_stepwise_2, elements_utils_stepwise_2, elements_conds_stepwise2 = \
-				self.simulator.get_one_instance(asset, random = self.random)
-
-			asset.accumulator.update(user_costs_stepwise_1,
-									elements_costs_stepwise_1,
-									elements_utils_stepwise_1,
-									elements_conds_stepwise1)
-
-			year0_user_costs += min(user_costs_stepwise_1[0], user_costs_stepwise_2[0])
+			year0_user_costs += asset.accumulator.user_costs.at_year(0)
 			year0_agency_costs += asset.accumulator.agency_costs.at_year(0)
 			year0_utils = asset.accumulator.asset_utils.at_year(0)
 

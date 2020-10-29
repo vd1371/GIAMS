@@ -64,4 +64,8 @@ class MRRFourActions(BaseMRRPlan):
 			elif counts[self.MAINT] > 5:
 				return False
 
+		for val1, val2 in zip(mrr_decimal[0][:-1], mrr_decimal[0][1:]):
+			if val1 * val2 > 0:
+				return False
+
 		return True
