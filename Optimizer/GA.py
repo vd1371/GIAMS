@@ -22,7 +22,7 @@ class Individual:
 
 		self.lca_instance.run()
 		if self.is_in_budget() and self.lca_instance.get_network_npv()[1] > 0:
-			self.value = self.lca_instance.get_network_npv()[2] / self.lca_instance.get_network_npv()[0]**0.1
+			self.value = self.lca_instance.get_network_npv()[2] / self.lca_instance.get_network_npv()[0]**0.2
 		else:
 			self.value = -1000
 
