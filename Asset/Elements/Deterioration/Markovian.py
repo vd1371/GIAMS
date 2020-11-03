@@ -2,7 +2,7 @@ import numpy as np
 
 from .BaseDeterioration import BaseDeterioration
 
-class Markovian(BaseDeteriorationModel):
+class Markovian(BaseDeterioration):
 
 	def __init__(self, probs_list):
 		super().__init__()
@@ -13,7 +13,7 @@ class Markovian(BaseDeteriorationModel):
 
 		self.probs_list = probs_list
 
-	def predict_condition(self, previous_condition = 0, t = None):
+	def predict_condition(self, previous_condition = 0, t = None, **kwargs):
 
 		if np.random.rand() > self.probs_list[previous_condition]:
 			return previous_condition + 1

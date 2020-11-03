@@ -63,7 +63,10 @@ class HazusBridgeResponseAccurate(BaseResponse):
 		idx = conds.index(mapped_condition)
 		ds = ['ds1', 'ds2', 'ds3', 'ds4', 'ds5'][idx]
 			
-		return mapped_condition, ds
+		if mapped_condition > previous_condition:
+			return mapped_condition, ds
+		else:
+			return previous_condition, 'ds1'
 
 
 def long_period_modifier(sa_long, soil_type):

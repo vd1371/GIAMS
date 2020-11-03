@@ -1,13 +1,13 @@
 # -------------------------------------------------------------------- #
-# This example was designed to show the project-level optimization
-# option in GIAMS. This example was used in the original paper as well
+# This example was designed to show the usefulness of GIAMS in another example
+# in the original paper
 # -------------------------------------------------------------------- #
 
 
 import time
 import ast
 
-from Network.IndianaNetwork import IndianaNetwork
+from Network.DummyBuildingNetwork import BuildingNetwork
 from LifeCycleAnalyzer.Simulators.BridgeSimulator import BridgeSimulator
 from LifeCycleAnalyzer.LCA import LCA
 
@@ -21,9 +21,9 @@ from utils.GeneralSettings import *
 
 def lca():
 
-	session_name = 'Indiana'
+	session_name = 'BuildingRetrofit'
 	
-	mynetwork = IndianaNetwork("INDIANA2019", n_assets = 1)
+	mynetwork = BuildingNetwork(None, n_assets = 1)
 	mynetwork.load_network()
 
 	# The old one with 42
@@ -59,28 +59,9 @@ def GA_test(obj):
 	optimizer.optimize()
 
 
-def example1():
-
-	# GA_test(lca)
+def example():
 
 	mylca = lca()
-	# print (mylca.network.assets[0].mrr_model.mrr)
-
-	# import matplotlib.pyplot as plt
-	# all_utils = []
-	# plt.ion()
-	# for _ in range (100):
-
-	# 	mylca.run()
-	# 	_, _, new_util = mylca.get_network_npv()
-	# 	all_utils.append(new_util)
-
-	# 	plt.clf()
-	# 	plt.plot([i for i in range(len(all_utils))], all_utils)
-	# 	plt.legend()
-	# 	plt.grid(True, which = 'both')
-	# 	plt.draw()
-	# 	plt.pause(0.00001)
 
 	start = time.time()
 	mylca.run(verbose = False)

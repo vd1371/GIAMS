@@ -10,7 +10,7 @@ class BaseElement(object):
 		self.age = age
 		self.initial_age = age
 
-	def refresh(self):
+	def refresh_age(self):
 		self.age = self.initial_age
 
 	def set_age(self, new_age):

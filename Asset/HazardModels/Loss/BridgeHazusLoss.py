@@ -1,7 +1,7 @@
 import numpy as np
 from .BaseHazardLoss import BaseHazardLoss
 
-class HazusLoss(BaseHazardLoss):
+class BridgeHazusLoss(BaseHazardLoss):
 
 	def __init__(self):
 		super().__init__()

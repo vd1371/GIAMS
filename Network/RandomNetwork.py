@@ -7,7 +7,7 @@ class RandomNetwork(BaseNetwork):
     def __init__(self, file_name, n_assets):
         super().__init__(file_name, n_assets)
         
-    def load_asset(self):
+    def load_asset(self, idx = None):
 
         prm = {'id' : hash(str(np.random.random()*np.random.random())), 
                     'length' : np.random.random_integers(5, 1800),
@@ -95,7 +95,7 @@ class RandomNetwork(BaseNetwork):
         hazard_model.set_generator_model(PoissonProcess(occurrence_rate = occurrence_rate,
                                                         dist = LogNormal(dist_first_param, dist_second_param))) 
         hazard_model.set_response_model(HazusBridgeResponse(asset))
-        hazard_model.set_loss_model(HazusLoss())
+        hazard_model.set_loss_model(BridgeHazusLoss())
         hazard_model.set_recovery_model(SimpleRecovery())
         asset.set_hazard_model(hazard_model)
         asset.set_replacement_value_model(hazus_default = True)
@@ -138,28 +138,11 @@ class RandomNetwork(BaseNetwork):
         asset.add_element(substructure)
  
         return asset, prm
-    
+
     def load_network(self):
         
-        assets = []
-
+        self.assets = []
         asset, params = self.load_asset()
-        assets.append(asset) 
+        self.assets.append(asset) 
         
-        self.assets = assets
         return params
-
-    def set_current_budget_limit(self, val):
-        self.current_budget_limit = val
-
-    def set_budget_limit_model(self, model):
-        self.budget_model = model
-        
-    def set_npv_budget_limit(self, val):
-        self.npv_budget_limit = val
-
-    def objective1(self):
-        return np.random.random()
-
-    def objective2(self):
-        return np.random.random()

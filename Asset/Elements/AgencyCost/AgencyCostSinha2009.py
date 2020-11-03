@@ -40,6 +40,12 @@ class DeckCosts(BaseAgencyCost):
 	def reconstruction_costs(self, random):
 		return meter_to_feet(self.element.asset.length) * meter_to_feet(self.element.asset.width) * 35/1000 * self.linear_model.predict_series(random, "deck_recon")
 
+	def predict_series(self, random):
+		# This method is called in the simulators
+		return {self.MAINT: self.maintenance_costs(random),
+				self.REHAB: self.rehabilitation_costs(random),
+				self.RECON: self.reconstruction_costs(random)}
+
 class SubstructureCosts(BaseAgencyCost):
 
 	def __init__(self):
@@ -68,6 +74,12 @@ class SubstructureCosts(BaseAgencyCost):
 					 meter_to_feet(self.element.asset.width) **C *\
 					 	meter_to_feet(self.element.asset.vertical_clearance) ** D *\
 					 	 self.linear_model.predict_series(random, "sub_recon")
+
+	def predict_series(self, random):
+		# This method is called in the simulators
+		return {self.MAINT: self.maintenance_costs(random),
+				self.REHAB: self.rehabilitation_costs(random),
+				self.RECON: self.reconstruction_costs(random)}
 
 class SuperstructureCosts(BaseAgencyCost):
 
@@ -103,3 +115,9 @@ class SuperstructureCosts(BaseAgencyCost):
 		return A * meter_to_feet(self.element.asset.length)**B * \
 						meter_to_feet(self.element.asset.width) **C * \
 							self.linear_model.predict_series(random, "super_recon")
+
+	def predict_series(self, random):
+		# This method is called in the simulators
+		return {self.MAINT: self.maintenance_costs(random),
+				self.REHAB: self.rehabilitation_costs(random),
+				self.RECON: self.reconstruction_costs(random)}

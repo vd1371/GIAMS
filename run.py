@@ -61,15 +61,12 @@ if __name__ == "__main__":
 	# my_lca = lca()
 
 
-	from Examples.Example1 import example1
-	example1()
-	input()
-
-
+	# from Examples.Example1 import example1
+	# example1()
 	# from Examples.Example3 import example
 	# from Examples.Example3 import validate_ga
 
-	# example()
-
-	# validate_ga(N = 1000, batch_size = 20)
+	
+	from Examples.BuildingRetrofitDummy import example
+	example()
 

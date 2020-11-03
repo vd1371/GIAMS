@@ -1,29 +1,13 @@
 '''
 This is the main asset class
 '''
-import numpy as np
-
-from utils.GeneralSettings import GenSet
+from .BaseAsset import BaseAsset
 from utils.PredictiveModels.Linear import Linear
 
-class Bridge(GenSet):
+class Bridge(BaseAsset):
 
 	def __init__(self, ID = 11111, **kwargs):
-		super().__init__()
-		self.ID = ID
-
-		for key, value in kwargs.items():
-			setattr(self, key, value)
-
-		self.elements = []
-		self.elements_util_weight = np.array([1/self.n_elements for _ in range(self.n_elements)])
-
-	def set_accumulator(self, accumulator):
-		self.accumulator = accumulator(self.ID, self.elements, self.elements_util_weight)
-
-	def refresh(self):
-		for element in self.elements:
-			element.refresh()
+		super().__init__(ID, **kwargs)
 
 	def set_traffic_info(self, road_class = 'NHS',
 								ADT = 1000,
@@ -45,23 +29,15 @@ class Bridge(GenSet):
 		self.skew_angle = skew_angle
 		self.n_spans = n_spans
 
-	def set_mrr_model(self, mrr):
-		self.mrr_model = mrr
-
-	def set_user_cost_model(self, model):
-		model.set_asset(self)
-		self.user_cost_model = model
-
-	def set_hazard_model(self, model):
-		self.hazard_model = model
-
 	def set_replacement_value_model(self, model = None, hazus_default = True):
 		
 		if hazus_default:
 			# Based on Hazus
 			if self.hazus_class in  ['HWB1', 'HWB2']: 
 				val = 20
-			elif self.hazus_class in ['HWB8', 'HWB9', 'HWB10', 'HWB11', 'HWB15', 'HWB16', 'HWB20', 'HWB21', 'HWB22', 'HWB23', 'HWB26', 'HWB27']:
+			elif self.hazus_class in ['HWB8', 'HWB9', 'HWB10', 'HWB11',
+										'HWB15', 'HWB16', 'HWB20', 'HWB21',
+											'HWB22', 'HWB23', 'HWB26', 'HWB27']:
 				val = 5
 			else:
 				val =1
@@ -69,11 +45,5 @@ class Bridge(GenSet):
 
 		else:
 			self.replacement_value = model
-
-	def add_element(self, element):
-		self.elements.append(element)
-		
-	def __repr__(self):
-		return f"Bridge-{self.ID}"
 
 	

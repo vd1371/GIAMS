@@ -30,7 +30,7 @@ class BridgeSimulator(BaseSimulator):
 			mrr_costs.append(element.agency_cost_model.predict_series(random))
 
 		# Refreshing the asset
-		asset.refresh()
+		asset.refresh_age()
 
 		mrr = asset.mrr_model.mrr_to_decimal()
 		for step in range(self.n_steps):

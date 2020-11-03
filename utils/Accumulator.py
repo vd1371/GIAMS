@@ -6,6 +6,8 @@ from .GeneralSettings import *
 from .NPV import NPV
 
 class Container(GenSet):
+
+	# This is a holder for different values that need to be recorded in the simulation
 	
 	def __init__(self):
 		self.npv_samples = []

@@ -23,7 +23,7 @@ def EstLca():
 
 	session_name = 'EstLca'
 	
-	mynetwork = RandomNetwork("INDIANA2019", n_assets = 1)
+	mynetwork = RandomNetwork(file_name = None, n_assets = 1)
 	
 	params = mynetwork.load_network()
 	mrr = mynetwork.assets[0].mrr_model.mrr

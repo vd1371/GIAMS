@@ -17,8 +17,5 @@ class BaseAgencyCost(GenSet):
 	def reconstruction_costs(self):
 		raise NotImplementedError ("reconstruction_costs model is not implemented yet")
 
-	def predict_series(self, random):
-		# This method is called in the simulators
-		return {self.MAINT: self.maintenance_costs(random),
-				self.REHAB: self.rehabilitation_costs(random),
-				self.RECON: self.reconstruction_costs(random)}
+	def predict_series(self):
+		raise NotImplementedError ("predict_series model is not implemented yet")
