@@ -22,8 +22,8 @@ LOCAL = 'Local'
 
 class GenSet(object):
 
-	n_elements = 1
-	n_states = 5
+	n_elements = 3
+	n_states = 8
 	dt = 2
 	horizon = 20
 	discount_rate = 0.03

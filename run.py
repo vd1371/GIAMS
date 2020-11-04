@@ -13,47 +13,6 @@ from utils.AwesomeTimeIt import timeit
 from utils.GeneralSettings import *
 
 
-def lca():
-
-	session_name = 'Indiana-IUC'
-	
-	mynetwork = IndianaNetwork("INDIANA2019", n_assets = -1)
-	mynetwork.load_network()
-
-	# mynetwork.assets[0].mrr_model.set_mrr(np.array([[1,1,1,1,1,0,0,0,1,0,1,0], [1,0,1,0,1,0,1,0,1,0,1,1], [0,0,0,0,1,1,0,0,0,1,1,1]]))
-	mynetwork.set_current_budget_limit(10000)
-	mynetwork.set_budget_limit_model(Linear(X0 = 10000, drift = 0))
-	mynetwork.set_npv_budget_limit(100000)
-
-	simulator = BridgeSimulator()
-	lca = LCA(network = mynetwork,
-			lca_name = session_name,
-			simulator = simulator,
-			random = False,
-			is_hazard = False)
-
-	return lca
-
-
-def GA_test(obj):
-
-	optimizer = GA(obj)
-	optimizer.set_ga_chars(crossver_prob = 0.75,
-							mutation_prob = 0.02,
-							population_size = 20,
-							n_generations = 200,
-							n_elites = 5,
-							optimzition_type = 'max',
-							n_jobs = -1)
-	optimizer.optimize()
-
-@timeit
-def IUC_test(obj):
-
-	optimizer = IUC(obj)
-	optimizer.optimize()
-
-
 if __name__ == "__main__":
 
 	# GA_test(lca)
@@ -61,12 +20,12 @@ if __name__ == "__main__":
 	# my_lca = lca()
 
 
-	# from Examples.Example1 import example1
-	# example1()
+	from Examples.Example1 import example1
+	example1()
 	# from Examples.Example3 import example
 	# from Examples.Example3 import validate_ga
 
 	
-	from Examples.BuildingRetrofitDummy import example
-	example()
+	# from Examples.BuildingRetrofitDummy import example
+	# example()
 

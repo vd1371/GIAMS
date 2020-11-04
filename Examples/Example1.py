@@ -23,7 +23,11 @@ def lca():
 
 	session_name = 'Indiana'
 	
-	mynetwork = IndianaNetwork("INDIANA2019", n_assets = 1)
+	mynetwork = IndianaNetwork("INDIANA2019",
+								n_assets = 1,
+								is_deck = True,
+				                is_superstructure = True,
+				                is_substructure = True)
 	mynetwork.load_network()
 
 	# The old one with 42
@@ -51,8 +55,8 @@ def GA_test(obj):
 	optimizer = GA(obj)
 	optimizer.set_ga_chars(crossver_prob = 0.75,
 							mutation_prob = 0.03,
-							population_size = 200,
-							n_generations = 100,
+							population_size = 20,
+							n_generations = 10,
 							n_elites = 5,
 							optimzition_type = 'max',
 							n_jobs = -1)
@@ -61,27 +65,9 @@ def GA_test(obj):
 
 def example1():
 
-	# GA_test(lca)
+	GA_test(lca)
 
 	mylca = lca()
-	# print (mylca.network.assets[0].mrr_model.mrr)
-
-	# import matplotlib.pyplot as plt
-	# all_utils = []
-	# plt.ion()
-	# for _ in range (100):
-
-	# 	mylca.run()
-	# 	_, _, new_util = mylca.get_network_npv()
-	# 	all_utils.append(new_util)
-
-	# 	plt.clf()
-	# 	plt.plot([i for i in range(len(all_utils))], all_utils)
-	# 	plt.legend()
-	# 	plt.grid(True, which = 'both')
-	# 	plt.draw()
-	# 	plt.pause(0.00001)
-
 	start = time.time()
 	mylca.run(verbose = False)
 	print (time.time() - start)
