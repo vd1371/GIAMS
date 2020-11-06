@@ -45,9 +45,11 @@ class LCA(BaseLCA):
 
 		asset.accumulator.refresh()
 		for i in range(N):
-			user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise = \
-				self.simulator.get_one_instance(asset, is_hazard= False, random = self.random)
-			asset.accumulator.update(user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise)
+			user_costs_stepwise, elements_costs_stepwise, \
+				elements_utils_stepwise, elements_conds_stepwise = \
+					self.simulator.get_one_instance(asset, is_hazard= False, random = self.random)
+			asset.accumulator.update(user_costs_stepwise, elements_costs_stepwise,
+										elements_utils_stepwise, elements_conds_stepwise)
 
 	def get_network_npv(self):
 		
