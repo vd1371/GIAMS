@@ -40,46 +40,48 @@ class BridgeSimulator(BaseSimulator):
 			recovery_action = None
 			for element_idx, element in enumerate (asset.elements):
 				
+				got_recovery = False
 				# Finding the current condition, before taking any actions
 				if step == 0:
 					previous_condition = element.initial_condition
 				else:
 					previous_condition = elements_conds_stepwise[element_idx][step-1]
 
-
-				# if element_idx == 0:
-				# 	print (step, previous_condition, 'previous_condition')
-
 				# Finding the action
 				action = mrr[element_idx][step]
 
-				# If there is an earthquake in that year
+				# If there is an earthquake in that year, 
 				iter_year = step*self.dt
 				if iter_year in hazard and is_hazard:
-					next_condition, ds = asset.hazard_model.response.get(previous_condition = previous_condition,
+					after_hazard_condition, ds = asset.hazard_model.response.get(previous_condition = previous_condition,
 																			pga = hazard[iter_year])
 					
-					# The earthquake has had severe effects and the state has changes
-					if not next_condition == previous_condition:
+					# The earthquake has had severe effects and the state has changed
+					if not after_hazard_condition == previous_condition:
 
-						next_condition, recovery_action = asset.hazard_model.recovery.get(next_condition)
+						next_condition, recovery_action = asset.hazard_model.recovery.get(after_hazard_condition)
 						
 						if not recovery_action is self.DONOT:
 							elements_costs_stepwise[element_idx][step] += mrr_costs[element_idx][recovery_action][step]
 							max_duration = max(max_duration, asset.mrr_model.mrr_duration[recovery_action])
+							got_recovery = True
 
 					# If it's the latest element
 					if element_idx == self.n_elements - 1:
 						
 						# Adding the loss cost of the asset due to earthquake
 						user_costs_stepwise[step] += asset.hazard_model.loss.predict_series(ds, random)[step]
-
-					# if element_idx == 0:
-					# 	print ('next_condition', next_condition, 'in hazard. Element_idx:', element_idx)
 							
-				# If there is a planned MRR action
-				else:
-					if not action == self.DONOT:
+				# If the asset did not get recovery
+				if not got_recovery:
+
+					# If none of the above, then simple degradation
+					if action == self.DONOT:
+						next_condition = \
+							element.deterioration_model.predict_condition(previous_condition = previous_condition,
+																			age = element.age)
+					# If there is a planned MRR action
+					elif not action == self.DONOT:
 
 						# Updating the max duration
 						max_duration = max(max_duration, asset.mrr_model.mrr_duration[action])
@@ -93,15 +95,6 @@ class BridgeSimulator(BaseSimulator):
 						# Adding the utility of the action on the element at the year
 						elements_utils_stepwise[element_idx][step] += element.utility_model.get(previous_condition,
 																								next_condition)
-
-					# If none of the above, then simple degradation
-					elif action == self.DONOT:
-						next_condition = \
-							element.deterioration_model.predict_condition(previous_condition = previous_condition,
-																			age = element.age)
-
-						# if element_idx == 0:
-						# 	print ('next_condition', next_condition, 'in deterioration. Element_idx:', element_idx)
 
 				# If it's the latest element (This is done to ensure the user cost is added only once)
 				if element_idx == self.n_elements - 1:
