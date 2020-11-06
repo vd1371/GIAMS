@@ -2,7 +2,7 @@ import time
 
 
 from Network.IndianaNetwork import IndianaNetwork
-from LifeCycleAnalyzer.Simulators.BridgeSimulator import BridgeSimulator
+from LifeCycleAnalyzer.Simulators.MainSimulator import MainSimulator
 from LifeCycleAnalyzer.LCA import LCA
 
 from Optimizer.GA import GA

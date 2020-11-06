@@ -6,7 +6,7 @@ from .BaseSimulator import BaseSimulator
 from utils.GeneralSettings import *
 import time
 
-class BridgeSimulator(BaseSimulator):
+class MainSimulator(BaseSimulator):
 
 	def __init__(self):
 		super().__init__()

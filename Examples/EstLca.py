@@ -11,7 +11,7 @@ import multiprocessing as mp
 from multiprocessing import Process, Queue
 
 from Network.RandomNetwork import RandomNetwork
-from LifeCycleAnalyzer.Simulators.BridgeSimulator import BridgeSimulator
+from LifeCycleAnalyzer.Simulators.MainSimulator import MainSimulator
 from LifeCycleAnalyzer.LCA import LCA
 
 from utils.PredictiveModels.Linear import Linear
@@ -33,7 +33,7 @@ def EstLca():
 	# mrr_str = np.array(ast.literal_eval(mrr_str.replace(" ", ",")))
 	# mynetwork.assets[0].mrr_model.set_mrr(mrr_str)
 
-	simulator = BridgeSimulator()
+	simulator = MainSimulator()
 	lca = LCA(network = mynetwork,
 			lca_name = session_name,
 			simulator = simulator,

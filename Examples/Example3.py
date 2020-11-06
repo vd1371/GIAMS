@@ -13,7 +13,7 @@ from multiprocessing import Process, Queue
 import itertools
 
 from Network.IndianaNetwork import IndianaNetwork
-from LifeCycleAnalyzer.Simulators.BridgeSimulator import BridgeSimulator
+from LifeCycleAnalyzer.Simulators.MainSimulator import MainSimulator
 from LifeCycleAnalyzer.LCA import LCA
 
 from Optimizer.GA import GA
@@ -42,7 +42,7 @@ def lca(mrr = None):
 	mynetwork.set_budget_limit_model(Linear(X0 = 100000, drift = 0))
 	mynetwork.set_npv_budget_limit(10000)
 
-	simulator = BridgeSimulator()
+	simulator = MainSimulator()
 	lca = LCA(network = mynetwork,
 			lca_name = session_name,
 			simulator = simulator,
@@ -92,7 +92,7 @@ def lca_for_validation(mrrs, q_out):
 
 		mynetwork.assets[0].mrr_model.set_mrr(np.atleast_2d(mrr))
 
-		simulator = BridgeSimulator()
+		simulator = MainSimulator()
 		lca = LCA(network = mynetwork,
 				lca_name = session_name,
 				simulator = simulator,

@@ -8,7 +8,7 @@ import time
 import ast
 
 from Network.DummyBuildingNetwork import BuildingNetwork
-from LifeCycleAnalyzer.Simulators.BridgeSimulator import BridgeSimulator
+from LifeCycleAnalyzer.Simulators.MainSimulator import MainSimulator
 from LifeCycleAnalyzer.LCA import LCA
 
 from Optimizer.GA import GA
@@ -35,7 +35,7 @@ def lca():
 	mynetwork.set_budget_limit_model(Linear(X0 = 100000, drift = 0))
 	mynetwork.set_npv_budget_limit(10000)
 
-	simulator = BridgeSimulator()
+	simulator = MainSimulator()
 	lca = LCA(network = mynetwork,
 			lca_name = session_name,
 			simulator = simulator,
