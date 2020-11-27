@@ -43,9 +43,9 @@ def lca():
 	lca = LCA(network = mynetwork,
 			lca_name = session_name,
 			simulator = simulator,
-			random = False,
-			is_hazard = False,
-			n_simulations = 20)
+			random = True,
+			is_hazard = True,
+			n_simulations = 1000)
 
 	return lca
 
@@ -65,7 +65,7 @@ def GA_test(obj):
 
 def example1():
 
-	GA_test(lca)
+	# GA_test(lca)
 
 	mylca = lca()
 	start = time.time()

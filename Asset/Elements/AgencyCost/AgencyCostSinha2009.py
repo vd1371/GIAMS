@@ -30,15 +30,21 @@ class DeckCosts(BaseAgencyCost):
 		elif deck_area >= 2000:
 			unit_cost_1 = 8.11
 
-		if unit_cost_1 * meter_to_feet(self.element.asset.length) * meter_to_feet(self.element.asset.width) / 1000 < 100:
+		if unit_cost_1 * meter_to_feet(self.element.asset.length) * \
+						meter_to_feet(self.element.asset.width) / 1000 < 100:
 			unit_cost_2 = 1.2331
-		elif unit_cost_1 * meter_to_feet(self.element.asset.length) * meter_to_feet(self.element.asset.width) / 1000 >= 100:
+		elif unit_cost_1 * meter_to_feet(self.element.asset.length) * \
+						meter_to_feet(self.element.asset.width) / 1000 >= 100:
 			unit_cost_2 = 0.9311
 
-		return (unit_cost_1 * meter_to_feet(self.element.asset.length) * meter_to_feet(self.element.asset.width) / 1000) * (1 + unit_cost_2 ) * self.linear_model.predict_series(random, "deck_rehab")
+		return (unit_cost_1 * meter_to_feet(self.element.asset.length) * \
+					meter_to_feet(self.element.asset.width) / 1000) * \
+						(1 + unit_cost_2 ) * self.linear_model.predict_series(random, "deck_rehab")
 
 	def reconstruction_costs(self, random):
-		return meter_to_feet(self.element.asset.length) * meter_to_feet(self.element.asset.width) * 35/1000 * self.linear_model.predict_series(random, "deck_recon")
+		return meter_to_feet(self.element.asset.length) * \
+					meter_to_feet(self.element.asset.width) * 35/1000 * \
+						self.linear_model.predict_series(random, "deck_recon")
 
 	def predict_series(self, random):
 		# This method is called in the simulators
