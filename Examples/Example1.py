@@ -45,10 +45,12 @@ def lca():
 			simulator = simulator,
 			random = True,
 			is_hazard = True,
-			n_simulations = 1000)
+			n_simulations = 10)
 
 	return lca
 
+def obj_func(**kwargs):
+		return kwargs['Utility'] / kwargs['UserCost'] ** 0.2
 
 def GA_test(obj):
 
@@ -60,6 +62,9 @@ def GA_test(obj):
 							n_elites = 5,
 							optimzition_type = 'max',
 							n_jobs = -1)
+	
+	optimizer.set_obj_func(obj_func)
+
 	optimizer.optimize()
 
 
@@ -77,6 +82,7 @@ def example1():
 
 if __name__ == "__main__":
 
+	GA_test(lca)
 	example1()
 
 

@@ -9,20 +9,24 @@ import ast
 
 class Individual:
 
-	def __init__(self, lca, chrom = None, val = None, flag = 'Regular'):
+	def __init__(self, lca, chrom = None, val = None, flag = 'Regular', obj_func = None):
 
 		self.lca_instance = lca()
 		self.lca_instance.network.set_network_mrr(chrom)
 		self.chrom = chrom
 		self.value = val
 		self.flag = flag
+		self.obj_func = obj_func
 		self.hash_ = hash(self.chrom.tostring())
 
 	def evaluate(self):
 
 		self.lca_instance.run()
-		if self.is_in_budget() and self.lca_instance.get_network_npv()[1] > 0:
-			self.value = self.lca_instance.get_network_npv()[2] / self.lca_instance.get_network_npv()[0]**0.2
+		user_costs, agency_costs, utilities = self.lca_instance.get_network_npv()
+		if self.is_in_budget(agency_costs) and agency_costs > 0:
+			self.value = self.obj_func (UserCost = user_costs,
+										AgencyCost = agency_costs,
+										Utility = utilities)
 		else:
 			self.value = -1000
 
@@ -36,7 +40,7 @@ class Individual:
 				return False
 		return True
 
-	def is_in_budget(self):
+	def is_in_budget(self, agency_costs):
 
 		def exceed_yearly_budget_against_costs(budgets, costs):
 
@@ -49,11 +53,12 @@ class Individual:
 			# To check whether the plan meets the current budget
 			return False
 
-		elif self.lca_instance.get_network_npv()[1] > self.lca_instance.network.npv_budget_limit:
+		elif agency_costs > self.lca_instance.network.npv_budget_limit:
 			# To put a cap on the npv of the MRR plan
 			return False
 
-		elif exceed_yearly_budget_against_costs(self.lca_instance.network.budget_model.predict_series(random = False), self.lca_instance.get_network_stepwise()[1]):
+		elif exceed_yearly_budget_against_costs(self.lca_instance.network.budget_model.predict_series(random = False), 
+												self.lca_instance.get_network_stepwise()[1]):
 			# To check whether the predicted costs and budget suits each other
 			return False
 
@@ -113,6 +118,9 @@ class GA:
 	def _chrom_to_original_shape(self, chrom):
 		return np.array(chrom).reshape(self.chrom_shape)
 
+	def set_obj_func(self, obj_func):
+		self.obj_func = obj_func
+
 	def set_ga_chars(self, crossver_prob = 0.75,
 							mutation_prob = 0.02,
 							population_size = 10,
@@ -163,7 +171,7 @@ class GA:
 		while True:
 			for p in [0.1, 0.2, 0.3, 0.4, 0.5]:
 				chrom = np.random.choice([0,1], size = self.chrom_shape, p = [1-p, p])
-				new_ind = Individual(self.lca, chrom = chrom)
+				new_ind = Individual(self.lca, chrom = chrom, obj_func = self.obj_func)
 				if new_ind.is_valid():
 					gener.append(new_ind)
 				self._add_to_taboo_list(chrom)
@@ -205,7 +213,11 @@ class GA:
 
 		# Ellitism
 		for i in range(self.n_elites):
-			new_ind = Individual(self.lca, gener[i].get_chrom(), gener[i].value, 'Elite')
+			new_ind = Individual(self.lca, 
+								chrom = gener[i].get_chrom(),
+								val = gener[i].value,
+								flag = 'Elite',
+								obj_func = self.obj_func)
 			next_gener.append(new_ind)
 
 		start = time.time()
@@ -220,13 +232,13 @@ class GA:
 			# Adding offsprings to the next generation
 			if not self._is_in_taboo_list(chrom1):
 
-				offspring1 = Individual(self.lca, np.copy(chrom1))
+				offspring1 = Individual(self.lca, np.copy(chrom1), obj_func = self.obj_func)
 				if offspring1.is_valid():
 					next_gener.append(offspring1)
 
 			if not self._is_in_taboo_list(chrom2):
 				
-				offspring2 = Individual(self.lca, np.copy(chrom2))
+				offspring2 = Individual(self.lca, np.copy(chrom2), obj_func = self.obj_func)
 				if offspring2.is_valid():
 					next_gener.append(offspring2)
 

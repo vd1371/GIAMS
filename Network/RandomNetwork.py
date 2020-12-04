@@ -42,6 +42,9 @@ class RandomNetwork(BaseNetwork):
                     'substructure_cond': np.random.choice([9, 8, 7, 6, 5, 4]),
                     'substructure_age': np.random.random_integers(1, 90)
                     }
+
+        # Be careful, if the length x width (sqft) is bigger than 300,000
+        # Agency cost will be negative. Solve it in the future.
         
         id_, length, width, \
             material, design, vertical_clearance = prm['id'], prm['length'], prm['width'], \
