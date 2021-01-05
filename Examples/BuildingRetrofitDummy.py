@@ -11,8 +11,7 @@ from Network.DummyBuildingNetwork import BuildingNetwork
 from LifeCycleAnalyzer.Simulators.DummyRiskAnalyzer import DummyRiskAnalyzer
 from LifeCycleAnalyzer.LCA import LCA
 
-from Optimizer.GA import GA
-from Optimizer.IUC import IUC
+from Optimizer.Rank import Rank
 
 from utils.PredictiveModels.Linear import Linear
 from utils.AwesomeTimeIt import timeit
@@ -23,7 +22,7 @@ def lca():
 
 	session_name = 'BuildingRetrofit'
 	
-	mynetwork = BuildingNetwork(None, n_assets = 1)
+	mynetwork = BuildingNetwork(None, n_assets = 5)
 	mynetwork.load_network()
 
 	mynetwork.set_current_budget_limit(100000)
@@ -40,34 +39,17 @@ def lca():
 
 	return lca
 
-
-def GA_test(obj):
-
-	optimizer = GA(obj)
-	optimizer.set_ga_chars(crossver_prob = 0.75,
-							mutation_prob = 0.03,
-							population_size = 200,
-							n_generations = 100,
-							n_elites = 5,
-							optimzition_type = 'max',
-							n_jobs = -1)
-	optimizer.optimize()
-
-
 def example():
 
-	mylca = lca()
-
 	start = time.time()
-	mylca.run(verbose = False)
-	print (time.time() - start)
-	print (mylca.get_network_npv())
+	opt = Rank(lca)
+	print (opt.optimize())
 
 
 
 if __name__ == "__main__":
 
-	example1()
+	example()
 
 
 

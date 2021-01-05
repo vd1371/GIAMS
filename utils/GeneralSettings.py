@@ -24,8 +24,8 @@ class GenSet(object):
 
 	n_elements = 1
 	n_states = 8
-	dt = 2
-	horizon = 20
+	dt = 1
+	horizon = 50
 	discount_rate = 0.03
 
 	init_year = 0

@@ -12,8 +12,8 @@ class DummyRiskAnalyzer(BaseSimulator):
 	def get_one_instance(self, asset, is_hazard = True, random = True):
 
 		user_costs_stepwise = np.random.random(self.n_steps)
-		elements_costs_stepwise = np.random.random(size = (self.n_steps, asset.n_elements)).tolist()
-		elements_utils_stepwise = np.random.random(size = (self.n_steps, asset.n_elements)).tolist()
-		elements_conds_stepwise = np.random.random(size = (self.n_steps, asset.n_elements)).tolist()
+		elements_costs_stepwise = np.random.random(size = (asset.n_elements, self.n_steps)).tolist()
+		elements_risk_stepwise = np.random.random(size = (asset.n_elements, self.n_steps)).tolist()
+		elements_conds_stepwise = np.random.random(size = (asset.n_elements, self.n_steps)).tolist()
 
-		return user_costs_stepwise, elements_costs_stepwise, elements_utils_stepwise, elements_conds_stepwise
+		return user_costs_stepwise, elements_costs_stepwise, elements_risk_stepwise, elements_conds_stepwise
