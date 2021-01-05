@@ -9,4 +9,4 @@ class BaseSimulator(GenSet):
 		super().__init__()
 
 	def get_one_instance():
-		raise NotImplementedErrors
+		raise NotImplementedError ("The get_one_instance is not implemented yet")
