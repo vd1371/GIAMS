@@ -22,6 +22,7 @@ if __name__ == "__main__":
 	import Examples as Ex
 	# from Examples.Example1 import example1
 	Ex.Example1.example1()
+	Ex.Example1.GA_test()
 	# from Examples.Example3 import example
 	# from Examples.Example3 import validate_ga
 

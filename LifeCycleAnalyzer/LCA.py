@@ -123,6 +123,37 @@ class LCA(BaseLCA):
 
 		return year0_user_costs, year0_agency_costs, year0_utils
 
+	def check_budget(self):
+
+		# TO check if the MRR action is in the budget of the network
+		def exceed_yearly_budget_against_costs(budgets, costs):
+
+			for budget, cost in zip(budgets, costs):
+				if cost > budget:
+					return True
+			return False
+
+		_, npv_agency_costs, _ = self.get_network_npv() 
+		_, agency_costs, _ = self.get_year_0()
+
+		if agency_costs > self.network.current_budget_limit:
+			# To check whether the plan meets the current budget
+			return False
+
+		elif npv_agency_costs > self.network.npv_budget_limit:
+			# To put a cap on the npv of the MRR plan
+			return False
+
+		elif exceed_yearly_budget_against_costs(self.network.budget_model.predict_series(random = False), 
+												self.get_network_stepwise()[1]):
+			# To check whether the predicted costs and budget suits each other
+			return False
+
+		elif npv_agency_costs == 0:
+			# Check if at least one action is chosed
+			return False
+		return True
+
 	def log_results(self):
 
 		# Logging each asset independently

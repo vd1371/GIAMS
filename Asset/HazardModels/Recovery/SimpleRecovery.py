@@ -1,5 +1,5 @@
 #Loading dependencies
-from .BaseRecovery import BaseRecovery
+from .BaseRecovery import *
 
 class SimpleRecovery(BaseRecovery):
 	

@@ -1,3 +1,6 @@
+#Loading dependencies
+from utils.GeneralSettings import *
+
 class BaseRecovery:
 	def __init__(self, **params):
 		'''Parent object for all future recovery models
