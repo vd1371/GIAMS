@@ -1,10 +1,11 @@
+#Loading dependencies
 import numpy as np
 from .BaseHazardLoss import BaseHazardLoss
 
 class DummyLoss(BaseHazardLoss):
 
-	def __init__(self):
-		super().__init__()
+	def __init__(self, **params):
+		super().__init__(**params)
 
 	def direct_economic_loss(self, ds, replacement_value):
 		

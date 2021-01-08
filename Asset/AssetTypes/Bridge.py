@@ -41,7 +41,7 @@ class Bridge(BaseAsset):
 				val = 5
 			else:
 				val =1
-			self.replacement_value = Linear(val, 0)
+			self.replacement_value = Linear(X0 = val, drift = 0, settings = self.settings)
 
 		else:
 			self.replacement_value = model

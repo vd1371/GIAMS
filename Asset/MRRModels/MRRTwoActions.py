@@ -6,16 +6,18 @@ from .BaseMRRPlan import *
 
 class MRRTwoActions(BaseMRRPlan):
 	
-	def __init__(self, start = 0, action_duration = 0):
-		super().__init__()
+	def __init__(self, **params):
+		super().__init__(**params)
 
-		self.start = 0
-		self.mrr_duration = {self.BINAR: action_duration}
+		self.start = params.pop(start)
+		
+		action_duration = params.pop('action_duration')
+		self.mrr_duration = {BINAR: action_duration}
 		
 		self.randomize_mrr()
 
 	def randomize_mrr(self):
-		self.mrr = np.random.randint(2, size=(self.n_elements, self.n_steps))
+		self.mrr = np.random.randint(2, size=(self.settings.n_elements, self.settings.n_steps))
 		return self.mrr
 
 	def mrr_to_decimal(self, mrr_binary = None):
@@ -33,7 +35,7 @@ class MRRTwoActions(BaseMRRPlan):
 		mrr_decimal = self.mrr_to_decimal()
 
 		for elem_mrr in mrr_decimal:
-			if np.sum(elem_mrr) > self.dt/2 :
+			if np.sum(elem_mrr) > self.settings.dt/2 :
 				return False
 
 		return True

@@ -1,10 +1,12 @@
-from utils.GeneralSettings import *
+class BaseAgencyCost:
+	def __init__(self, **params):
+		'''Parent object for all future agency costs
 
-class BaseAgencyCost(GenSet):
-
-	def __init__(self):
-		pass
-
+		::params::
+		settings: analysis general settings
+		'''
+		self.settings = params.pop('settings')
+		
 	def set_element(self, element):
 		self.element = element
 

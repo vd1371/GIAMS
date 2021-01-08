@@ -6,21 +6,25 @@ from .BaseMRRPlan import *
 
 class MRRFourActions(BaseMRRPlan):
 	
-	def __init__(self, maint_duration = 0, rehab_duration = 0, recon_duration = 0):
-		super().__init__()
+	def __init__(self, **params):
+		super().__init__(**params)
 
-		self.mrr_duration = {self.MAINT: maint_duration, self.REHAB: rehab_duration, self.RECON: recon_duration}
+		maint_duration = params.pop('maint_duration')
+		rehab_duration = params.pop('rehab_duration')
+		recon_duration = params.pop('recon_duration')
+
+		self.mrr_duration = {MAINT: maint_duration, REHAB: rehab_duration, RECON: recon_duration}
 		
 		self.randomize_mrr()
 
 	def set_mrr(self, new_mrr):
-		if np.shape(new_mrr) != (self.n_elements, self.n_steps*self.dt):
-			raise ValueError(f"Expected shape of mrr is {(self.n_elements, self.n_steps*self.dt)}"\
+		if np.shape(new_mrr) != (self.settings.n_elements, self.settings.n_steps*self.settings.dt):
+			raise ValueError(f"Expected shape of mrr is {(self.settings.n_elements, self.settings.n_steps*self.settings.dt)}"\
 								f"But {new_mrr.shape} was given")
 		self.mrr = new_mrr
 
 	def randomize_mrr(self):
-		self.mrr = np.random.randint(2, size=(self.n_elements, self.dt*self.n_steps))
+		self.mrr = np.random.randint(2, size=(self.settings.n_elements, self.settings.dt*self.settings.n_steps))
 		return self.mrr
 
 	def mrr_to_decimal(self, mrr_binary = None):
@@ -31,7 +35,7 @@ class MRRFourActions(BaseMRRPlan):
 			mrr = mrr_binary
 
 		self.mrr_decoded = []
-		for element_idx in range (self.n_elements):
+		for element_idx in range (self.settings.n_elements):
 			element_mrr = []
 			for j in range(0, len(mrr[element_idx]), 2):
 				element_mrr.append(int(str(int(mrr[element_idx][j]*10+ mrr[element_idx][j+1])), 2))
@@ -57,11 +61,11 @@ class MRRFourActions(BaseMRRPlan):
 		for elem_mrr in mrr_decimal:
 			counts = Counter(elem_mrr)
 
-			if counts[self.RECON] > 2:
+			if counts[RECON] > 2:
 				return False
-			elif counts[self.REHAB] > 3:
+			elif counts[REHAB] > 3:
 				return False
-			elif counts[self.MAINT] > 5:
+			elif counts[MAINT] > 5:
 				return False
 
 		for i in range (len(mrr_decimal)):

@@ -20,20 +20,17 @@ MAJOR = 'Major'
 MINOR = 'Minor'
 LOCAL = 'Local'
 
-class GenSet(object):
+### MRR encodings
+DONOT = 0
+MAINT = 1
+REHAB = 2
+RECON = 3
+BINAR = 1
 
-	n_elements = 1
-	n_states = 8
-	dt = 1
-	horizon = 50
-	discount_rate = 0.03
+### Analysis results
+USERCOSTS = 'user_costs'
+AGENCOSTS = 'agency_costs'
+UTILS = 'utilities'
 
-	init_year = 0
-	n_steps = int(horizon/dt)
 	
-	DONOT = 0
-	MAINT = 1
-	REHAB = 2
-	RECON = 3
-	BINAR = 1
 	

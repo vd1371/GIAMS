@@ -5,18 +5,14 @@ from utils.PredictiveModels.WienerDrift import WienerDrift
 
 class TexasDOTUserCostWithVolatility(BaseUserCost):
 
-	def __init__(self, speed_before = 60,
-						speed_after = 30,
-						drift = 0.1,
-						volatility = 0.01,
-						detour_usage_percentage = 0.1):
-		
+	def __init__(self, **params):
+		super().__init__(**params)
 
-		super().__init__()
-
-		self.speed_before = speed_before
-		self.speed_after = speed_after
-		self.detour_usage_percentage = detour_usage_percentage
+		self.speed_before = params.pop('speed_before', 60)
+		self.speed_after = params.pop('speed_after', 30)
+		self.detour_usage_percentage = params.pop('detour_usage_percentage', 0.1)
+		volatility = params.pop('volatility', 0.01)
+		drift = params.pop('drift', 0.1)
 
 		val = 30.12
 		self.vehicle_value_of_time = WienerDrift(val, val*drift, val*volatility)

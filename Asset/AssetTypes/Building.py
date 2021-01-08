@@ -19,6 +19,6 @@ class Building(BaseAsset):
 
 	def set_replacement_value_model(self, model = None):
 		
-		self.replacement_value = Linear(100, 0)
+		self.replacement_value = Linear(X0 = 100, drift = 0, settings = self.settings)
 
 	

@@ -1,9 +1,14 @@
+#Loading dependencies
 from utils.GeneralSettings import *
 
-class BaseMRRPlan(GenSet):
-	
-	def __init__(self):
-		super().__init__()
+class BaseMRRPlan:
+	def __init__(self, **params):
+		'''Parent object for all future MRR models
+		
+		::params::
+		settings
+		'''
+		self.settings = params.pop('settings')
 		self.mrr = []
 
 	def set_mrr(self, new_mrr):

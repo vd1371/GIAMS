@@ -2,13 +2,14 @@ from utils.GeneralSettings import *
 
 class BaseElement(object):
 
-	def __init__(self, name = None, initial_condition = None, age = 0):
+	def __init__(self, **params):
 		super().__init__()
 		
-		self.name = name
-		self.initial_condition = int(initial_condition)
-		self.age = age
-		self.initial_age = age
+		self.name = params.pop('name')
+		self.initial_condition = int(params.pop('initial_condition'))
+		self.age = params.pop('age')
+		self.initial_age = self.age
+		self.settings = params.pop('settings')
 
 	def refresh_age(self):
 		self.age = self.initial_age

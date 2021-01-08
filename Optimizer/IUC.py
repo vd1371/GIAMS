@@ -1,18 +1,7 @@
 import time
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from copy import deepcopy
 from itertools import permutations, product
-import pprint
-
-
-from utils.GeneralSettings import GenSet
-
-'''
-This IUC optimiztion is built on the premise that we have 4 different types of actions
-Do nothing, maintenance, rehabiliation, reconstruction
-'''
 
 def to_binary(actions):
 	elements_mrr = []
@@ -26,29 +15,34 @@ def to_binary(actions):
 		elif val == 3:
 			elements_mrr += [[1, 1]]
 
-class IUC(GenSet):
-	def __init__(self, lca = None):
-
-		# Gettign the objective function
-		self.lca = lca()
+class IUC:
+	def __init__(self, **params):
+		'''
+		This implementation of IUC optimiztion is built on the
+		premise that we have 4 different types of actions
+		Do nothing, maintenance, rehabiliation, reconstruction
+		It also works with the BridgeLCA and AccumulatorThree
+		'''	
+		self.lca = params.pop('lca')
+		self.settings = params.pop('settings')
 
 		n_assets = len(self.lca.network.assets)
 		self.asset_mrr_shape = self.lca.network.assets[0].mrr_model.mrr.shape
 		self.network_mrr_shape = (n_assets, self.asset_mrr_shape[0], self.asset_mrr_shape[1])
 
-		self.possible_mrrs = list(product([0,1], repeat=self.n_elements * 2))
+		self.possible_mrrs = list(product([0,1], repeat=self.settings.n_elements * 2))
 
 	def optimize(self):
 
 		network_mrr = np.zeros(self.network_mrr_shape)
 
-		for step in range(self.n_steps):
+		for step in range(self.settings.n_steps):
 
 			start = time.time()
 			assessment_dic = {}
 			for asset_idx, asset in enumerate(self.lca.network.assets):
 
-				print (f"Asset {asset_idx + 1} is about to be processed at step {step+1} / {self.n_steps}")
+				print (f"Asset {asset_idx + 1} is about to be processed at step {step+1} / {self.settings.n_steps}")
 
 				mrr = np.copy(network_mrr[asset_idx])
 
@@ -56,8 +50,8 @@ class IUC(GenSet):
 
 					# Assigning a possible mrr plan
 					for elem_idx, element in enumerate(asset.elements):
-						mrr[elem_idx][step*self.dt] = possible_mrr[elem_idx*self.dt]
-						mrr[elem_idx][step*self.dt + 1] = possible_mrr[elem_idx*self.dt + 1]
+						mrr[elem_idx][step*self.settings.dt] = possible_mrr[elem_idx*self.settings.dt]
+						mrr[elem_idx][step*self.settings.dt + 1] = possible_mrr[elem_idx*self.settings.dt + 1]
 
 					# Assigning it to the
 					asset.mrr_model.set_mrr(mrr)
@@ -66,9 +60,9 @@ class IUC(GenSet):
 					self.lca.run_for_one_asset(asset)
 
 					# Let's get the costs
-					user_costs = asset.accumulator.user_costs.at_year(step*self.dt)
-					agency_costs = asset.accumulator.agency_costs.at_year(step*self.dt)
-					asset_utils = asset.accumulator.asset_utils.at_year(step*self.dt)
+					user_costs = asset.accumulator.user_costs.at_year(step*self.settings.dt)
+					agency_costs = asset.accumulator.agency_costs.at_year(step*self.settings.dt)
+					asset_utils = asset.accumulator.asset_utils.at_year(step*self.settings.dt)
 
 					# Find the utiliti/cost and agency costs
 					U_C = asset_utils/(user_costs + agency_costs) if agency_costs != 0 else 0
@@ -104,8 +98,8 @@ class IUC(GenSet):
 
 					# Set the corresponding mrr to the network mrr
 					for elem_idx, element in enumerate(asset.elements):
-						network_mrr[asset_idx][elem_idx][step*self.dt] = temp_mrr[elem_idx*self.dt]
-						network_mrr[asset_idx][elem_idx][step*self.dt + 1] = temp_mrr[elem_idx*self.dt + 1]
+						network_mrr[asset_idx][elem_idx][step*self.settings.dt] = temp_mrr[elem_idx*self.settings.dt]
+						network_mrr[asset_idx][elem_idx][step*self.settings.dt + 1] = temp_mrr[elem_idx*self.settings.dt + 1]
 
 					temp_dic[asset_id] = list(network_mrr[asset_idx].reshape(1, -1)[0]) + [U_C, agency_costs, user_costs]
 
@@ -113,7 +107,7 @@ class IUC(GenSet):
 
 		# Turning temp_dic to a dataframe
 		cols = []
-		for i in range (self.n_elements):
+		for i in range (self.settings.n_elements):
 			for j in range (2):
 				cols.append(f'Elem{i}-{j}')
 		cols += ['U_C', 'AgencyCosts', 'UserCosts']

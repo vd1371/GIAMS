@@ -1,13 +1,11 @@
+#Loading dependencies
 from .BaseUserCost import BaseUserCost
-
 from utils.PredictiveModels.Linear import Linear
 
 class DummyUserCost(BaseUserCost):
-
-	def __init__(self):
-		super().__init__()
-
-		self.linear_model = Linear(1, 0)
+	def __init__(self, **params):
+		super().__init__(**params)
+		self.linear_model = Linear(X0 = 1, drift = 0, settings = self.settings)
 
 	def predict_series(self, project_duration, random = True):
 

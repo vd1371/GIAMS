@@ -1,18 +1,17 @@
+#Loading dependencies
 from .BaseUserCost import BaseUserCost
-
 from utils.PredictiveModels.Linear import Linear
 
 class TexasDOTUserCost(BaseUserCost):
 
-	def __init__(self, speed_before = 60,
-						speed_after = 30):
-		super().__init__()
+	def __init__(self, **params):
+		super().__init__(**params)
 
-		self.speed_before = speed_before
-		self.speed_after = speed_after
+		self.speed_before = params.pop('speed_before', 60)
+		self.speed_after = params.pop('speed_after', 30)
 		self.detour_usage_percentage = 0.1
 
-		self.linear_model = Linear(1, 0)
+		self.linear_model = Linear(X0 = 1, drift = 0, settings = self.settings)
 
 	def set_detour_usage_percentage(self, val):
 		self.detour_usage_percentage = val

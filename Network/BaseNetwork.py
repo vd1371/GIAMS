@@ -4,12 +4,19 @@ import sys
 from utils.GeneralSettings import *
 
 from Asset.AssetTypes.Bridge import Bridge
+from Asset.AssetTypes.Building import Building
 
 from Asset.Elements.BridgeElement import BridgeElement
 from Asset.Elements.ConditionRating.NBIRatingModified import NBI
-from Asset.Elements.Deterioration.IBMSSinha2009 import Markovian
+from Asset.Elements.Deterioration.IBMSSinha2009 import Markovian as MarkovianIBMS
 from Asset.Elements.Utility.BridgeElementsUtilityBai2013 import *
-from Asset.Elements.AgencyCost.AgencyCostSinha2009 import * 
+from Asset.Elements.AgencyCost.AgencyCostSinha2009 import *
+
+from Asset.Elements.BuildingElement import BuildingElement
+from Asset.Elements.ConditionRating.PONTISRating import Pontis_CR
+from Asset.Elements.Deterioration.Markovian import Markovian
+from Asset.Elements.Utility.DummyBuildingUtility import DummyUtility
+from Asset.Elements.AgencyCost.DummyBuildingRetrofitCost import RetrofitCosts
 
 from Asset.HazardModels.HazardModel import HazardModel
 from Asset.HazardModels.Generator.PoissonProcess import PoissonProcess
@@ -17,13 +24,21 @@ from Asset.HazardModels.Response.HazusBridgeResponse import HazusBridgeResponse
 from Asset.HazardModels.Loss.BridgeHazusLoss import BridgeHazusLoss
 from Asset.HazardModels.Recovery.SimpleRecovery import SimpleRecovery
 
+from Asset.HazardModels.Response.DummyBuildingResponse import DummyResponse
+from Asset.HazardModels.Loss.DummyBuildingLoss import DummyLoss
+from Asset.HazardModels.Recovery.DummyBuildingRecovery import DummyRecovery
+
 from Asset.MRRModels.MRRFourActions import MRRFourActions
+from Asset.MRRModels.MRRTwoActions import MRRTwoActions
 from Asset.MRRModels.EffectivenessModels.SimpleEffectiveness import SimpleEffectiveness
+from Asset.MRRModels.EffectivenessModels.DummyRetrofitEffectiveness import DummyEffectiveness
 
 from Asset.UserCostModels.TexasDOTUserCost import TexasDOTUserCost
 from Asset.UserCostModels.TexasDOTUserCostWithVolatility import TexasDOTUserCostWithVolatility
+from Asset.UserCostModels.DummyBuildingUserCost import DummyUserCost
 
-from utils.Accumulator import Accumulator
+
+from utils.AccumulatorThree import AccumulatorThree
 
 from utils.PredictiveModels.Linear import Linear
 from utils.PredictiveModels.WienerDrift import WienerDrift
@@ -36,15 +51,16 @@ from utils.Distributions.Exponential import Exponential
 from utils.Distributions.Gamma import Gamma
 from utils.Distributions.Binomial import Binomial
 
-class BaseNetwork(GenSet):
-    def __init__(self, file_name = None, n_assets = 0):
+class BaseNetwork:
+    def __init__(self, **params):
         super().__init__()
         
-        self.file_name = file_name
-        self.n_assets = n_assets
+        self.file_name = params.pop('file_name', None)
+        self.n_assets = params.pop('n_assets', 0)
+        self.settings = params.pop('settings')
         
-        if not file_name is None:
-            dir = f'./Network/Networks/{file_name}.csv'
+        if not self.file_name is None:
+            dir = f'./Network/Networks/{self.file_name}.csv'
             self.assets_df = pd.read_csv(dir, index_col = 0).iloc[:self.n_assets, :]
         
     def load_asset(self, *args, **kwargs):

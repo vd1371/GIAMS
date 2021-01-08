@@ -1,18 +1,22 @@
+#Loading dependencies
 from .BaseAgencyCost import BaseAgencyCost
-from utils.PredictiveModels.Linear import Linear
+from utils.PredictiveModels import Linear
 from utils.GeneralSettings import *
 
-# All of the formulas are based on imperial system
-# The conversions are made to turn them to metric system
-# The maintenance costs are assumed based on the IBMS information
+'''
+All of the formulas are based on imperial system
+The conversions are made to turn them to metric system
+The maintenance costs are assumed based on the IBMS information
+'''
 
 def meter_to_feet(val):
 	return val * 3.28
 
 class DeckCosts(BaseAgencyCost):
 
-	def __init__(self):
-		self.linear_model = Linear(1, 0)
+	def __init__(self, **params):
+		self.settings = params.pop("settings")
+		self.linear_model = Linear(X0 = 1, drift = 0, settings = self.settings)
 		pass
 
 	def maintenance_costs(self, random):
@@ -48,14 +52,15 @@ class DeckCosts(BaseAgencyCost):
 
 	def predict_series(self, random):
 		# This method is called in the simulators
-		return {self.MAINT: self.maintenance_costs(random),
-				self.REHAB: self.rehabilitation_costs(random),
-				self.RECON: self.reconstruction_costs(random)}
+		return {MAINT: self.maintenance_costs(random),
+				REHAB: self.rehabilitation_costs(random),
+				RECON: self.reconstruction_costs(random)}
 
 class SubstructureCosts(BaseAgencyCost):
 
-	def __init__(self):
-		self.linear_model = Linear(1, 0)
+	def __init__(self, **params):
+		self.settings = params.pop("settings")
+		self.linear_model = Linear(X0 = 1, drift = 0, settings = self.settings)
 		pass
 
 	def maintenance_costs(self, random):
@@ -83,14 +88,15 @@ class SubstructureCosts(BaseAgencyCost):
 
 	def predict_series(self, random):
 		# This method is called in the simulators
-		return {self.MAINT: self.maintenance_costs(random),
-				self.REHAB: self.rehabilitation_costs(random),
-				self.RECON: self.reconstruction_costs(random)}
+		return {MAINT: self.maintenance_costs(random),
+				REHAB: self.rehabilitation_costs(random),
+				RECON: self.reconstruction_costs(random)}
 
 class SuperstructureCosts(BaseAgencyCost):
 
-	def __init__(self):
-		self.linear_model = Linear(1, 0)
+	def __init__(self, **params):
+		self.settings = params.pop("settings")
+		self.linear_model = Linear(X0 = 1, drift = 0, settings = self.settings)
 		pass
 
 	def maintenance_costs(self, random):
@@ -124,6 +130,6 @@ class SuperstructureCosts(BaseAgencyCost):
 
 	def predict_series(self, random):
 		# This method is called in the simulators
-		return {self.MAINT: self.maintenance_costs(random),
-				self.REHAB: self.rehabilitation_costs(random),
-				self.RECON: self.reconstruction_costs(random)}
+		return {MAINT: self.maintenance_costs(random),
+				REHAB: self.rehabilitation_costs(random),
+				RECON: self.reconstruction_costs(random)}

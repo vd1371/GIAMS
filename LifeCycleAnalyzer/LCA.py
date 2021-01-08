@@ -1,26 +1,27 @@
-import os, sys
-import logging
-import time
+# Loading dependencies
+import os
 import numpy as np
 import matplotlib.pyplot as plt
-
 from .BaseLCA import BaseLCA
 
 class LCA(BaseLCA):
 
-	def __init__(self, network = None,
-						lca_name = 'Unknown',
-						simulator = None,
-						log_level = logging.DEBUG,
-						random = True,
-						is_hazard = True,
-						n_simulations = 100,
-						should_report = True):
-		super().__init__(network, lca_name, simulator, log_level, should_report)
+	def __init__(self, **params):
+		super().__init__(**params)
+		'''The first monte carlo analyzer in GIAMS
 
-		self.random = random
-		self.is_hazard = is_hazard
-		self.n_simulations = n_simulations
+		This module conducts life cycle analysis with the
+			help of a simulator
+		
+		::params::
+		random: whether the analysis should be done stochastically
+		is_hazard: whether the hazard should be considered or not
+		n_simulations: number of simulation rounds for monte carlo
+		'''
+
+		self.random = params.pop("random", True)
+		self.is_hazard = params.pop('is_hazard', True)
+		self.n_simulations = params.pop('n_simulations')
 
 	def run(self, n_simulations = None, random = False, verbose = False):
 
@@ -59,16 +60,16 @@ class LCA(BaseLCA):
 
 		for asset in self.network.assets:
 
-			network_user_costs += asset.accumulator.user_costs.expected()[0]
-			network_agency_costs += asset.accumulator.agency_costs.expected()[0]
-			network_util += asset.accumulator.asset_utils.expected()[0]
+			network_user_costs += asset.accumulator.meta_data['user_costs'].expected()[0]
+			network_agency_costs += asset.accumulator.meta_data['agency_costs'].expected()[0]
+			network_util += asset.accumulator.meta_data['asset_utils'].expected()[0]
 
 		return network_user_costs, network_agency_costs, network_util
 
 	def get_network_util_holism(self):
 
-		network_cond_after = np.zeros((self.n_elements, self.n_steps))
-		network_cond_before = np.zeros(self.n_elements).reshape(-1, 1)
+		network_cond_after = np.zeros((self.settings.n_elements, self.settings.n_steps))
+		network_cond_before = np.zeros(self.settings.n_elements).reshape(-1, 1)
 
 		# Summation of the conditions of the condition ratings
 		# TODO: Consider not assessing the effect of recovery
@@ -85,7 +86,7 @@ class LCA(BaseLCA):
 		network_cond_before = np.concatenate((network_cond_before, network_cond_after), axis = 1)
 		network_cond_before = network_cond_before[:, :-1]
 
-		network_util_stepwise = np.zeros((self.n_elements, self.n_steps))
+		network_util_stepwise = np.zeros((self.settings.n_elements, self.settings.n_steps))
 		# Converting the conditions to utility
 		for element_idx, element in enumerate(self.network.assets[0].elements):
 			network_util_stepwise[element_idx] = \
@@ -98,15 +99,15 @@ class LCA(BaseLCA):
 
 	def get_network_stepwise(self):
 
-		network_user_costs = np.zeros(self.n_steps)
-		network_agency_costs = np.zeros(self.n_steps)
-		network_util = np.zeros(self.n_steps)
+		network_user_costs = np.zeros(self.settings.n_steps)
+		network_agency_costs = np.zeros(self.settings.n_steps)
+		network_util = np.zeros(self.settings.n_steps)
 
 		for asset in self.network.assets:
 			
-			network_user_costs += asset.accumulator.user_costs.get_stepwise()
-			network_agency_costs += asset.accumulator.agency_costs.get_stepwise()
-			network_util += asset.accumulator.asset_utils.get_stepwise()
+			network_user_costs += asset.accumulator.meta_data['user_costs'].get_stepwise()
+			network_agency_costs += asset.accumulator.meta_data['agency_costs'].get_stepwise()
+			network_util += asset.accumulator.meta_data['asset_utils'].get_stepwise()
 
 		return network_user_costs, network_agency_costs, network_util
 
@@ -116,9 +117,9 @@ class LCA(BaseLCA):
 
 		for asset in self.network.assets:
 
-			year0_user_costs += asset.accumulator.user_costs.at_year(0)
-			year0_agency_costs += asset.accumulator.agency_costs.at_year(0)
-			year0_utils = asset.accumulator.asset_utils.at_year(0)
+			year0_user_costs += asset.accumulator.meta_data['user_costs'].at_year(0)
+			year0_agency_costs += asset.accumulator.meta_data['agency_costs'].at_year(0)
+			year0_utils = asset.accumulator.meta_data['asset_utils'].at_year(0)
 
 		return year0_user_costs, year0_agency_costs, year0_utils
 
@@ -133,16 +134,16 @@ class LCA(BaseLCA):
 			self.log.info(f"MRR: {asset.mrr_model.mrr_to_decimal()}")
 
 		# Logginf the network
-		N = self.network.assets[0].accumulator.user_costs.simulator_counter
+		N = self.network.assets[0].accumulator.meta_data['user_costs'].simulator_counter
 
 		user_costs = np.zeros(N)
 		agency_costs = np.zeros(N)
 		network_utils = np.zeros(N)
 
 		for asset in self.network.assets:
-			user_costs += asset.accumulator.user_costs.get_samples()
-			agency_costs += asset.accumulator.agency_costs.get_samples()
-			network_utils += asset.accumulator.asset_utils.get_samples()
+			user_costs += asset.accumulator.meta_data['user_costs'].get_samples()
+			agency_costs += asset.accumulator.meta_data['agency_costs'].get_samples()
+			network_utils += asset.accumulator.meta_data['asset_utils'].get_samples()
 
 		self.log.info(f"The network user costs Mean: {round(np.mean(user_costs),2)} , Stdv:{round(np.std(user_costs),2)}")
 		self.log.info(f"The network agency costs Mean: {round(np.mean(agency_costs),2)} , Stdv:{round(np.std(agency_costs),2)}")

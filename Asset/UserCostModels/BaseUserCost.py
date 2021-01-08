@@ -1,10 +1,11 @@
-from utils.GeneralSettings import GenSet
-
-
-class BaseUserCost(GenSet):
-
-	def __init__(self):
-		super().__init__()
+class BaseUserCost:
+	def __init__(self, **params):
+		'''Parent object for all future recovery models
+		
+		::params::
+		settings
+		'''
+		self.settings = params.pop('settings')
 
 	def set_asset(self, asset):
 		self.asset = asset

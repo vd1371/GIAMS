@@ -1,14 +1,13 @@
-
-from utils.GeneralSettings import GenSet
-
-class BasePredictiveModel(GenSet):
+class BasePredictiveModel:
 	
-	def __init__(self, X0):
-		super().__init__()
+	def __init__(self, **params):
+		'''Parent object for all predictive models
+
+		This is the base model for all of the predictor
+		mdoels such as cost predictors, raffic models, etc.
 		'''
-		This is the base model for all of the predictor mdoels such as cost predictors, raffic models, etc.
-		'''
-		self.X0 = X0
+		self.X0 = params.pop('X0')
+		self.settings = params.pop('settings')
 
 	def set_model(**kwargs):
 		raise NotImplementedError ("The set_model method of the module is not implemented yet")

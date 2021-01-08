@@ -1,20 +1,17 @@
+# Loading dependencies
 from .BasePredictiveModel import BasePredictiveModel
 import numpy as np
 
-
 class Power(BasePredictiveModel):
 
-	def __init__(self, X0 = None, growth_rate = None):
-		super().__init__(X0 = X0)
-		
-		'''
-		This is a simple linear predictor model
-		f(t) = mt + c
-		m : drift
-		c : X0
-		'''
-		self.growth_rate = growth_rate
+	def __init__(self, **params):
+		super().__init__(**params)
+		'''Power growth model for predicting future trends
 
+		::params::
+		growth_rate
+		'''
+		self.growth_rate = params.pop('growth_rate')
 		self.x = self.predict_series(random = True)
 
 	def predict(self, T = None):
@@ -23,7 +20,7 @@ class Power(BasePredictiveModel):
 	def predict_series(self, random = True):
 
 		if random:
-			T = np.linspace(0, self.horizon, self.n_steps)
+			T = np.linspace(0, self.settings.horizon, self.settings.n_steps)
 			x = self.X0 * (1+self.growth_rate) ** T
 			return x
 		else:

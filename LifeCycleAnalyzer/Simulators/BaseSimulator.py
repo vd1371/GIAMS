@@ -1,12 +1,7 @@
-'''
-The base class of the simulator
-'''
-from utils.GeneralSettings import GenSet
+class BaseSimulator:
 
-class BaseSimulator(GenSet):
-
-	def __init__(self):
-		super().__init__()
+	def __init__(self, **params):
+		self.settings = params.pop('settings')
 
 	def get_one_instance():
 		raise NotImplementedError ("The get_one_instance is not implemented yet")

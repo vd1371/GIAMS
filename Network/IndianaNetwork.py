@@ -4,16 +4,11 @@ from .BaseNetwork import *
 
 class IndianaNetwork(BaseNetwork):
     
-    def __init__(self,
-                file_name,
-                n_assets,
-                is_deck = True,
-                is_superstructure = True,
-                is_substructure = True):
-        super().__init__(file_name, n_assets)
-        self.is_deck = is_deck
-        self.is_substructure = is_substructure
-        self.is_superstructure = is_superstructure
+    def __init__(self, **params):
+        super().__init__(**params)
+        self.is_deck = params.pop('is_deck')
+        self.is_substructure = params.pop('is_substructure')
+        self.is_superstructure = params.pop('is_superstructure')
         
     def load_asset(self, idx = 0):
         
@@ -21,29 +16,41 @@ class IndianaNetwork(BaseNetwork):
         
         id_, length, width, material, design = asset_info[0:5]
         vertical_clearance = asset_info[21]
-        asset = Bridge(ID = id_, length = length,
-                                width = width,
-                                material = material,
-                                design = design,
-                                vertical_clearance = vertical_clearance)
-        asset.set_accumulator(Accumulator)
+        asset = Bridge(ID = id_,
+                        length = length,
+                        width = width,
+                        material = material,
+                        design = design,
+                        vertical_clearance = vertical_clearance,
+                        settings = self.settings)
+
+        asset.set_accumulator(AccumulatorThree)
 
         # Setting traffic info
         road_class, ADT, truck_percentage, detour_length = asset_info[5:9]
-        asset.set_traffic_info(road_class = road_class, ADT = ADT, truck_percentage = truck_percentage, detour_length = detour_length)
+        asset.set_traffic_info(road_class = road_class,
+                                ADT = ADT,
+                                truck_percentage = truck_percentage,
+                                detour_length = detour_length)
         
         # Setting seismic info
         hazus_class, site_class, skew_angle, n_spans = asset_info[9:13]
-        asset.set_seismic_info(hazus_class = hazus_class, site_class = site_class, skew_angle = skew_angle, n_spans = n_spans)
+        asset.set_seismic_info(hazus_class = hazus_class,
+                                site_class = site_class,
+                                skew_angle = skew_angle,
+                                n_spans = n_spans)
         
         # Setting MRR durations and effectiveness models
         maint_duration, rehab_duration, recon_duration = asset_info[13:16]
-        mrr = MRRFourActions(maint_duration = maint_duration, rehab_duration = rehab_duration, recon_duration = recon_duration)
-        mrr.set_effectiveness(SimpleEffectiveness())
+        mrr = MRRFourActions(maint_duration = maint_duration,
+                                rehab_duration = rehab_duration,
+                                recon_duration = recon_duration,
+                                settings = self.settings)
+        mrr.set_effectiveness(SimpleEffectiveness(settings = self.settings))
         asset.set_mrr_model(mrr)
 
         # User cost model
-        asset.set_user_cost_model(TexasDOTUserCost())
+        asset.set_user_cost_model(TexasDOTUserCost(settings = self.settings))
         
         # Hazard models
         hazard_model = HazardModel()
@@ -51,8 +58,8 @@ class IndianaNetwork(BaseNetwork):
         "Only earthquakes with magnitude of 4 or higher and based on historical data from USGS"
         hazard_model.set_generator_model(PoissonProcess(occurrence_rate = 0.3, dist = Exponential(2.1739, 4))) 
         hazard_model.set_response_model(HazusBridgeResponse(asset))
-        hazard_model.set_loss_model(BridgeHazusLoss())
-        hazard_model.set_recovery_model(SimpleRecovery())
+        hazard_model.set_loss_model(BridgeHazusLoss(settings = self.settings))
+        hazard_model.set_recovery_model(SimpleRecovery(settings = self.settings))
         asset.set_hazard_model(hazard_model)
         asset.set_replacement_value_model(hazus_default = True)
         
@@ -65,12 +72,13 @@ class IndianaNetwork(BaseNetwork):
             deck = BridgeElement(name = DECK,
                                 initial_condition = min(9-deck_cond, 7),
                                 age = age,
-                                material = deck_material)
+                                material = deck_material,
+                                settings = self.settings)
             deck.set_asset(asset)
             deck.set_condition_rating_model(NBI())
-            deck.set_deterioration_model(Markovian())
+            deck.set_deterioration_model(MarkovianIBMS())
             deck.set_utility_model(DeckUtility())
-            deck.set_agency_costs_model(DeckCosts())
+            deck.set_agency_costs_model(DeckCosts(settings = self.settings))
             asset.add_element(deck)
 
         if self.is_superstructure:
@@ -78,12 +86,13 @@ class IndianaNetwork(BaseNetwork):
             superstructure_cond = asset_info [19]
             superstructure = BridgeElement(name = SUPERSTRUCTURE,
                                             initial_condition = min(9-superstructure_cond, 7),
-                                            age = age)
+                                            age = age,
+                                            settings = self.settings)
             superstructure.set_asset(asset)
             superstructure.set_condition_rating_model(NBI())
-            superstructure.set_deterioration_model(Markovian())
+            superstructure.set_deterioration_model(MarkovianIBMS())
             superstructure.set_utility_model(SuperstructureUtility())
-            superstructure.set_agency_costs_model(SuperstructureCosts())
+            superstructure.set_agency_costs_model(SuperstructureCosts(settings = self.settings))
             asset.add_element(superstructure)
 
         if self.is_substructure:
@@ -91,12 +100,13 @@ class IndianaNetwork(BaseNetwork):
             substructure_cond = asset_info[20]
             substructure = BridgeElement(name = SUBSTRUCTURE,
                                         initial_condition = min(9-substructure_cond,7),
-                                        age = age)
+                                        age = age,
+                                        settings = self.settings)
             substructure.set_asset(asset)
             substructure.set_condition_rating_model(NBI())
-            substructure.set_deterioration_model(Markovian())
+            substructure.set_deterioration_model(MarkovianIBMS())
             substructure.set_utility_model(SubstructureUtility())
-            substructure.set_agency_costs_model(SubstructureCosts())
+            substructure.set_agency_costs_model(SubstructureCosts(settings = self.settings))
             asset.add_element(substructure)
  
         return asset

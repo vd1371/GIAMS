@@ -1,3 +1,4 @@
+#Loading dependencies
 import numpy as np
 import matplotlib.pyplot as plt
 import pprint
@@ -8,18 +9,19 @@ import time
 
 class MainSimulator(BaseSimulator):
 
-	def __init__(self):
-		super().__init__()
+	def __init__(self, **params):
+		super().__init__(**params)
 
 	def get_one_instance(self, asset, is_hazard = True, random = True):
 
-		user_costs_stepwise = np.zeros(self.n_steps)
-		elements_costs_stepwise = [np.zeros(self.n_steps) for _ in range(asset.n_elements)]
-		elements_utils_stepwise = [np.zeros(self.n_steps) for _ in range(asset.n_elements)]
-		elements_conds_stepwise = [np.zeros(self.n_steps, dtype = int) for _ in range(asset.n_elements)]
+		user_costs_stepwise = np.zeros(self.settings.n_steps)
+		elements_costs_stepwise = [np.zeros(self.settings.n_steps) for _ in range(self.settings.n_elements)]
+		elements_utils_stepwise = [np.zeros(self.settings.n_steps) for _ in range(self.settings.n_elements)]
+		elements_conds_stepwise = [np.zeros(self.settings.n_steps, dtype = int) for _ in range(self.settings.n_elements)]
 
 		# Generate hazards
-		hazard = asset.hazard_model.generator.generate_one_lifecycle(horizon = self.horizon, dt = self.dt)
+		hazard = asset.hazard_model.generator.generate_one_lifecycle(horizon = self.settings.horizon,
+																	dt = self.settings.dt)
 
 		# Finding an instance of replcement value in the horizon
 		replacement_value = asset.replacement_value.predict_series(random)
@@ -33,7 +35,7 @@ class MainSimulator(BaseSimulator):
 		asset.refresh_age()
 
 		mrr = asset.mrr_model.mrr_to_decimal()
-		for step in range(self.n_steps):
+		for step in range(self.settings.n_steps):
 			
 			# Max duration will be used for the user cost
 			max_duration = 0
@@ -51,7 +53,7 @@ class MainSimulator(BaseSimulator):
 				action = mrr[element_idx][step]
 
 				# If there is an earthquake in that year, 
-				iter_year = step*self.dt
+				iter_year = step*self.settings.dt
 				if iter_year in hazard and is_hazard:
 					after_hazard_condition, ds = asset.hazard_model.response.get(previous_condition = previous_condition,
 																			pga = hazard[iter_year])
@@ -61,13 +63,13 @@ class MainSimulator(BaseSimulator):
 
 						next_condition, recovery_action = asset.hazard_model.recovery.get(after_hazard_condition)
 						
-						if not recovery_action is self.DONOT:
+						if not recovery_action is DONOT:
 							elements_costs_stepwise[element_idx][step] += mrr_costs[element_idx][recovery_action][step]
 							max_duration = max(max_duration, asset.mrr_model.mrr_duration[recovery_action])
 							got_recovery = True
 
 					# If it's the latest element
-					if element_idx == self.n_elements - 1:
+					if element_idx == self.settings.n_elements - 1:
 						
 						# Adding the loss cost of the asset due to earthquake
 						user_costs_stepwise[step] += asset.hazard_model.loss.predict_series(ds, random)[step]
@@ -76,12 +78,12 @@ class MainSimulator(BaseSimulator):
 				if not got_recovery:
 
 					# If none of the above, then simple degradation
-					if action == self.DONOT:
+					if action == DONOT:
 						next_condition = \
 							element.deterioration_model.predict_condition(previous_condition = previous_condition,
 																			age = element.age)
 					# If there is a planned MRR action
-					elif not action == self.DONOT:
+					elif not action == DONOT:
 
 						# Updating the max duration
 						max_duration = max(max_duration, asset.mrr_model.mrr_duration[action])
@@ -97,16 +99,16 @@ class MainSimulator(BaseSimulator):
 																								next_condition)
 
 				# If it's the latest element (This is done to ensure the user cost is added only once)
-				if element_idx == self.n_elements - 1:
+				if element_idx == self.settings.n_elements - 1:
 
 					# Add the user cost to the asset_cost
 					user_costs_stepwise[step] += asset.user_cost_model.predict_series(max_duration, random)[step]
 
 				# Updating the age of the element
-				if action == self.RECON or recovery_action == self.RECON:
+				if action == RECON or recovery_action == RECON:
 					element.set_age(0)
 				else:
-					element.add_age(self.dt)
+					element.add_age(self.settings.dt)
 
 				# adding the condition to the element_condition_stepwise
 				elements_conds_stepwise[element_idx][step] = next_condition

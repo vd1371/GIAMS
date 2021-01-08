@@ -20,37 +20,41 @@ from utils.GeneralSettings import *
 
 class GeneralSettings:
 
-	n_elements = 3
+	n_elements = 1
 	n_states = 8
-	dt = 2
-	horizon = 20
+	dt = 1
+	horizon = 50
 	discount_rate = 0.03
+
 	init_year = 0
 	n_steps = int(horizon/dt)
+	
+	DONOT = 0
+	MAINT = 1
+	REHAB = 2
+	RECON = 3
+	BINAR = 1
 
 
 def lca_instance():
 
-	# Creating the settings instance
-	settings = GeneralSettings()
-
 	# Creating the network
 	session_name = 'Indiana'
-	mynetwork = IndianaNetwork(file_name = "INDIANA2019",
-								settings = settings,
+	mynetwork = IndianaNetwork("INDIANA2019",
 								n_assets = 1,
 								is_deck = True,
 				                is_superstructure = True,
 				                is_substructure = True)
 	mynetwork.load_network()
 	mynetwork.set_current_budget_limit(100000)
-	mynetwork.set_budget_limit_model(Linear(X0 = 100000, drift = 0, settings = settings))
+	mynetwork.set_budget_limit_model(Linear(X0 = 100000, drift = 0))
 	mynetwork.set_npv_budget_limit(10000)
 
-	print (mynetwork.assets[0].mrr_model.mrr)
-
 	# Creating the simulator
-	simulator = MainSimulator(settings = settings)
+	simulator = MainSimulator()
+
+	# Creating the settings instance
+	settings = GeneralSettings()
 
 	# shaping the main LCA
 	lca = LCA(lca_name = session_name,

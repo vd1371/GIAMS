@@ -74,7 +74,7 @@ class RandomNetwork(BaseNetwork):
         found = False
         while not found:
             p = np.random.choice([0.1, 0.2, 0.3, 0.4, 0.5])
-            random_mrr = np.random.choice([0, 1], size = [self.n_elements, self.n_steps*self.dt], p = [1-p, p])
+            random_mrr = np.random.choice([0, 1], size = [self.settings.n_elements, self.settings.n_steps*self.settings.dt], p = [1-p, p])
             if np.sum(random_mrr) > 3 and np.sum(random_mrr) < 34:
                 found = True
         asset.mrr_model.set_mrr(random_mrr)

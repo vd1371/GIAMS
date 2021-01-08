@@ -3,10 +3,10 @@ from .BaseElement import *
 
 class BuildingElement(BaseElement):
 
-	def __init__(self, name = 'Structure', initial_condition = 0, age = 0, **kwargs):
-		super().__init__(name, initial_condition, age)
+	def __init__(self, **params):
+		super().__init__(**params)
 
-		for key, value in kwargs.items():
+		for key, value in params.items():
 			setattr(self, key, value)
 
 	def set_asset(self, asset):

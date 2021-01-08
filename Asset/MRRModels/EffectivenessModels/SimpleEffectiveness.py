@@ -1,11 +1,11 @@
+#Loading dependencies
 import numpy as np
-
-from .BaseMRREffectiveness import BaseMRREffectiveness
+from .BaseMRREffectiveness import *
 
 class SimpleEffectiveness(BaseMRREffectiveness):
 	
-	def __init__(self):
-		super().__init__()
+	def __init__(self, **params):
+		super().__init__(**params)
 
 		self.maintenance_effectiveness = np.array([[1   , 0   , 0   , 0   , 0   , 0   , 0   , 0   ],
 											 	   [0.99, 0.01, 0   , 0   , 0   , 0   , 0   , 0   ],
@@ -34,13 +34,15 @@ class SimpleEffectiveness(BaseMRREffectiveness):
 											  		  [1, 0, 0, 0, 0, 0, 0, 0],
 											  		  [1, 0, 0, 0, 0, 0, 0, 0]])
 
-		self.effectiveness_dict = {self.MAINT: self.maintenance_effectiveness, self.REHAB: self.rehabilitation_effectiveness, self.RECON: self.reconstruction_effectiveness}
+		self.effectiveness_dict = {MAINT: self.maintenance_effectiveness,
+									REHAB: self.rehabilitation_effectiveness,
+									RECON: self.reconstruction_effectiveness}
 
 	def get(self, previous_state, action):
 		
 		rand = np.random.random()
 
-		action_array = np.zeros(self.n_states)
+		action_array = np.zeros(self.settings.n_states)
 		action_array[previous_state] = 1
 
 		# Finding the probabilities of states corresponding to the action

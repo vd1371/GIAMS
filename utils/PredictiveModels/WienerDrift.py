@@ -1,6 +1,6 @@
+# Loading dependencies
 from .BasePredictiveModel import BasePredictiveModel
 import numpy as np
-
 
 class WienerDrift(BasePredictiveModel):
 
@@ -19,14 +19,15 @@ class WienerDrift(BasePredictiveModel):
 		self.x = self.predict_series(random = True)
 
 	def predict(self, t = None):
-		return self.predict_series(t)[t//self.dt]
+		return self.predict_series(t)[t//self.settings.dt]
 
 	def predict_series(self, random = True, *args):
 
 		if random:
-			T = np.linspace(0, self.horizon, self.n_steps)
-			W = np.random.standard_normal(size = self.n_steps) 
-			W = np.cumsum(W)*np.sqrt(self.dt) ### standard brownian motion ###
+			T = np.linspace(0, self.settings.horizon, self.settings.n_steps)
+			W = np.random.standard_normal(size = self.settings.n_steps)
+			# standard brownian motion
+			W = np.cumsum(W)*np.sqrt(self.settings.dt) 
 			x = self.drift * T + self.volatility * W + self.X0
 			return x
 		else:

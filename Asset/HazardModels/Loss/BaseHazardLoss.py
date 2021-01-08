@@ -1,10 +1,14 @@
+#Loading dependencies
 import numpy as np
-from utils.GeneralSettings import GenSet
 
-class BaseHazardLoss(GenSet):
-
-	def __init__(self):
-		super().__init__()
+class BaseHazardLoss:
+	def __init__(self, **params):
+		'''Parent object for all future hazard loss models
+		
+		::params::
+		settings
+		'''
+		self.settings = params.pop('settings')
 
 	def set_asset(self, asset):
 		self.asset = asset
@@ -19,4 +23,4 @@ class BaseHazardLoss(GenSet):
 		raise NotImplementedError ("casaulties_costs is not implemented yet")
 
 	def total_costs(self):
-		return np.random.randn(int(self.horizon/self.dt))
+		return np.random.randn(int(self.settings.horizon/self.settings.dt))
