@@ -15,7 +15,7 @@ class Solution:
 		self.hash_ = hash(self.solut.tostring())
 
 		#Setting values, flag, and objective function
-		self.value = params.pop('val', None)
+		self.value = params.pop('val', -np.inf)
 		self.flag = params.pop('flag', 'Regular')
 		self.obj_func = params.pop('obj_func', None)
 

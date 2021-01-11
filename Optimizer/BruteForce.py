@@ -55,87 +55,157 @@ class BruteForce:
 	def set_obj_func(self, obj_func):
 		self.obj_func = obj_func
 
-	def _possible_mrr(self, mrr_que):
-
+	def _mrr_generator(self):
+		'''Naive mrr generator for brute foce algorithm
+		
+		Future development: Develop a smarter one
+		'''
 		# Getting all possible combination of the binary array for MRR
 		all_combinations = product([0, 1], repeat = self.binary_shape)
 
 		for mrr in all_combinations:
-			while mrr_que.qsize() > 100:
+			yield mrr
+
+	def _possible_solution(self, solution_que):
+
+		optimization_start = time.time()
+		for i, mrr in enumerate(self._mrr_generator()):
+
+			while solution_que.qsize() > 100:
 				pass
 
-			if mrr_que.qsize() < 100:
-				mrr_que.put(mrr)
+			# Creating a new solution
+			solut = self._solut_to_original_shape(mrr)
+			new_sol = Solution(lca = self.lca,
+								solut = solut,
+								obj_func = self.obj_func)
 
+			# printing the progress
+			if i % 100 == 0:
+				print (f"{i}/{2**self.binary_shape} solutions are suggested so far in "
+						f"{time.time() - optimization_start:.2f} seconds")
+			
+			# Checking if the generated mrr is valid
+			if new_sol.is_valid():
+				solution_que.put(new_sol)
+
+	def optimize_parallel(self, verbose = 1):
+
+		# Queue for generated mrrs
+		solution_que = Queue()
+		solution_generator = Process(target = self._possible_solution, args = (solution_que,))
+		solution_generator.start()
+
+		# Creaing a pool of workers for analysis
+		analysis_que = Queue()
+		workers_pool = []
+		for i in range(self.n_jobs - 1):
+			worker = Process(target = _eval_sol_q, args = (solution_que, analysis_que,))
+			worker.start()
+			workers_pool.append(worker)
+		print ("workers started analysis...")
+
+		# Getting the results and saving them
+		first = True
+		start = time.time()
+		while True:
+			while not analysis_que.empty():
+				solut = analysis_que.get()
+
+				if first:
+					best_solution = solut
+					first = False
+				else:
+					if solut.value > best_solution.value:
+						best_solution = solut
+						if verbose == 1:
+							print (f'A better solution is found\n{best_solution}')
+						self.log.info(f"BruteForce: Best solution so far: {best_solution} \n")
+
+				# To check the last time any analysis has been produced
+				start = time.time()
+
+			# If after a certain amount of time, there is nothing in the
+			# ... analysis queue, then probably no more solutions will be
+			# ... produced
+			if time.time() - start > 120:
+				ans = input('more than 2 minutes but no new results, terminate? (y/n) :')
+				
+				if ans.lower() == "y":
+					break
+				else:
+					# Refresh time counter
+					start = time.time() 
+
+		# Joining all processes
+		solution_generator.join()
+		for worker in workers_pool:
+			worker.join()
+		print ("Done")
+
+	def optimize_linear(self, verbose = 1):
+
+		optimization_start = time.time()
+
+		first = True
+		for i, mrr in enumerate(self._mrr_generator()):
+
+			if i % 100 == 0:
+				print (f"{i}/{2**self.binary_shape} solutions are analyzed so far in "
+						f"{time.time() - optimization_start:.2f} seconds")
+
+			# Creating a new solution
+			solut = self._solut_to_original_shape(mrr)
+			solut = Solution(lca = self.lca,
+								solut = solut,
+								obj_func = self.obj_func)
+			
+			# Checking if the generated mrr is valid
+			if solut.is_valid():
+				# To keep track of the time of the last valid solution
+				start = time.time()
+				# Evaluate the solution
+				solut.evaluate()
+
+				if first:
+					best_solution = solut
+					first = False
+				else:
+					if solut.value > best_solution.value:
+						best_solution = solut
+						if verbose == 1:
+							print (f'A better solution is found\n{best_solution}')
+						self.log.info(f"BruteForce: Best solution so far: {best_solution} \n")
+
+			if time.time() - start > 120:
+				ans = input('more than 2 minutes but no new results, terminate? (y/n) :')
+				
+				if ans.lower() == "y":
+					break
+				else:
+					# Refresh time counter
+					start = time.time()
+		print ("Done")
 
 	def optimize(self, verbose = 1):
 
-		mrr_que = Queue()
-
-
-
-
-		
-
-		return
-
-	def get_neighbours(self, ind):
-		'''Finding neighbours of the solution'''
-		print ("Trying to get new neighbours")
-		neighbours = []
-		old_solution = self._solut_to_1d_shape(ind.get_solut())
-
-		if self.stochastic:
-			while True:
-				new_solution = np.copy(old_solution)
-				idx = np.random.choice(range(len(new_solution)))
-				new_solution[idx] = 0 if new_solution[idx] == 1 else 1
-
-				# Checking if we have already seen this point
-				if not self._is_in_taboo_list(old_solution):
-					new_solution = self._solut_to_original_shape(new_solution)
-					new_solution = Solution(lca = self.lca,
-											solut = np.copy(new_solution),
-											obj_func = self.obj_func)
-					if new_solution.is_valid():
-						neighbours.append(new_solution)
-						break
-
-		else:
-			for idx in range(len(old_solution)):
-				new_solution = np.copy(old_solution)
-				new_solution[idx] = 0 if new_solution[idx] == 1 else 1
-
-				if not self._is_in_taboo_list(new_solution):
-					new_solution = self._solut_to_original_shape(new_solution)
-					new_solution = Solution(lca = self.lca,
-											solut = np.copy(new_solution),
-											obj_func = self.obj_func)
-					if new_solution.is_valid():
-						neighbours.append(new_solution)
-
-		return neighbours
-
-	def get_best_neighbour(self, neighbours):
-		'''Finding the best neighbour'''
-		print ('Trying to analyze neighbours')
-		n = len(neighbours)
 		if self.n_jobs == 1:
-			for i, ind in enumerate(neighbours):
-				start = time.time()
-				ind.evaluate()
-				print (f"Ind {i}/{n} in {time.time()-start:.2f}")
+			self.optimize_linear(verbose = verbose)
 
 		else:
-			with mp.Pool(max(-self.n_jobs * mp.cpu_count(), self.n_jobs)) as P:
-				to_be_eval = P.map(_eval_ind, neighbours)
+			self.optimize_parallel(verbose = verbose)
 
-		# Sorting the generation based on their value and the optimization type
-		neighbours = sorted(neighbours, key=lambda x: x.value, reverse = self.sorting_order)
-		# Returning the best neighbour
-		return neighbours[0]
+def _eval_sol_q(solution_que, analysis_que):
+	'''Producer_consumer function
 
-
+	solution queue: a queue of possible solutions
+	analysis queue: a qeueu of analyzed solutions
+	'''
+	while True:
+		while not solution_que.empty():
+			solut = solution_que.get()
+			solut.evaluate()
+			analysis_que.put(solut)
 
 
 
