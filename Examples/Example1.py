@@ -11,8 +11,7 @@ from Network import IndianaNetwork
 from LifeCycleAnalyzer.Simulators import MainSimulator
 from LifeCycleAnalyzer import LCA
 
-from Optimizer import GA
-from Optimizer import IUC
+from Optimizer import HillClimbing
 
 from utils.PredictiveModels.Linear import Linear
 from utils.AwesomeTimeIt import timeit
@@ -74,11 +73,18 @@ def GA_test():
 							n_elites = 5,
 							optimzition_type = 'max',
 							n_jobs = 1)
-	
-	optimizer.set_obj_func(obj_func)
 
+	optimizer.set_obj_func(obj_func)
 	optimizer.optimize(rounds = 3)
 
+def hill_climbing():
+
+	optimizer = HillClimbing(lca_instance)
+	optimizer.set_hyperparameters(stochastic = False,
+								optimzition_type = 'max',
+								n_jobs = 1)
+	optimizer.set_obj_func(obj_func)
+	optimizer.optimize(rounds = 3)
 
 def example1():
 
