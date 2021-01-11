@@ -6,59 +6,7 @@ import matplotlib.pyplot as plt
 
 import multiprocessing as mp
 import ast
-
-class Individual:
-
-	def __init__(self, lca, chrom = None, val = None, flag = 'Regular', obj_func = None):
-
-		self.lca_instance = lca()
-		self.lca_instance.network.set_network_mrr(chrom)
-		self.chrom = chrom
-		self.value = val
-		self.flag = flag
-		self.obj_func = obj_func
-		self.hash_ = hash(self.chrom.tostring())
-
-	def evaluate(self):
-
-		self.lca_instance.run()
-		if self.lca_instance.check_budget():
-			user_costs, agency_costs, utilities = self.lca_instance.get_network_npv()
-			self.value = self.obj_func (UserCost = user_costs,
-										AgencyCost = agency_costs,
-										Utility = utilities)
-		else:
-			self.value = -1000
-
-	def is_valid(self):
-
-		for asset in self.lca_instance.network.assets:
-			if not asset.mrr_model.check_policy():
-				# To check whether the mrr meets certain policies
-				# For example only two reconstrcution for an element in the horizon
-				return False
-
-		return True
-
-	def set_value(self, val):
-		self.value = val
-
-	def set_chrom(self, chrom):
-		self.chrom = chrom
-
-	def get_chrom(self):
-		return np.copy(self.chrom)
-
-	def __repr__(self):
-		return f"Ind {self.flag} - {self.hash_} - {self.chrom} - Val:{self.value}"
-	
-	def __str__(self):
-		return f"Ind {self.flag} - {self.hash_} - {self.chrom} - Val:{self.value}"
-
-# Creating a local function for to evaluate the individuals
-def _eval_ind(ind):
-	ind.evaluate()
-	return ind
+from ._Solution import Solution, _eval_sol
 
 class GA:
 	def __init__(self, lca = None):
@@ -76,23 +24,23 @@ class GA:
 		asset_mrr_shape = self.lca_ref.network.assets[0].mrr_model.mrr.shape
 		n_assets = len(self.lca_ref.network.assets)
 
-		# It will be used to reshape the chromosome to 1d and original shape
-		self.chrom_shape = (n_assets, asset_mrr_shape[0], asset_mrr_shape[1])
+		# It will be used to reshape the solution to 1d and original shape
+		self.solut_shape = (n_assets, asset_mrr_shape[0], asset_mrr_shape[1])
 
-		# To prevent double checking the checked individuals
+		# To prevent double checking the checked Solutions
 		self.taboo_list = []
 
-	def _add_to_taboo_list(self, chrom):
-		self.taboo_list.append(hash(chrom.tostring()))
+	def _add_to_taboo_list(self, solut):
+		self.taboo_list.append(hash(solut.tostring()))
 
-	def _is_in_taboo_list(self, chrom):
-		return hash(chrom.tostring()) in self.taboo_list
+	def _is_in_taboo_list(self, solut):
+		return hash(solut.tostring()) in self.taboo_list
 
-	def _chrom_to_1d_shape(self, chrom):
-		return chrom.reshape(-1)
+	def _solut_to_1d_shape(self, solut):
+		return solut.reshape(-1)
 
-	def _chrom_to_original_shape(self, chrom):
-		return np.array(chrom).reshape(self.chrom_shape)
+	def _solut_to_original_shape(self, solut):
+		return np.array(solut).reshape(self.solut_shape)
 
 	def set_obj_func(self, obj_func):
 		self.obj_func = obj_func
@@ -133,7 +81,7 @@ class GA:
 
 	def init_gener(self):
 		'''
-		The proportion of 1 in the initial chrom would be [0.1, 0.2, 0.3, 0.4, 0.5]
+		The proportion of 1 in the initial solut would be [0.1, 0.2, 0.3, 0.4, 0.5]
 		Higher probabilities would lead to higher costs, therefore, 0.5 would be the biggest proportion
 
 		This specific initiation is inspirer from Xuan, P., Guo, M.Z., Wang, J., Wang, C.Y., Liu, X.Y. and Liu, Y., 2011.
@@ -143,11 +91,13 @@ class GA:
 		start = time.time()
 		while True:
 			for p in [0.1, 0.2, 0.3, 0.4, 0.5]:
-				chrom = np.random.choice([0,1], size = self.chrom_shape, p = [1-p, p])
-				new_ind = Individual(self.lca, chrom = chrom, obj_func = self.obj_func)
+				solut = np.random.choice([0,1], size = self.solut_shape, p = [1-p, p])
+				new_ind = Solution(lca = self.lca,
+									solut = solut,
+									obj_func = self.obj_func)
 				if new_ind.is_valid():
 					gener.append(new_ind)
-				self._add_to_taboo_list(chrom)
+				self._add_to_taboo_list(solut)
 			
 			if len(gener) >= self.population_size:
 				break
@@ -165,19 +115,19 @@ class GA:
 	def mate(self, parent1, parent2):
 
 		# Changing the shapes to 1d
-		chrom1, chrom2 = self._chrom_to_1d_shape(parent1.get_chrom()), self._chrom_to_1d_shape(parent2.get_chrom())
+		solut1, solut2 = self._solut_to_1d_shape(parent1.get_solut()), self._solut_to_1d_shape(parent2.get_solut())
 
 		# Two point crossover
 		if np.random.random() < self.crossver_prob:
-			chrom1, chrom2 = tools.cxTwoPoint(chrom1, chrom2)
+			solut1, solut2 = tools.cxTwoPoint(solut1, solut2)
 
 		# Flipbit mutation
-		chrom1 = tools.mutFlipBit(chrom1, self.mutation_prob)
-		chrom2 = tools.mutFlipBit(chrom2, self.mutation_prob)
+		solut1 = tools.mutFlipBit(solut1, self.mutation_prob)
+		solut2 = tools.mutFlipBit(solut2, self.mutation_prob)
 
-		chrom1, chrom2 = self._chrom_to_original_shape(chrom1), self._chrom_to_original_shape(chrom2)
+		solut1, solut2 = self._solut_to_original_shape(solut1), self._solut_to_original_shape(solut2)
 
-		return chrom1, chrom2
+		return solut1, solut2
 
 	def next_gener(self, gener):
 
@@ -186,8 +136,8 @@ class GA:
 
 		# Ellitism
 		for i in range(self.n_elites):
-			new_ind = Individual(self.lca, 
-								chrom = gener[i].get_chrom(),
+			new_ind = Solution(lca = self.lca, 
+								solut = gener[i].get_solut(),
 								val = gener[i].value,
 								flag = 'Elite',
 								obj_func = self.obj_func)
@@ -200,23 +150,27 @@ class GA:
 			parent1, parent2 = np.random.choice(gener, size = (2,), p= self.p, replace = False)
 
 			# Creatings offsprings
-			chrom1, chrom2 = self.mate(parent1, parent2)
+			solut1, solut2 = self.mate(parent1, parent2)
 
 			# Adding offsprings to the next generation
-			if not self._is_in_taboo_list(chrom1):
+			if not self._is_in_taboo_list(solut1):
 
-				offspring1 = Individual(self.lca, np.copy(chrom1), obj_func = self.obj_func)
+				offspring1 = Solution(lca = self.lca,
+										solut = np.copy(solut1),
+										obj_func = self.obj_func)
 				if offspring1.is_valid():
 					next_gener.append(offspring1)
 
-			if not self._is_in_taboo_list(chrom2):
+			if not self._is_in_taboo_list(solut2):
 				
-				offspring2 = Individual(self.lca, np.copy(chrom2), obj_func = self.obj_func)
+				offspring2 = Solution(lca = self.lca,
+										solut = np.copy(solut2),
+										obj_func = self.obj_func)
 				if offspring2.is_valid():
 					next_gener.append(offspring2)
 
-			self._add_to_taboo_list(chrom1)
-			self._add_to_taboo_list(chrom2)
+			self._add_to_taboo_list(solut1)
+			self._add_to_taboo_list(solut2)
 
 			if (time.time()-start > 60):
 				start = time.time()
@@ -231,7 +185,7 @@ class GA:
 		idx = self.n_elites if n_gener != 0 else 0
 		elites, to_be_eval = gener[:idx], gener[idx:]
 
-		# Evaluating the individuals
+		# Evaluating the Solutions
 		if self.n_jobs == 1:
 			for i, ind in enumerate(to_be_eval):
 				start = time.time()
@@ -240,7 +194,7 @@ class GA:
 
 		else:
 			with mp.Pool(max(-self.n_jobs * mp.cpu_count(), self.n_jobs)) as P:
-				to_be_eval = P.map(_eval_ind, to_be_eval)
+				to_be_eval = P.map(_eval_sol, to_be_eval)
 			
 
 		# To prevent double calculating the elites values
@@ -301,7 +255,7 @@ class GA:
 					plt.xlabel('Generation')
 					plt.ylabel('Utility')
 					
-					plt.plot([i for i in range(len(best_values))], best_values, label="Best individual")
+					plt.plot([i for i in range(len(best_values))], best_values, label="Best Solution")
 					
 					plt.legend()
 					plt.grid(True, which = 'both')
