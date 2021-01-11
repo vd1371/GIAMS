@@ -27,7 +27,7 @@ class BaseLCA:
 		self.network = params.pop('network', None)
 		self.simulator = params.pop('simulator', None)
 		log_level = params.pop('log_level', logging.DEBUG)
-		should_report = params.pop('should_report', True)
+		should_report = params.pop('should_report', False)
 
 		if should_report:
 			self.directory = f"reports/{self.lca_name}"

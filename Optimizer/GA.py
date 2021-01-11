@@ -45,7 +45,7 @@ class GA:
 	def set_obj_func(self, obj_func):
 		self.obj_func = obj_func
 
-	def set_ga_chars(self, **params):
+	def set_hyperparameters(self, **params):
 
 		self.crossver_prob = params.pop('crossver_prob', 0.75)
 		self.mutation_prob = params.pop('mutation_prob', 0.02)
@@ -92,11 +92,11 @@ class GA:
 		while True:
 			for p in [0.1, 0.2, 0.3, 0.4, 0.5]:
 				solut = np.random.choice([0,1], size = self.solut_shape, p = [1-p, p])
-				new_ind = Solution(lca = self.lca,
+				new_sol = Solution(lca = self.lca,
 									solut = solut,
 									obj_func = self.obj_func)
-				if new_ind.is_valid():
-					gener.append(new_ind)
+				if new_sol.is_valid():
+					gener.append(new_sol)
 				self._add_to_taboo_list(solut)
 			
 			if len(gener) >= self.population_size:
@@ -136,12 +136,12 @@ class GA:
 
 		# Ellitism
 		for i in range(self.n_elites):
-			new_ind = Solution(lca = self.lca, 
+			new_sol = Solution(lca = self.lca, 
 								solut = gener[i].get_solut(),
 								val = gener[i].value,
 								flag = 'Elite',
 								obj_func = self.obj_func)
-			next_gener.append(new_ind)
+			next_gener.append(new_sol)
 
 		start = time.time()
 		while len(next_gener) < self.population_size:
@@ -187,10 +187,10 @@ class GA:
 
 		# Evaluating the Solutions
 		if self.n_jobs == 1:
-			for i, ind in enumerate(to_be_eval):
+			for i, sol in enumerate(to_be_eval):
 				start = time.time()
-				ind.evaluate()
-				print (f"Ind {i} in {time.time()-start:.2f}")
+				sol.evaluate()
+				print (f"sol {i} in {time.time()-start:.2f}")
 
 		else:
 			with mp.Pool(max(-self.n_jobs * mp.cpu_count(), self.n_jobs)) as P:

@@ -1,18 +1,5 @@
 import time
 
-
-from Network.IndianaNetwork import IndianaNetwork
-from LifeCycleAnalyzer.Simulators.MainSimulator import MainSimulator
-from LifeCycleAnalyzer.LCA import LCA
-
-from Optimizer.GA import GA
-from Optimizer.IUC import IUC
-
-from utils.PredictiveModels.Linear import Linear
-from utils.AwesomeTimeIt import timeit
-from utils.GeneralSettings import *
-
-
 if __name__ == "__main__":
 
 	# GA_test(lca)
@@ -23,6 +10,7 @@ if __name__ == "__main__":
 	# from Examples.Example1 import example1
 	# Ex.Example1.example1()
 	# Ex.Example1.GA_test()
+	Ex.Example1.brute_force()
 	Ex.Example1.hill_climbing()
 	# from Examples.Example3 import example
 	# from Examples.Example3 import validate_ga

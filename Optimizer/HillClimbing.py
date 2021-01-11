@@ -1,12 +1,9 @@
 #Loading dependencies
 import time
 import numpy as np
-import pandas as pd
-from deap import tools
 import matplotlib.pyplot as plt
-
 import multiprocessing as mp
-import ast
+
 from ._Solution import Solution, _eval_sol
 
 class HillClimbing:
@@ -83,11 +80,11 @@ class HillClimbing:
 				self._add_to_taboo_list(solut)
 				return new_solution
 
-	def get_neighbours(self, ind):
+	def get_neighbours(self, sol):
 		'''Finding neighbours of the solution'''
 		print ("Trying to get new neighbours")
 		neighbours = []
-		old_solution = self._solut_to_1d_shape(ind.get_solut())
+		old_solution = self._solut_to_1d_shape(sol.get_solut())
 
 		if self.stochastic:
 			while True:
@@ -125,14 +122,14 @@ class HillClimbing:
 		print ('Trying to analyze neighbours')
 		n = len(neighbours)
 		if self.n_jobs == 1:
-			for i, ind in enumerate(neighbours):
+			for i, sol in enumerate(neighbours):
 				start = time.time()
-				ind.evaluate()
-				print (f"Ind {i}/{n} in {time.time()-start:.2f}")
+				sol.evaluate()
+				print (f"sol {i}/{n} in {time.time()-start:.2f}")
 
 		else:
 			with mp.Pool(max(-self.n_jobs * mp.cpu_count(), self.n_jobs)) as P:
-				to_be_eval = P.map(_eval_ind, neighbours)
+				to_be_eval = P.map(_eval_sol, neighbours)
 
 		# Sorting the generation based on their value and the optimization type
 		neighbours = sorted(neighbours, key=lambda x: x.value, reverse = self.sorting_order)

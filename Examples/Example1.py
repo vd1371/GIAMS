@@ -12,6 +12,9 @@ from LifeCycleAnalyzer.Simulators import MainSimulator
 from LifeCycleAnalyzer import LCA
 
 from Optimizer import HillClimbing
+from Optimizer import BruteForce
+from Optimizer import GA
+from Optimizer import IUC
 
 from utils.PredictiveModels.Linear import Linear
 from utils.AwesomeTimeIt import timeit
@@ -34,7 +37,7 @@ def lca_instance():
 	settings = GeneralSettings()
 
 	# Creating the network
-	session_name = 'Indiana'
+	session_name = 'IndianaTest'
 	mynetwork = IndianaNetwork(file_name = "INDIANA2019",
 								settings = settings,
 								n_assets = 1,
@@ -56,7 +59,8 @@ def lca_instance():
 			simulator = simulator,
 			random = True,
 			is_hazard = True,
-			n_simulations = 5)
+			n_simulations = 5,
+			should_report = True)
 
 	return lca
 
@@ -66,7 +70,7 @@ def obj_func(**kwargs):
 def GA_test():
 
 	optimizer = GA(lca_instance)
-	optimizer.set_ga_chars(crossver_prob = 0.75,
+	optimizer.set_hyperparameters(crossver_prob = 0.75,
 							mutation_prob = 0.03,
 							population_size = 10,
 							n_generations = 10,
@@ -84,7 +88,15 @@ def hill_climbing():
 								optimzition_type = 'max',
 								n_jobs = 1)
 	optimizer.set_obj_func(obj_func)
-	optimizer.optimize(rounds = 3)
+	optimizer.optimize(rounds = 3,
+						verbose = 1)
+
+def brute_force():
+	optimizer = BruteForce(lca_instance)
+	optimizer.set_hyperparameters(optimzition_type = 'max',
+									n_jobs = 1)
+	optimizer.set_obj_func(obj_func)
+	optimizer.optimize(verbose = 1)
 
 def example1():
 
