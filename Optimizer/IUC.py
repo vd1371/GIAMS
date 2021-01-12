@@ -1,29 +1,19 @@
+#Loading dependencies
 import time
 import numpy as np
 import pandas as pd
-from itertools import permutations, product
-
-def to_binary(actions):
-	elements_mrr = []
-	for val in actions:
-		if val == 0:
-			elements_mrr += [[0, 0]]
-		elif val == 1:
-			elements_mrr += [[0, 1]]
-		elif val == 2:
-			elements_mrr += [[1, 0]]
-		elif val == 3:
-			elements_mrr += [[1, 1]]
+from itertools import product
 
 class IUC:
 	def __init__(self, **params):
-		'''
+		'''Incremental utility cost heuristic
+
 		This implementation of IUC optimiztion is built on the
 		premise that we have 4 different types of actions
 		Do nothing, maintenance, rehabiliation, reconstruction
 		It also works with the BridgeLCA and AccumulatorThree
 		'''	
-		self.lca = params.pop('lca')
+		self.lca = params.pop('lca')()
 		self.settings = params.pop('settings')
 
 		n_assets = len(self.lca.network.assets)
@@ -60,9 +50,9 @@ class IUC:
 					self.lca.run_for_one_asset(asset)
 
 					# Let's get the costs
-					user_costs = asset.accumulator.user_costs.at_year(step*self.settings.dt)
-					agency_costs = asset.accumulator.agency_costs.at_year(step*self.settings.dt)
-					asset_utils = asset.accumulator.asset_utils.at_year(step*self.settings.dt)
+					user_costs = asset.accumulator.meta_data['user_costs'].at_year(step*self.settings.dt)
+					agency_costs = asset.accumulator.meta_data['agency_costs'].at_year(step*self.settings.dt)
+					asset_utils = asset.accumulator.meta_data['asset_utils'].at_year(step*self.settings.dt)
 
 					# Find the utiliti/cost and agency costs
 					U_C = asset_utils/(user_costs + agency_costs) if agency_costs != 0 else 0
@@ -121,7 +111,17 @@ class IUC:
 
 
 
-
+def to_binary(actions):
+	elements_mrr = []
+	for val in actions:
+		if val == 0:
+			elements_mrr += [[0, 0]]
+		elif val == 1:
+			elements_mrr += [[0, 1]]
+		elif val == 2:
+			elements_mrr += [[1, 0]]
+		elif val == 3:
+			elements_mrr += [[1, 1]]
 
 
 

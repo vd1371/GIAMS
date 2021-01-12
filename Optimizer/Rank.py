@@ -1,17 +1,18 @@
-import time
-import numpy as np
-import pprint
+#Loading dependencies
 from collections import OrderedDict
 
 class Rank:
 	def __init__(self, **params):
-		'''Rank optimization'''
-		# Gettign the objective function
+		'''Rank optimization
+
+		This method shall be used for LCAs with one objective value
+		like risk, losses, etc.
+		'''
 		self.lca = params.pop('lca')
 		self.settings = params.pop('settings')
 
 	def optimize(self):
-
+		'''Optimize method'''
 		assessment_dic = {}
 		for asset in self.lca.network.assets:
 

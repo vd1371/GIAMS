@@ -4,7 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import multiprocessing as mp
 
-from ._Solution import Solution, _eval_sol
+from ._objectives import LCASolution
+from ._objectives import _eval_sol
 
 class HillClimbing:
 
@@ -72,7 +73,7 @@ class HillClimbing:
 		while True:
 			p = np.random.choice([0.1, 0.2, 0.3, 0.4, 0.5])
 			solut = np.random.choice([0,1], size = self.solut_shape, p = [1-p, p])
-			new_solution = Solution(lca = self.lca,
+			new_solution = LCASolution(lca = self.lca,
 									solut = solut,
 									obj_func = self.obj_func)
 			if new_solution.is_valid():
@@ -95,7 +96,7 @@ class HillClimbing:
 				# Checking if we have already seen this point
 				if not self._is_in_taboo_list(old_solution):
 					new_solution = self._solut_to_original_shape(new_solution)
-					new_solution = Solution(lca = self.lca,
+					new_solution = LCASolution(lca = self.lca,
 											solut = np.copy(new_solution),
 											obj_func = self.obj_func)
 					if new_solution.is_valid():
@@ -109,7 +110,7 @@ class HillClimbing:
 
 				if not self._is_in_taboo_list(new_solution):
 					new_solution = self._solut_to_original_shape(new_solution)
-					new_solution = Solution(lca = self.lca,
+					new_solution = LCASolution(lca = self.lca,
 											solut = np.copy(new_solution),
 											obj_func = self.obj_func)
 					if new_solution.is_valid():

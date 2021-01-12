@@ -1,3 +1,4 @@
+#Loading dependencies
 import time
 import numpy as np
 import pandas as pd
@@ -6,10 +7,15 @@ import matplotlib.pyplot as plt
 
 import multiprocessing as mp
 import ast
-from ._Solution import Solution, _eval_sol
+from ._objectives import LCASolution
+from ._objectives import _eval_sol
 
 class GA:
 	def __init__(self, lca = None):
+		'''Genetic algorithm for project-level optimization
+	
+		Therefore, it is expected that only one asset is analyzed
+		'''
 
 		# Objective_function is an instance of lca
 		self.lca = lca
@@ -22,10 +28,12 @@ class GA:
 		self.log = self.lca_ref.log
 
 		asset_mrr_shape = self.lca_ref.network.assets[0].mrr_model.mrr.shape
-		n_assets = len(self.lca_ref.network.assets)
+		self.n_assets = len(self.lca_ref.network.assets)
+		assert self.n_assets == 1, 'Only 1 asset must be used for GA'
 
 		# It will be used to reshape the solution to 1d and original shape
-		self.solut_shape = (n_assets, asset_mrr_shape[0], asset_mrr_shape[1])
+		self.solut_shape = (self.n_assets, asset_mrr_shape[0], asset_mrr_shape[1])
+		self.dimension = self.n_assets * asset_mrr_shape[0] * asset_mrr_shape[1]
 
 		# To prevent double checking the checked Solutions
 		self.taboo_list = []
@@ -42,6 +50,9 @@ class GA:
 	def _solut_to_original_shape(self, solut):
 		return np.array(solut).reshape(self.solut_shape)
 
+	def _solut_to_validation_shape(self, solut):
+		return np.array(solut).reshape(self.validation_shape)
+
 	def set_obj_func(self, obj_func):
 		self.obj_func = obj_func
 
@@ -53,6 +64,13 @@ class GA:
 		self.n_generations = params.pop('n_generations', 200)
 		self.n_elites = params.pop('n_elites', 5)
 		self.n_jobs = params.pop('n_jobs', 1)
+		
+		self.validation_dimension = params.pop('validation_dimension', 3)
+		self.validation_shape = (self.n_assets,
+								self.validation_dimension,
+								int(self.dimension/self.validation_dimension))
+		
+		self.solution_class = LCASolution
 		optimization_type = params.pop('optimization_type', 'max')
 
 		if optimization_type == 'min':
@@ -69,6 +87,8 @@ class GA:
 					f"Number of generations: {self.n_generations} \n"
 					f"Number of elites: {self.n_elites} \n"
 					f"Optimization type: {optimization_type} \n"
+					f"Validation dimension: {self.validation_dimension} \n"
+					f"Validation shape: {self.validation_shape}"
 					))
 
 		'''
@@ -89,18 +109,22 @@ class GA:
 		'''
 		gener = []
 		start = time.time()
-		while True:
-			for p in [0.1, 0.2, 0.3, 0.4, 0.5]:
-				solut = np.random.choice([0,1], size = self.solut_shape, p = [1-p, p])
-				new_sol = Solution(lca = self.lca,
-									solut = solut,
-									obj_func = self.obj_func)
-				if new_sol.is_valid():
-					gener.append(new_sol)
-				self._add_to_taboo_list(solut)
-			
-			if len(gener) >= self.population_size:
-				break
+		while len(gener) < self.population_size:
+
+			if not self.should_validate:
+				for p in [0.1, 0.2, 0.3, 0.4, 0.5]:
+					solut = np.random.choice([0,1], size = self.solut_shape, p = [1-p, p])
+					new_sol = self.solution_class(lca = self.lca,
+										solut = solut,
+										obj_func = self.obj_func)
+					if new_sol.is_valid():
+						gener.append(new_sol)
+					self._add_to_taboo_list(solut)
+
+			else:
+				solut = self.solution_class(shape = self.validation_shape)
+				solut.random_init()
+				gener.append(solut)
 
 			thresh = 10
 			if (time.time()-start > thresh):
@@ -125,8 +149,12 @@ class GA:
 		solut1 = tools.mutFlipBit(solut1, self.mutation_prob)
 		solut2 = tools.mutFlipBit(solut2, self.mutation_prob)
 
-		solut1, solut2 = self._solut_to_original_shape(solut1), self._solut_to_original_shape(solut2)
-
+		if not self.should_validate:
+			solut1, solut2 = self._solut_to_original_shape(solut1), self._solut_to_original_shape(solut2)
+		
+		else:
+			solut1, solut2 = self._solut_to_validation_shape(solut1), self._solut_to_validation_shape(solut2)
+			
 		return solut1, solut2
 
 	def next_gener(self, gener):
@@ -136,11 +164,17 @@ class GA:
 
 		# Ellitism
 		for i in range(self.n_elites):
-			new_sol = Solution(lca = self.lca, 
-								solut = gener[i].get_solut(),
-								val = gener[i].value,
-								flag = 'Elite',
-								obj_func = self.obj_func)
+			if not self.should_validate:
+				new_sol = LCASolution(lca = self.lca, 
+									solut = gener[i].get_solut(),
+									val = gener[i].value,
+									flag = 'Elite',
+									obj_func = self.obj_func)
+			else:
+				new_sol = self.solution_class(solut = gener[i].get_solut(),
+											val = gener[i].value,
+											flag = 'Elite',
+											shape = self.validation_shape)
 			next_gener.append(new_sol)
 
 		start = time.time()
@@ -153,24 +187,21 @@ class GA:
 			solut1, solut2 = self.mate(parent1, parent2)
 
 			# Adding offsprings to the next generation
-			if not self._is_in_taboo_list(solut1):
+			for solut in [solut1, solut2]:
 
-				offspring1 = Solution(lca = self.lca,
-										solut = np.copy(solut1),
-										obj_func = self.obj_func)
-				if offspring1.is_valid():
-					next_gener.append(offspring1)
+				if not self._is_in_taboo_list(solut):
 
-			if not self._is_in_taboo_list(solut2):
-				
-				offspring2 = Solution(lca = self.lca,
-										solut = np.copy(solut2),
-										obj_func = self.obj_func)
-				if offspring2.is_valid():
-					next_gener.append(offspring2)
-
-			self._add_to_taboo_list(solut1)
-			self._add_to_taboo_list(solut2)
+					if not self.should_validate:
+						offspring = LCASolution(lca = self.lca,
+												solut = np.copy(solut),
+												obj_func = self.obj_func)
+					else:
+						offspring = self.solution_class(solut = np.copy(solut),
+													shape = self.validation_shape)
+					
+					if offspring.is_valid():
+						next_gener.append(offspring)
+						self._add_to_taboo_list(solut)
 
 			if (time.time()-start > 60):
 				start = time.time()
@@ -186,17 +217,18 @@ class GA:
 		elites, to_be_eval = gener[:idx], gener[idx:]
 
 		# Evaluating the Solutions
-		if self.n_jobs == 1:
+		# We don't need parallel processing for validation function
+		if self.n_jobs == 1 or self.should_validate:
 			for i, sol in enumerate(to_be_eval):
 				start = time.time()
 				sol.evaluate()
 				print (f"sol {i} in {time.time()-start:.2f}")
 
+		# Parallel processing
 		else:
 			with mp.Pool(max(-self.n_jobs * mp.cpu_count(), self.n_jobs)) as P:
 				to_be_eval = P.map(_eval_sol, to_be_eval)
 			
-
 		# To prevent double calculating the elites values
 		gener = to_be_eval if idx == 0 else elites + to_be_eval
 
@@ -209,7 +241,11 @@ class GA:
 	def optimize(self,
 				should_plot = True,
 				should_plot_live = False,
-				rounds = 1):
+				rounds = 1,
+				label = 'GA',
+				should_validate = False):
+
+		self.should_validate = should_validate
 
 		# Creating a dataframe holder for the analysis
 		df = pd.DataFrame()
@@ -267,7 +303,7 @@ class GA:
 			df[f'Values-Round{i}'] = best_values
 
 		# Saving the results
-		df.to_csv(self.directory + "/GAValues.csv")
+		df.to_csv(self.directory + f"/{label}Values.csv")
 
 		if should_plot:
 			print ("About to draw plot")
@@ -276,10 +312,31 @@ class GA:
 			x = [i for i in range (len(best_values))]
 			for col in df.columns:
 				plt.plot(x, df[col])
-			plt.savefig(self.directory + "/GAValues.png")
-	
+			plt.savefig(self.directory + f"/{label}Values.png")
 
 
+	def validate(self):
 
+		from ._objectives import AxisParallel
+		from ._objectives import DeJong
+		from ._objectives import RotatedHyperEllipsoid
+		from ._objectives import RosenbrockValley
+		from ._objectives import Rastrigin
+		from ._objectives import Schwefel
+		from ._objectives import Griewangk
 
+		test_dic = {'DeJong' : DeJong,
+					'AxisParallel': AxisParallel,
+					'RotatedHyperEllipsoid': RotatedHyperEllipsoid,
+					'RosenbrockValley': RosenbrockValley,
+					'Rastrigin': Rastrigin,
+					'Schwefel' : Schwefel,
+					'Griewangk': Griewangk}
+
+		test_dic = {'Griewangk': Griewangk}
+		for k, v in test_dic.items():
+
+			self.solution_class = v
+			self.optimize(label = k,
+							should_validate = True)
 

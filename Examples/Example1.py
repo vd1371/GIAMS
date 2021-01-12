@@ -15,6 +15,7 @@ from Optimizer import HillClimbing
 from Optimizer import BruteForce
 from Optimizer import GA
 from Optimizer import IUC
+from Optimizer import PSO
 
 from utils.PredictiveModels.Linear import Linear
 from utils.AwesomeTimeIt import timeit
@@ -72,14 +73,15 @@ def GA_test():
 	optimizer = GA(lca_instance)
 	optimizer.set_hyperparameters(crossver_prob = 0.75,
 							mutation_prob = 0.03,
-							population_size = 10,
-							n_generations = 10,
+							population_size = 200,
+							n_generations = 200,
 							n_elites = 5,
 							optimzition_type = 'max',
 							n_jobs = 1)
 
 	optimizer.set_obj_func(obj_func)
-	optimizer.optimize(rounds = 3)
+	# optimizer.optimize(rounds = 3)
+	optimizer.validate()
 
 def hill_climbing():
 
@@ -92,9 +94,18 @@ def hill_climbing():
 						verbose = 1)
 
 def brute_force():
-	optimizer = BruteForce(lca_instance)
+	optimizer = BruteForce(lca = lca_instance)
 	optimizer.set_hyperparameters(optimzition_type = 'max',
 									n_jobs = 1)
+	optimizer.set_obj_func(obj_func)
+	optimizer.optimize(verbose = 1)
+
+def pso():
+	optimizer = PSO(lca_instance)
+	optimizer.set_hyperparameters(n_particles = 200,
+									k = 50,
+									n_jobs = 1,
+									iter = 10)
 	optimizer.set_obj_func(obj_func)
 	optimizer.optimize(verbose = 1)
 

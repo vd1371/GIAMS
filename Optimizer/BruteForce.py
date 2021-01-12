@@ -5,13 +5,15 @@ import pandas as pd
 import multiprocessing as mp
 from multiprocessing import Queue, Process
 from itertools import product
-from ._Solution import Solution, _eval_sol
+from ._objectives import LCASolution
+from ._objectives import _eval_sol
 
 class BruteForce:
 
-	def __init__(self, lca = None):
+	def __init__(self, **params):
 
 		# Objective_function is an instance of lca
+		lca = params.pop('lca')
 		self.lca = lca
 
 		# Gettign one instance the objective function
@@ -29,7 +31,7 @@ class BruteForce:
 		# It will be used for producing all combination of n binaries
 		# It equals to number of assets x number of elements x number of decision making step
 		# .. in the future
-		self.binary_shape = n_assets * asset_mrr_shape[0] * asset_mrr_shape[1]
+		self.dimension = n_assets * asset_mrr_shape[0] * asset_mrr_shape[1]
 
 	def _solut_to_1d_shape(self, solut):
 		return solut.reshape(-1)
@@ -61,7 +63,7 @@ class BruteForce:
 		Future development: Develop a smarter one
 		'''
 		# Getting all possible combination of the binary array for MRR
-		all_combinations = product([0, 1], repeat = self.binary_shape)
+		all_combinations = product([0, 1], repeat = self.dimension)
 
 		for mrr in all_combinations:
 			yield mrr
@@ -76,13 +78,13 @@ class BruteForce:
 
 			# Creating a new solution
 			solut = self._solut_to_original_shape(mrr)
-			new_sol = Solution(lca = self.lca,
+			new_sol = LCASolution(lca = self.lca,
 								solut = solut,
 								obj_func = self.obj_func)
 
 			# printing the progress
 			if i % 100 == 0:
-				print (f"{i}/{2**self.binary_shape} solutions are suggested so far in "
+				print (f"{i}/{2**self.dimension} solutions are suggested so far in "
 						f"{time.time() - optimization_start:.2f} seconds")
 			
 			# Checking if the generated mrr is valid
@@ -151,12 +153,12 @@ class BruteForce:
 		for i, mrr in enumerate(self._mrr_generator()):
 
 			if i % 100 == 0:
-				print (f"{i}/{2**self.binary_shape} solutions are analyzed so far in "
+				print (f"{i}/{2**self.dimension} solutions are analyzed so far in "
 						f"{time.time() - optimization_start:.2f} seconds")
 
 			# Creating a new solution
 			solut = self._solut_to_original_shape(mrr)
-			solut = Solution(lca = self.lca,
+			solut = LCASolution(lca = self.lca,
 								solut = solut,
 								obj_func = self.obj_func)
 			
