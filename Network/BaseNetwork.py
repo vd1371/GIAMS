@@ -18,6 +18,8 @@ from Asset.Elements.Deterioration.Markovian import Markovian
 from Asset.Elements.Utility.DummyBuildingUtility import DummyUtility
 from Asset.Elements.AgencyCost.DummyBuildingRetrofitCost import RetrofitCosts
 
+from Asset.Elements.BuildingElement import SHMElement
+
 from Asset.HazardModels.HazardModel import HazardModel
 from Asset.HazardModels.Generator.PoissonProcess import PoissonProcess
 from Asset.HazardModels.Response.HazusBridgeResponse import HazusBridgeResponse
@@ -30,8 +32,10 @@ from Asset.HazardModels.Recovery.DummyBuildingRecovery import DummyRecovery
 
 from Asset.MRRModels.MRRFourActions import MRRFourActions
 from Asset.MRRModels.MRRTwoActions import MRRTwoActions
+from Asset.MRRModels.SHMActions import SHMActions
 from Asset.MRRModels.EffectivenessModels.SimpleEffectiveness import SimpleEffectiveness
 from Asset.MRRModels.EffectivenessModels.DummyRetrofitEffectiveness import DummyEffectiveness
+from Asset.MRRModels.EffectivenessModels.SHMEffectiveness import SHMEffectiveness
 
 from Asset.UserCostModels.TexasDOTUserCost import TexasDOTUserCost
 from Asset.UserCostModels.TexasDOTUserCostWithVolatility import TexasDOTUserCostWithVolatility
@@ -39,6 +43,7 @@ from Asset.UserCostModels.DummyBuildingUserCost import DummyUserCost
 
 
 from utils.AccumulatorThree import AccumulatorThree
+from utils.AccumulatorX import AccumulatorX
 
 from utils.PredictiveModels.Linear import Linear
 from utils.PredictiveModels.WienerDrift import WienerDrift
