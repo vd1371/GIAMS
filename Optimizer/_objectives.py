@@ -114,7 +114,7 @@ class DeJong(BaseSolution):
 	def evaluate(self):
 		if self.is_valid():
 			ans = 0
-			for arr in self.solut:
+			for arr in self.solut[0]:
 				num = binary_to_num(arr)
 				ans += num**2
 			self.value = -ans

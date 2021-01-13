@@ -248,6 +248,7 @@ class GA:
 		self.should_validate = should_validate
 
 		# Creating a dataframe holder for the analysis
+		self.taboo_list = []
 		df = pd.DataFrame()
 
 		for i in range(rounds):
@@ -281,7 +282,7 @@ class GA:
 							f"Timme elapsed: {time.time()-start:.2f}")
 				self.log.info(log_str)
 
-				best_values.append(max(gener[0].value, 0))
+				best_values.append(gener[0].value)
 
 				# Plotting the value online
 				if should_plot_live:
@@ -312,6 +313,8 @@ class GA:
 			x = [i for i in range (len(best_values))]
 			for col in df.columns:
 				plt.plot(x, df[col])
+			plt.xlabel('Generation')
+			plt.ylabel(f'{label} value')
 			plt.savefig(self.directory + f"/{label}Values.png")
 
 
@@ -333,7 +336,7 @@ class GA:
 					'Schwefel' : Schwefel,
 					'Griewangk': Griewangk}
 
-		test_dic = {'Griewangk': Griewangk}
+		# test_dic = {'Griewangk': Griewangk}
 		for k, v in test_dic.items():
 
 			self.solution_class = v
