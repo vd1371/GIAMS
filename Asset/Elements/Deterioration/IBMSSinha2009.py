@@ -11,6 +11,12 @@ class Markovian(BaseDeterioration):
 		To be completed
 		"""
 
+	def update_deterioration(self, observation):
+		'''Dummy model for updating the deterioration models
+		It can be used in the SHM anslysis
+		'''
+		pass
+
 	def predict_condition(self, previous_condition, age = None):
 
 		if self.element.name == SUPERSTRUCTURE:

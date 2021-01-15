@@ -1,6 +1,5 @@
 #Loading dependencies
 import numpy as np
-import matplotlib.pyplot as plt
 
 from .BaseSimulator import BaseSimulator
 from utils.GeneralSettings import *
@@ -10,6 +9,11 @@ class SHMSimulator(BaseSimulator):
 
 	def __init__(self, **params):
 		super().__init__(**params)
+		'''Dummy simulator for SHM analysis
+		
+		This module requires modifications
+		'''
+
 
 	def get_one_instance(self, asset, is_hazard = True, random = True):
 
@@ -74,6 +78,14 @@ class SHMSimulator(BaseSimulator):
 				# If the asset did not get recovery
 				if not got_recovery:
 
+					if action == INSP1:
+						asset.mrr_model.update_mrr(**observations)
+						element.deterioration_model.update_deterioration(**observations)
+
+					if action == INSP2:
+						asset.mrr_model.update_mrr(**observations)
+						element.deterioration_model.update_deterioration(**observations)
+
 					# If none of the above, then simple degradation
 					if action == DONOT:
 						next_condition = \
@@ -102,7 +114,7 @@ class SHMSimulator(BaseSimulator):
 					user_costs_stepwise[step] += asset.user_cost_model.predict_series(max_duration, random)[step]
 
 				# Updating the age of the element
-				if action == RECON or recovery_action == RECON:
+				if action == DOMNT or recovery_action == DOMNT:
 					element.set_age(0)
 				else:
 					element.add_age(self.settings.dt)

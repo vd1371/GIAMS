@@ -54,9 +54,6 @@ class BruteForce:
 		elif self.optimization_type == 'max':
 			self.sorting_order = True
 
-	def set_obj_func(self, obj_func):
-		self.obj_func = obj_func
-
 	def _mrr_generator(self):
 		'''Naive mrr generator for brute foce algorithm
 		
@@ -80,7 +77,7 @@ class BruteForce:
 			solut = self._solut_to_original_shape(mrr)
 			new_sol = LCASolution(lca = self.lca,
 								solut = solut,
-								obj_func = self.obj_func)
+								obj_func = self.lca_ref.network.objective)
 
 			# printing the progress
 			if i % 100 == 0:
@@ -160,7 +157,7 @@ class BruteForce:
 			solut = self._solut_to_original_shape(mrr)
 			solut = LCASolution(lca = self.lca,
 								solut = solut,
-								obj_func = self.obj_func)
+								obj_func = self.lca_ref.network.objective)
 			
 			# Checking if the generated mrr is valid
 			if solut.is_valid():

@@ -61,9 +61,6 @@ class HillClimbing:
 		elif self.optimization_type == 'max':
 			self.sorting_order = True
 
-	def set_obj_func(self, obj_func):
-		self.obj_func = obj_func
-
 	def random_solution(self):
 		'''Randomly find a solution
 
@@ -75,7 +72,7 @@ class HillClimbing:
 			solut = np.random.choice([0,1], size = self.solut_shape, p = [1-p, p])
 			new_solution = LCASolution(lca = self.lca,
 									solut = solut,
-									obj_func = self.obj_func)
+									obj_func = self.lca_ref.network.objective)
 			if new_solution.is_valid():
 				new_solution.evaluate()
 				self._add_to_taboo_list(solut)
@@ -98,7 +95,7 @@ class HillClimbing:
 					new_solution = self._solut_to_original_shape(new_solution)
 					new_solution = LCASolution(lca = self.lca,
 											solut = np.copy(new_solution),
-											obj_func = self.obj_func)
+											obj_func = self.lca_ref.network.objective)
 					if new_solution.is_valid():
 						neighbours.append(new_solution)
 						break
@@ -112,7 +109,7 @@ class HillClimbing:
 					new_solution = self._solut_to_original_shape(new_solution)
 					new_solution = LCASolution(lca = self.lca,
 											solut = np.copy(new_solution),
-											obj_func = self.obj_func)
+											obj_func = self.lca_ref.network.objective)
 					if new_solution.is_valid():
 						neighbours.append(new_solution)
 

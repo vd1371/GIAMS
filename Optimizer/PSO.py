@@ -54,9 +54,6 @@ class PSO:
 					f"iter: {self.iter}"
 					))
 
-	def set_obj_func(self, obj_func):
-		self.obj_func = obj_func
-
 	def _pso_obj(self, x):
 
 		# Creting the solutions objects
@@ -66,7 +63,7 @@ class PSO:
 			new_solut = self._solut_to_original_shape(particle)
 			new_solut = LCASolution(lca = self.lca,
 								solut = new_solut,
-								obj_func = self.obj_func)
+								obj_func = self.lca_ref.network.objective)
 			solution_holder.append(new_solut)
 
 		# Evaluating the Solutions

@@ -54,3 +54,7 @@ class SHMActions(BaseMRRPlan):
 	def check_policy(self):
 		'''Dummy check_policy method'''
 		return True
+
+	def update_mrr(self, observation):
+		'''Dummy model for updating the mrr model based on an observations'''
+		self.mrr = mrr

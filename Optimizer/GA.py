@@ -53,9 +53,6 @@ class GA:
 	def _solut_to_validation_shape(self, solut):
 		return np.array(solut).reshape(self.validation_shape)
 
-	def set_obj_func(self, obj_func):
-		self.obj_func = obj_func
-
 	def set_hyperparameters(self, **params):
 
 		self.crossver_prob = params.pop('crossver_prob', 0.75)
@@ -116,7 +113,7 @@ class GA:
 					solut = np.random.choice([0,1], size = self.solut_shape, p = [1-p, p])
 					new_sol = self.solution_class(lca = self.lca,
 										solut = solut,
-										obj_func = self.obj_func)
+										obj_func = self.lca_ref.network.objective)
 					if new_sol.is_valid():
 						gener.append(new_sol)
 					self._add_to_taboo_list(solut)
@@ -169,7 +166,7 @@ class GA:
 									solut = gener[i].get_solut(),
 									val = gener[i].value,
 									flag = 'Elite',
-									obj_func = self.obj_func)
+									obj_func = self.lca_ref.network.objective)
 			else:
 				new_sol = self.solution_class(solut = gener[i].get_solut(),
 											val = gener[i].value,
@@ -194,7 +191,7 @@ class GA:
 					if not self.should_validate:
 						offspring = LCASolution(lca = self.lca,
 												solut = np.copy(solut),
-												obj_func = self.obj_func)
+												obj_func = self.lca_ref.network.objective)
 					else:
 						offspring = self.solution_class(solut = np.copy(solut),
 													shape = self.validation_shape)

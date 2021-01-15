@@ -39,7 +39,7 @@ def lca_instance():
 
 	# Creating the network
 	session_name = 'IndianaSHM'
-	mynetwork = IndianaNetwork(file_name = "INDIANA2019",
+	mynetwork = DummySHMNetwork(file_name = "INDIANA2019",
 								settings = settings,
 								n_assets = 1,
 								is_deck = False,

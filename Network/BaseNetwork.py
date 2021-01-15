@@ -18,7 +18,7 @@ from Asset.Elements.Deterioration.Markovian import Markovian
 from Asset.Elements.Utility.DummyBuildingUtility import DummyUtility
 from Asset.Elements.AgencyCost.DummyBuildingRetrofitCost import RetrofitCosts
 
-from Asset.Elements.BuildingElement import SHMElement
+from Asset.Elements.SHMElement import SHMElement
 
 from Asset.HazardModels.HazardModel import HazardModel
 from Asset.HazardModels.Generator.PoissonProcess import PoissonProcess

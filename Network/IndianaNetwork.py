@@ -110,3 +110,7 @@ class IndianaNetwork(BaseNetwork):
             asset.add_element(substructure)
  
         return asset
+
+    def objective(self, **kwargs):
+        return kwargs['Utility'] / kwargs['UserCost'] ** 0.2
+
