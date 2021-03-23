@@ -46,6 +46,13 @@ def lca_instance():
 				                is_superstructure = True,
 				                is_substructure = True)
 	mynetwork.load_network()
+
+	new_mrr = np.array([[1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+						[0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+						[1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1]])
+
+
+	mynetwork.assets[0].mrr_model.set_mrr(new_mrr)
 	mynetwork.set_current_budget_limit(100000)
 	mynetwork.set_budget_limit_model(Linear(X0 = 100000, drift = 0, settings = settings))
 	mynetwork.set_npv_budget_limit(10000)
@@ -60,7 +67,7 @@ def lca_instance():
 			simulator = simulator,
 			random = True,
 			is_hazard = True,
-			n_simulations = 5,
+			n_simulations = 20,
 			should_report = True)
 
 	return lca

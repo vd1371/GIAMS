@@ -8,6 +8,10 @@ class RandomNetwork(BaseNetwork):
         super().__init__(file_name, n_assets)
         
     def load_asset(self, idx = None):
+        '''Loading an asset in a random manner for the EstLCCA idea
+
+        The values are based on the 
+        '''
 
         prm = {'id' : hash(str(np.random.random()*np.random.random())), 
                     'length' : np.random.random_integers(5, 1800),
@@ -143,7 +147,11 @@ class RandomNetwork(BaseNetwork):
         return asset, prm
 
     def load_network(self):
-        
+        '''Loading the random network
+
+        Since load asset is different from other ones, a new 
+        load_network should be used to unpack 2 params (asset, prm)
+        '''
         self.assets = []
         asset, params = self.load_asset()
         self.assets.append(asset) 

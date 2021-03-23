@@ -1,3 +1,4 @@
+#Loading dependencies
 import pandas as pd
 import sys
 
@@ -59,11 +60,12 @@ from utils.Distributions.Binomial import Binomial
 class BaseNetwork:
     def __init__(self, **params):
         super().__init__()
-        
+        '''Constructor of the base network'''
         self.file_name = params.pop('file_name', None)
         self.n_assets = params.pop('n_assets', 0)
         self.settings = params.pop('settings')
         
+
         if not self.file_name is None:
             dir = f'./Network/Networks/{self.file_name}.csv'
             self.assets_df = pd.read_csv(dir, index_col = 0).iloc[:self.n_assets, :]
@@ -75,11 +77,16 @@ class BaseNetwork:
         raise NotImplementedError ("load_network in loader is not implemented yet")
 
     def set_network_mrr(self, network_mrr):
+        '''Setting the mrr of the network to each asset'''
         for asset, mrr in zip (self.assets, network_mrr):
             asset.mrr_model.set_mrr(mrr)
     
     def load_network(self):
+        '''Loading the network
         
+        If the file_name is None, it is assumed that the network will be randomized
+        Else, the netwotk will be loaded from a datafile
+        '''
         self.assets = []
         if self.file_name is None:
             # For generated networks
@@ -93,12 +100,15 @@ class BaseNetwork:
         return self.assets
 
     def set_current_budget_limit(self, val):
+        '''Setting the current budget limit'''
         self.current_budget_limit = val
 
     def set_budget_limit_model(self, model):
+        '''Setting the budget limit in time'''
         self.budget_model = model
         
     def set_npv_budget_limit(self, val):
+        '''Set the npv of the budget limit'''
         self.npv_budget_limit = val
 
     def objective1(self):

@@ -9,6 +9,7 @@ class HazusBridgeResponseAccurate(BaseResponse):
 
 	def __init__(self, asset):
 		super().__init__(asset)
+		'''Hazus bridge reposne class'''
 		
 		self.damage_state_dic = damage_state_dic_generator(self.asset.hazus_class)
 		self.k_skew = np.sqrt(np.sin((90-self.asset.skew_angle)*np.pi/180))
@@ -19,7 +20,8 @@ class HazusBridgeResponseAccurate(BaseResponse):
 			self.mapped_conditions.append(val[-1])
 
 	def get_response(self, previous_condition = -1, soil_type = 'A', pga=None, pgd=0, sa_long=0.5, sa_short = 0.1):
-
+		'''Getting the response of asset to a specific hazard'''
+		# Reference: HAZUS Manual
 		MEDIAN = 0 # It's just an index, to make it more clear to read
 		BETA = 1 # It's just an index, to make it more clear to read
 

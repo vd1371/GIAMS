@@ -1,8 +1,8 @@
 import time
 
 def timeit(method):
-    # This function is written to be used as dcorator
-    # Example of usage can be found in the below
+    '''This function is written to be used as dcorator
+    Example of usage can be found in the below'''
 
     def timed(*args, **kw):
         ts = time.time()
@@ -19,7 +19,6 @@ def timeit(method):
 
 
 if __name__ == '__main__':
-
 
 	# This is how to use timeIt as decorator
 	@timeIt

@@ -1,5 +1,4 @@
 import numpy as np
-
 from .BaseDeterioration import *
 
 class Markovian(BaseDeterioration):
@@ -18,7 +17,7 @@ class Markovian(BaseDeterioration):
 		pass
 
 	def predict_condition(self, previous_condition, age = None):
-
+		'''To predict the condition rating after one time step given some information'''
 		if self.element.name == SUPERSTRUCTURE:
 			if self.asset.road_class == NHS or self.asset.road_class == MAJOR:
 				if self.element.asset.material == STEEL or self.element.asset.material == TIMBER:

@@ -11,7 +11,7 @@ class IndianaNetwork(BaseNetwork):
         self.is_superstructure = params.pop('is_superstructure')
         
     def load_asset(self, idx = 0):
-        
+        '''Load asset for the dummy model for SHM example'''
         asset_info = self.assets_df.loc[idx, :]
         
         id_, length, width, material, design = asset_info[0:5]
@@ -59,7 +59,7 @@ class IndianaNetwork(BaseNetwork):
         hazard_model.set_loss_model(BridgeHazusLoss(settings = self.settings))
         hazard_model.set_recovery_model(SimpleRecovery(settings = self.settings))
         asset.set_hazard_model(hazard_model)
-        asset.set_replacement_value_model(hazus_default = True)
+        asset.set_replacement_value_model(Linear(X0 = 100, drift = 0, settings = self.settings))
         
         # Finding the age
         age = asset_info [16]

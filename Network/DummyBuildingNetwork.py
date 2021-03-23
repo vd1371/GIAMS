@@ -1,5 +1,5 @@
+#Loading dependencies
 import numpy as np
-
 from .BaseNetwork import *
 
 class BuildingNetwork(BaseNetwork):
@@ -8,7 +8,10 @@ class BuildingNetwork(BaseNetwork):
         super().__init__(file_name, n_assets)
         
     def load_asset(self):
+        '''Loading asset for a dummy model for building network
 
+        Features of this network are randomized
+        '''
         prm = {'id' : hash(str(np.random.random()*np.random.random())), 
                     'height' : np.random.random_integers(5, 20),
                     'width' : np.random.random_integers(3, 60),
@@ -44,7 +47,7 @@ class BuildingNetwork(BaseNetwork):
         hazard_model.set_loss_model(DummyLoss())
         hazard_model.set_recovery_model(DummyRecovery())
         asset.set_hazard_model(hazard_model)
-        asset.set_replacement_value_model(hazus_default = True)
+        asset.set_replacement_value_model(Linear(X0 = 100, drift = 0, settings = self.settings))
 
         # Adding the structure to the asset
         structure = BuildingElement(name = 'Structure',

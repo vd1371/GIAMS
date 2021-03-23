@@ -39,7 +39,7 @@ class SimpleEffectiveness(BaseMRREffectiveness):
 									RECON: self.reconstruction_effectiveness}
 
 	def get(self, previous_state, action):
-		
+		'''The effectiveness model used for the Indiana example'''
 		rand = np.random.random()
 
 		action_array = np.zeros(self.settings.n_states)

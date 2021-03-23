@@ -1,7 +1,5 @@
 import numpy as np
-
 from .BaseUtility import BaseUtility
-
 
 """
 TheReference

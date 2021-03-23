@@ -11,7 +11,7 @@ class IndianaNetwork(BaseNetwork):
         self.is_superstructure = params.pop('is_superstructure')
         
     def load_asset(self, idx = 0):
-        
+        '''Loading each asset from a source file'''
         asset_info = self.assets_df.loc[idx, :]
         
         id_, length, width, material, design = asset_info[0:5]
@@ -61,7 +61,16 @@ class IndianaNetwork(BaseNetwork):
         hazard_model.set_loss_model(BridgeHazusLoss(settings = self.settings))
         hazard_model.set_recovery_model(SimpleRecovery(settings = self.settings))
         asset.set_hazard_model(hazard_model)
-        asset.set_replacement_value_model(hazus_default = True)
+
+
+        hazus_class_number = int(hazus_class[3:])
+        if hazus_class_number in  [1, 2]: 
+            val = 20
+        elif hazus_class_number in [8, 9, 10, 11, 15, 16, 20, 21, 22, 23, 26, 27]:
+            val = 5
+        else:
+            val =1
+        asset.set_replacement_value_model(model = Linear(X0 = val, drift = 0, settings = self.settings))
         
         # Finding the age
         age = asset_info [16]
@@ -112,5 +121,6 @@ class IndianaNetwork(BaseNetwork):
         return asset
 
     def objective(self, **kwargs):
+        '''Getting the objective of this network'''
         return kwargs['Utility'] / kwargs['UserCost'] ** 0.2
 

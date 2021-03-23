@@ -1,3 +1,4 @@
+#Loading dependencies
 from .BaseDistribution import BaseDistribution
 
 class Gamma(BaseDistribution):

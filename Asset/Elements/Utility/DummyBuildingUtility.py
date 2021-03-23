@@ -1,5 +1,4 @@
 import numpy as np
-
 from .BaseUtility import BaseUtility
 
 class DummyUtility(BaseUtility):

@@ -9,10 +9,11 @@ class BridgeEarthQuakeResponse(BaseResponse):
 											'Extensive': [1.1*1*1.125, 0.6, 5],
 											'Complete': [1.7*1*1.125, 0.6, 5]}):
 		super().__init__()
+		'''Fragility based reposne class'''
 		self.damage_state_dic = damage_state_dic
 
 	def get_response(self, previous_condition = -1, pga=None, pgd=0, sa_long=0, sa_short = 0):
-
+		'''Getting the response of asset to a specific hazard'''
 		#TODO: Make the output states more clear and rational
 		#TODO: Make the connection between the condition rates and damage states
 

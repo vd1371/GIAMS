@@ -24,7 +24,6 @@ class DeckCosts(BaseAgencyCost):
 		return cost * self.linear_model.predict_series(random, "deck_maint") / 1000
 
 	def rehabilitation_costs(self, random):
-
 		deck_area = meter_to_feet(self.element.asset.length) * meter_to_feet(self.element.asset.width) / 9
 		# Assumption: patchin is more than 15%
 		if deck_area < 500:
@@ -52,6 +51,7 @@ class DeckCosts(BaseAgencyCost):
 
 	def predict_series(self, random):
 		# This method is called in the simulators
+		assert isinstance(random, bool), 'random must be boolean'
 		return {MAINT: self.maintenance_costs(random),
 				REHAB: self.rehabilitation_costs(random),
 				RECON: self.reconstruction_costs(random)}
@@ -87,6 +87,7 @@ class SubstructureCosts(BaseAgencyCost):
 					 	 self.linear_model.predict_series(random, "sub_recon")
 
 	def predict_series(self, random):
+		assert isinstance(random, bool), 'random must be boolean'
 		# This method is called in the simulators
 		return {MAINT: self.maintenance_costs(random),
 				REHAB: self.rehabilitation_costs(random),
@@ -129,6 +130,7 @@ class SuperstructureCosts(BaseAgencyCost):
 							self.linear_model.predict_series(random, "super_recon")
 
 	def predict_series(self, random):
+		assert isinstance(random, bool), 'random must be boolean'
 		# This method is called in the simulators
 		return {MAINT: self.maintenance_costs(random),
 				REHAB: self.rehabilitation_costs(random),

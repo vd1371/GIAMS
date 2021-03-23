@@ -1,8 +1,8 @@
+'''Solutions and objective classes for optimization algorithms'''
 #Loading dependencies
 import numpy as np
 
 class BaseSolution:
-
 	def __init__(self, **params):
 		#Solut is a representation of a solution for the whole network
 		#It represents the MRR of a network
@@ -28,6 +28,15 @@ class BaseSolution:
 		return np.copy(self.solut)
 
 	def random_init(self):
+		'''Randomly initialize the solution
+		
+		The solution represents the mrr vector
+		The shape[0] refers to the number of elements for each asset
+		Shape[1] refers to the number of steps in the horizon
+
+		These solutions shall be used for only one asset and single
+		asset optimization
+		'''
 
 		solut = []
 		for n_asset in range(self.shape[0]):

@@ -80,7 +80,7 @@ class PSO:
 		return np.array(results)
 
 	def optimize(self, verbose = 2):
-
+		'''Optimizing using the particle swarm optimization'''
 		optimizer = BinaryPSO(n_particles = self.n_particles,
 								dimensions = self.dimensions,
 								options = self.pso_options)
@@ -92,9 +92,6 @@ class PSO:
 		print (cost)
 		print (pos)
 			
-
-
-
 
 def _eval_sol_val(sol):
 	sol.evaluate()

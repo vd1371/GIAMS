@@ -13,7 +13,7 @@ class SHMEffectiveness(BaseMRREffectiveness):
 		'''
 
 	def get(self, previous_state, action):
-		
+		'''A dummy effectiveness model for  the SHM example'''
 		effectiveness_dict = {INSP1 : [0, 1],
 								INSP2: [0, 1],
 								DOMNT: [0, 1]}

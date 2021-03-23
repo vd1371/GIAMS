@@ -1,9 +1,9 @@
 import numpy as np
-
 class BaseUtility(object):
 
 	def __init__(self):
 		super().__init__()
+		'''Parent class of all future utility function'''
 
 	def get(self, previous_condition, new_condition):
 
@@ -13,7 +13,7 @@ class BaseUtility(object):
 
 		elif isinstance(previous_condition, (float, int, np.integer, np.floating)):
 			util_result = max(self.utility_function(previous_condition) - self.utility_function(new_condition), 0)
-		
+			
 		else:
 			raise ValueError (f"Something is wrong at the BaseUtility with the conditions: perhaps {previous_condition}")
 

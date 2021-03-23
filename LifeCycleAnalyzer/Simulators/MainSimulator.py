@@ -13,7 +13,7 @@ class MainSimulator(BaseSimulator):
 		super().__init__(**params)
 
 	def get_one_instance(self, asset, is_hazard = True, random = True):
-
+		'''Get one instance of simulation in the life cycle'''
 		user_costs_stepwise = np.zeros(self.settings.n_steps)
 		elements_costs_stepwise = [np.zeros(self.settings.n_steps) for _ in range(self.settings.n_elements)]
 		elements_utils_stepwise = [np.zeros(self.settings.n_steps) for _ in range(self.settings.n_elements)]

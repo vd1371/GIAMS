@@ -11,6 +11,7 @@ class HazusBridgeResponse(BaseResponse):
 
 	def __init__(self, asset):
 		super().__init__(asset)
+		'''Hazus bridge reposne class'''
 		
 		self.damage_state_dic = damage_state_dic_generator(self.asset.hazus_class)
 		self.k_skew = np.sqrt(np.sin((90-self.asset.skew_angle)*np.pi/180))
@@ -26,7 +27,7 @@ class HazusBridgeResponse(BaseResponse):
 		self.damage_state_dic['Collapse'][MEDIAN] = self.damage_state_dic['Collapse'][MEDIAN] * self.k_skew * self.k_3d
 
 	def get(self, previous_condition = -1, soil_type = 'A', pga=None, pgd=0, sa_long=0.5, sa_short = 0.1):
-
+		'''Getting the response of asset to a specific hazard'''
 		# Reference: HAZUS Manual
 		sa_long = sa_long * long_period_modifier(sa_long, soil_type)
 

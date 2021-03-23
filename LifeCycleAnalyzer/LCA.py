@@ -24,7 +24,11 @@ class LCA(BaseLCA):
 		self.n_simulations = params.pop('n_simulations')
 
 	def run(self, n_simulations = None, random = False, verbose = False):
+		'''Run the life cycle analysis
 
+		It will call the simulator for n_simulations times
+		In each instance, the results are paassed to accumulator to store them
+		'''
 		N = self.n_simulations if n_simulations is None else n_simulations
 
 		for asset in self.network.assets:
@@ -42,6 +46,14 @@ class LCA(BaseLCA):
 										elements_utils_stepwise, elements_conds_stepwise)
 
 	def run_for_one_asset(self, asset, n_simulations = None):
+		'''Run the life cycle analysis for only one asset
+
+		It will call the simulator for n_simulations times
+		In each instance, the results are paassed to accumulator to store them
+
+		The difference is that the accumulator is refereshed before each time
+		the we call it
+		'''
 		N = self.n_simulations if n_simulations is None else n_simulations
 
 		asset.accumulator.refresh()
@@ -53,6 +65,7 @@ class LCA(BaseLCA):
 										elements_utils_stepwise, elements_conds_stepwise)
 
 	def get_network_npv(self):
+		'''Get the network results from the accumulator'''
 		
 		network_user_costs = 0
 		network_agency_costs = 0
@@ -67,6 +80,14 @@ class LCA(BaseLCA):
 		return network_user_costs, network_agency_costs, network_util
 
 	def get_network_util_holism(self):
+		'''Get the network utility based on the holism concept
+		
+		For more information, please refer to the original:
+		Bai, Q., Labi, S., Sinha, K.C. and Thompson, P.D., 2013.
+		Multiobjective optimization for project selection in network-level bridge management
+		incorporating decision-maker’s preference using the concept of Holism.
+		Journal of Bridge Engineering, 18(9), pp.879-889.
+		'''
 
 		network_cond_after = np.zeros((self.settings.n_elements, self.settings.n_steps))
 		network_cond_before = np.zeros(self.settings.n_elements).reshape(-1, 1)
@@ -98,7 +119,10 @@ class LCA(BaseLCA):
 		return network_util_holism
 
 	def get_network_stepwise(self):
-
+		'''Getting the stepwise results of the network
+	
+		Stepwise refers to the results of each year, month, ... depending on the problem definition
+		'''
 		network_user_costs = np.zeros(self.settings.n_steps)
 		network_agency_costs = np.zeros(self.settings.n_steps)
 		network_util = np.zeros(self.settings.n_steps)
@@ -112,7 +136,7 @@ class LCA(BaseLCA):
 		return network_user_costs, network_agency_costs, network_util
 
 	def get_year_0(self):
-
+		'''Get the results at the step 0 of the analysis'''
 		year0_user_costs, year0_agency_costs, year0_utils = 0, 0, 0
 
 		for asset in self.network.assets:
@@ -124,8 +148,9 @@ class LCA(BaseLCA):
 		return year0_user_costs, year0_agency_costs, year0_utils
 
 	def check_budget(self):
+		'''See if the costs are affordable baased on the budget'''
 
-		# TO check if the MRR action is in the budget of the network
+		#TO check if the MRR action is in the budget of the network
 		def exceed_yearly_budget_against_costs(budgets, costs):
 
 			for budget, cost in zip(budgets, costs):
@@ -195,14 +220,6 @@ class LCA(BaseLCA):
 		plt.clf()
 		plt.hist(network_utils)
 		plt.savefig(self.directory + f"/NetworkUtilsHistogram.png")
-
-	
-
-	def get_objective1(self):
-		return self.network.objective1()
-
-	def get_objective2(self):
-		return self.network.objective2()
 
 
 

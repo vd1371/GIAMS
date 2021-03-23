@@ -78,8 +78,7 @@ def GA_test():
 							n_elites = 5,
 							optimzition_type = 'max',
 							n_jobs = 1)
-
-	optimizer.set_obj_func(obj_func)
+	
 	# optimizer.optimize(rounds = 3)
 	optimizer.validate()
 

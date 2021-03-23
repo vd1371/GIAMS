@@ -18,7 +18,6 @@ class ContinuousYang2020(BaseDeterioration):
 		self.exponent = exponent
 
 	def predict_condition(self, previous_condition = 0, age = None):
-
+		'''To predict the condition rating after one time step given some information'''
 		condition = self.initial_condition - self.lambda_ * age ** self.exponent
-
 		return condition

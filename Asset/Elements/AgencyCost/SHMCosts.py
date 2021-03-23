@@ -18,6 +18,7 @@ class RetrofitCosts(BaseAgencyCost):
 		return 100 * self.linear_model.predict_series(random) / 1000
 
 	def predict_series(self, random):
+		assert isinstance(random, bool), 'random must be boolean'
 		return {INSP1: self.first_inspection_costs(random),
 				INSP2: self.further_inspection_costs(random),
 				DOMNT: self.action_costs(random)}

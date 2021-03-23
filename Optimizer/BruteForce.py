@@ -187,7 +187,7 @@ class BruteForce:
 		print ("Done")
 
 	def optimize(self, verbose = 1):
-
+		'''Conducting the optimization'''
 		if self.n_jobs == 1:
 			self.optimize_linear(verbose = verbose)
 

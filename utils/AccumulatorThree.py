@@ -72,6 +72,7 @@ class AccumulatorThree:
 
 
 	def log_results(self, logger, directory):
+		'''Logging the results and saving the figures'''
 		for idx in range(self.settings.n_elements):
 			logger.info(f"Asset {self.ID} - Element {self.elements[idx].name} "\
 							f"costs: Mean, Stdv:{self.elements_costs[idx].expected()}")

@@ -10,5 +10,6 @@ class BaseMRREffectiveness:
 		'''
 		self.settings = params.pop('settings')
 
-	def get(self, previous_state, action):
+	def get(self, **kwargs):
+		'''To make sure all future effectiveness models have get method'''
 		raise NotImplementedError ("mrr_effectiveness is not implemented yet")

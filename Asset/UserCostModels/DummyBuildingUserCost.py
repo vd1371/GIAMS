@@ -8,6 +8,6 @@ class DummyUserCost(BaseUserCost):
 		self.linear_model = Linear(X0 = 1, drift = 0, settings = self.settings)
 
 	def predict_series(self, project_duration, random = True):
-
+		'''Method for predicting the user costs in time'''
 		return 3 * self.linear_model.predict_series(random)
 		# The out put will be 1000 dollars

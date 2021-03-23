@@ -17,6 +17,7 @@ class TexasDOTUserCost(BaseUserCost):
 		self.detour_usage_percentage = val
 
 	def predict_series(self, project_duration, random = True):
+		'''Method for predicting the user costs in time'''
 
 		# These values are based on dollars
 		vehicle_value_of_time = 30.12 * self.linear_model.predict_series(random, "TexasDOTUserCost")

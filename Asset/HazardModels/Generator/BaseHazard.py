@@ -2,6 +2,7 @@ class BaseHazard(object):
 	
 	def __init__(self):
 		super().__init__()
+		'''Parent class for all future hazard generators'''
 
 	def set_magnitude_distribution(self):
 		raise ("set_magnitude_distribution is not implemented yet")

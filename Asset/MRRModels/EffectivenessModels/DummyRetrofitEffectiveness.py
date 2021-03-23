@@ -17,7 +17,7 @@ class DummyEffectiveness(BaseMRREffectiveness):
 		self.effectiveness_dict = {BINAR: self.retrofit_effectiveness}
 
 	def get(self, previous_state, action):
-		
+		'''Dummy efectiveness'''
 		rand = np.random.random()
 
 		action_array = np.zeros(self.settings.n_states)

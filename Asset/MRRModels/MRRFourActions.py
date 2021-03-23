@@ -1,8 +1,8 @@
+#Loading dependencies
 import numpy as np
 from collections import Counter
 
 from .BaseMRRPlan import *
-
 
 class MRRFourActions(BaseMRRPlan):
 	
@@ -18,17 +18,19 @@ class MRRFourActions(BaseMRRPlan):
 		self.randomize_mrr()
 
 	def set_mrr(self, new_mrr):
+		'''Set the MRR'''
 		if np.shape(new_mrr) != (self.settings.n_elements, self.settings.n_steps*self.settings.dt):
 			raise ValueError(f"Expected shape of mrr is {(self.settings.n_elements, self.settings.n_steps*self.settings.dt)}"\
 								f"But {new_mrr.shape} was given")
 		self.mrr = new_mrr
 
 	def randomize_mrr(self):
+		'''Randomly initialize the mrr'''
 		self.mrr = np.random.randint(2, size=(self.settings.n_elements, self.settings.dt*self.settings.n_steps))
 		return self.mrr
 
 	def mrr_to_decimal(self, mrr_binary = None):
-
+		'''Converting the binray representation to decicaml representations'''
 		if mrr_binary is None:
 			mrr = self.mrr
 		else:
@@ -44,7 +46,7 @@ class MRRFourActions(BaseMRRPlan):
 		return self.mrr_decoded
 
 	def mrr_to_binary(self, decoded_mrr):
-		
+		'''Converting the decimal representation to binary representations'''
 		self.mrr = []
 		for i in range(len(decoded_mrr)):
 			temp_mrr = []
@@ -56,6 +58,7 @@ class MRRFourActions(BaseMRRPlan):
 		return self.mrr
 
 	def check_policy(self):
+		'''Checking if a policy is acceptable'''
 		mrr_decimal = self.mrr_to_decimal()
 
 		for elem_mrr in mrr_decimal:

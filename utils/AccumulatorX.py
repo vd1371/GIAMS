@@ -27,17 +27,21 @@ class AccumulatorX:
 		self.refresh()
 		
 	def refresh(self):
+		'''Re creating a metadata for containing all future information'''
 		self.meta_data = {k: Container(settings = self.settings) for k in self.to_store}
 
 	def update(self, **analysis_results):
+		'''Updating the continers of meta data based on analysis results
 
+		analysis_results is a dictonary with key: items to be stored and their values
+		'''
 		for key, values in analysis_results.items():
 
 			self.meta_data[key].add_to_npv_samples(values)
 			self.meta_data[key].update_stepwise(values)
 
 	def log_results(self, logger, directory):
-
+		'''Loggint the results and saving the figures'''
 		df = pd.DataFrame()
 		for key, container_ in self.meta_data.items():
 			logger.info(f"Asset {self.ID} "\

@@ -13,10 +13,7 @@ class SHMSimulator(BaseSimulator):
 		
 		This module requires modifications
 		'''
-
-
 	def get_one_instance(self, asset, is_hazard = True, random = True):
-
 		# In this dummy simulator for SHM, it is assumed that only 1 element is being
 		# studied. Further modifications could lead to more advanced models.
 		agency_costs = np.zeros(self.settings.n_steps)

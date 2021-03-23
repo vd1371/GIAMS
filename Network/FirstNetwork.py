@@ -8,6 +8,10 @@ class FirstNetwork(BaseNetwork):
         super().__init__(file_name)
         
     def load_asset(self, idx = 0):
+        '''Loading asset for the first time analysis and testing GIAMS
+        
+        This example is out of date.
+        '''
         
         asset_info = self.assets_df.iloc[idx, :]
         

@@ -2,6 +2,9 @@ from .BaseAgencyCost import BaseAgencyCost
 from utils.PredictiveModels.Linear import Linear
 from utils.GeneralSettings import *
 
+def check_random(random):
+	assert isinstance(random, bool), 'random must be boolean'
+
 class RetrofitCosts(BaseAgencyCost):
 
 	def __init__(self):
@@ -9,6 +12,7 @@ class RetrofitCosts(BaseAgencyCost):
 		pass
 
 	def retrofit_costs(self, random):
+		check_random(random)
 		return 100 * self.linear_model.predict_series(random) / 1000
 
 	def predict_series(self, random):
