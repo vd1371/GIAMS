@@ -72,9 +72,6 @@ class BaseNetwork:
         
     def load_asset(self, *args, **kwargs):
         raise NotImplementedError ("load_asset in Loader is not implemented yet")
-    
-    def load_network(self, *args, **kwargs):
-        raise NotImplementedError ("load_network in loader is not implemented yet")
 
     def set_network_mrr(self, network_mrr):
         '''Setting the mrr of the network to each asset'''

@@ -22,5 +22,5 @@ class BaseHazardLoss:
 	def casualties_costs(self):
 		raise NotImplementedError ("casaulties_costs is not implemented yet")
 
-	def total_costs(self):
-		return np.random.randn(int(self.settings.horizon/self.settings.dt))
+	def predict_series(self):
+		raise NotImplementedError ("rpedict_series is not implemented yet")
