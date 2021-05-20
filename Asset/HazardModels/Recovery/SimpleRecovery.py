@@ -14,7 +14,7 @@ class SimpleRecovery(BaseRecovery):
 		if not after_hazard_condition in self.possible_actions:
 			raise ValueError ('After hazard condition is not in the possible actions')
 			
-		if not actions[after_hazard_condition] == RECON:
-			return 1, actions[after_hazard_condition]
+		if not self.actions[after_hazard_condition] == RECON:
+			return 1, self.actions[after_hazard_condition]
 		else:
-			return 0, actions[RECON]
+			return 0, self.actions[RECON]
