@@ -1,5 +1,6 @@
 #Loading dependencies
 import pandas as pd
+import os
 import sys
 
 from utils.GeneralSettings import *
@@ -67,8 +68,9 @@ class BaseNetwork:
         
 
         if not self.file_name is None:
-            dir = f'./Network/Networks/{self.file_name}.csv'
-            self.assets_df = pd.read_csv(dir, index_col = 0).iloc[:self.n_assets, :]
+            script_path = os.path.dirname(__file__)
+            direc = os.path.join(script_path, f'Networks/{self.file_name}.csv')
+            self.assets_df = pd.read_csv(direc, index_col = 0).iloc[:self.n_assets, :]
         
     def load_asset(self, *args, **kwargs):
         raise NotImplementedError ("load_asset in Loader is not implemented yet")
