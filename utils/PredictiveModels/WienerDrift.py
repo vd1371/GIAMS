@@ -4,8 +4,8 @@ import numpy as np
 
 class WienerDrift(BasePredictiveModel):
 
-	def __init__(self, X0 = None, drift = None, volatility = None):
-		super().__init__(X0 = X0)
+	def __init__(self, X0 = None, drift = None, volatility = None, settings = None):
+		super().__init__(X0 = X0, settings = settings)
 		
 		'''
 		This is a simple linear predictor model

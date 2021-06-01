@@ -16,22 +16,22 @@ class TexasDOTUserCostWithVolatility(BaseUserCost):
 		drift = params.pop('drift', 0.1)
 
 		val = 30.12
-		self.vehicle_value_of_time = WienerDrift(val, val*drift, val*volatility)
+		self.vehicle_value_of_time = WienerDrift(val, val*drift, val*volatility, settings = self.settings)
 
 		val = 0.741
-		self.vehicle_value_per_mile = WienerDrift(val, val*drift, val*volatility)
+		self.vehicle_value_per_mile = WienerDrift(val, val*drift, val*volatility, settings = self.settings)
 
 		val = 0.0962
-		self.vehicle_marginal_cost_per_mile = WienerDrift(val, val*drift, val*volatility)
+		self.vehicle_marginal_cost_per_mile = WienerDrift(val, val*drift, val*volatility, settings = self.settings)
 
 		val = 41.33
-		self.truck_value_of_time = WienerDrift(val, val*drift, val*volatility)
+		self.truck_value_of_time = WienerDrift(val, val*drift, val*volatility, settings = self.settings)
 		
 		val = 1.022
-		self.truck_value_per_mile = WienerDrift(val, val*drift, val*volatility)
+		self.truck_value_per_mile = WienerDrift(val, val*drift, val*volatility, settings = self.settings)
 		
 		val = 0.3137
-		self.truck_marginal_cost_per_mile = WienerDrift(val, val*drift, val*volatility)
+		self.truck_marginal_cost_per_mile = WienerDrift(val, val*drift, val*volatility, settings = self.settings)
 
 	def set_detour_usage_percentage(self, val):
 		self.detour_usage_percentage = val
