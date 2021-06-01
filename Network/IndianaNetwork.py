@@ -50,7 +50,7 @@ class IndianaNetwork(BaseNetwork):
         asset.set_mrr_model(mrr)
 
         # User cost model
-        asset.set_user_cost_model(TexasDOTUserCost(settings = self.settings))
+        asset.set_user_cost_model(TexasDOTUserCostWithVolatility(settings = self.settings))
         
         # Hazard models
         hazard_model = HazardModel()
