@@ -67,19 +67,19 @@ class IndianaEnv(BaseEnv):
 			total_costs += np.sum(costs) * \
 							 np.exp(-self.settings.discount_rate * self.settings.dt * step)
 
-		return total_costs < self.remaining_npv_budget
+		return total_costs <= self.remaining_npv_budget
 
 	def _deduct_npv_budget(self, s_a_rs):
 		total_costs = 0
 		for id_ in s_a_rs:
 
 			npv_costs = np.sum(s_a_rs[id_]['elements_costs']) * \
-							np.exp(-self.settings.discount_rate * self.settings.dt * s_a_rs[id_]['step'])
+							np.exp(-self.settings.discount_rate * self.settings.dt * (s_a_rs[id_]['step']-1))
 
 			total_costs += npv_costs
 
 		# This will never be less than zero because the enough_budget MUST be checked before it
-		self.remaining_npv_budget -= total_costs
+		self.remaining_npv_budget = max(self.remaining_npv_budget - total_costs, 0)
 
 	def step(self, actions):
 		'''Simulation for all assets in a network
