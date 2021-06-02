@@ -70,29 +70,13 @@ class EnvSimulator(BaseSimulator):
 			# Finding the action
 			action = mrr[element_idx]
 
-			# If there is an earthquake in that year, 
-			iter_year = self.step*self.settings.dt
-			if iter_year in self.hazard and is_hazard:
-				after_hazard_condition, ds = self.asset.hazard_model.response.get(previous_condition = previous_condition,
-																		pga = self.hazard[iter_year])
-				
-				# The earthquake has had severe effects and the state has changed
-				if not after_hazard_condition == previous_condition:
+			# The earthquake is missed because we don't know whether an earthquake will happen
+			# or not...
 
-					next_condition, recovery_action = self.asset.hazard_model.recovery.get(after_hazard_condition)
-					
-					if not recovery_action is DONOT:
-						elements_costs[element_idx] += self.mrr_costs[element_idx][recovery_action][self.step]
-						got_recovery = True
-						
-			# If the asset did not get recovery
-			if not got_recovery:
-
-				# If there is a planned MRR action
-				if not action == DONOT:
-
-					# Adding the agency costs
-					elements_costs[element_idx] += self.mrr_costs[element_idx][action][self.step]
+			# If there is a planned MRR action
+			if not action == DONOT:
+				# Adding the agency costs
+				elements_costs[element_idx] += self.mrr_costs[element_idx][action][self.step]
 
 		return elements_costs, self.step
 
@@ -186,7 +170,6 @@ class EnvSimulator(BaseSimulator):
 			elements_conds[element_idx] = next_condition
 
 			elements_age[element_idx] = element.age
-
 
 		self.step += 1
 
