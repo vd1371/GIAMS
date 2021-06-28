@@ -102,9 +102,9 @@ class BaseNetwork:
         '''Setting the current budget limit'''
         self.current_budget_limit = val
 
-    def set_budget_limit_model(self, model):
+    def set_annual_budget_limit_model(self, model):
         '''Setting the budget limit in time'''
-        self.budget_model = model
+        self.annual_budget_model = model
         
     def set_npv_budget_limit(self, val):
         '''Set the npv of the budget limit'''

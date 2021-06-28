@@ -6,7 +6,7 @@ from .BaseEnv import BaseEnv
 
 from Network import IndianaNetwork
 from LifeCycleAnalyzer.Simulators import EnvSimulator
-from utils.PredictiveModels.Linear import Linear
+from utils.PredictiveModels import Linear, Power
 from utils.NPV import NPV
 
 class IndianaEnv(BaseEnv):
@@ -36,18 +36,21 @@ class IndianaEnv(BaseEnv):
 	def reset_network_budget(self):
 
 		self.network.set_current_budget_limit(10000)
-		self.network.set_budget_limit_model(Linear(X0 = 10000,
-												drift = 0,
+		self.network.set_annual_budget_limit_model(Power(X0 = 30000,
+												growth_rate = 0.03,
 												settings = self.settings))
-		self.network.set_npv_budget_limit(400)
+		self.network.set_npv_budget_limit(3000)
 
+
+		self.remaining_npv_budget = self.network.npv_budget_limit
+		self.annual_budget_limit = self.network.annual_budget_model.predict_series()
 
 	def reset(self):
 		self.simulators = {}
 		s_a_rs = {}
 		
 		self.reset_network_budget()
-		self.remaining_npv_budget = self.network.npv_budget_limit
+
 
 		for asset in self.network.assets:
 
@@ -59,15 +62,25 @@ class IndianaEnv(BaseEnv):
 
 		return s_a_rs
 
-	def enough_budget(self, actions):
+	def enough_NPV_budget(self, actions):
 		total_costs = 0
 
 		for asset in self.network.assets:
-			costs, step = self.simulators[asset.ID].cost_of(actions[asset.ID])
+			costs, _, step = self.simulators[asset.ID].cost_of(actions[asset.ID])
 			total_costs += np.sum(costs) * \
 							 np.exp(-self.settings.discount_rate * self.settings.dt * step)
 
 		return total_costs <= self.remaining_npv_budget
+
+	def enough_annual_budget(self, actions, step):
+		total_costs = 0
+
+		for asset in self.network.assets:
+			costs, _, step = self.simulators[asset.ID].cost_of(actions[asset.ID])
+			total_costs += np.sum(costs)
+
+		return total_costs <= self.annual_budget_limit[step]
+
 
 	def _deduct_npv_budget(self, s_a_rs):
 		total_costs = 0
@@ -75,7 +88,6 @@ class IndianaEnv(BaseEnv):
 
 			npv_costs = np.sum(s_a_rs[id_]['elements_costs']) * \
 							np.exp(-self.settings.discount_rate * self.settings.dt * (s_a_rs[id_]['step']-1))
-
 			total_costs += npv_costs
 
 		# This will never be less than zero because the enough_budget MUST be checked before it

@@ -15,7 +15,7 @@ class Power(BasePredictiveModel):
 		self.x = self.predict_series(random = True)
 
 	def predict(self, T = None):
-		return self.X0 * (1+self.growth_rate) ** t
+		return self.X0 * (1+self.growth_rate) ** T
 
 	def predict_series(self, random = True):
 

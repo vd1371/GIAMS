@@ -47,12 +47,13 @@ class EnvSimulator(BaseSimulator):
 			'elements_utils' : elements_utils,
 			'elements_conds' : elements_conds,
 			'elements_age' : elements_age,
-			'done': self.step == (self.settings.n_steps - 1)
+			'done': False
 		}
 
 	def cost_of(self, mrr, is_hazard = True):
 		'''Getting the costs of actions for managing the budget in RL'''
 		elements_costs = np.zeros(self.settings.n_elements)
+		elements_utils = np.zeros(self.settings.n_elements)
 
 		# Max duration will be used for the user cost
 		max_duration = 0
@@ -75,10 +76,23 @@ class EnvSimulator(BaseSimulator):
 
 			# If there is a planned MRR action
 			if not action == DONOT:
+
+				# Updating the max duration
+				max_duration = max(max_duration, self.asset.mrr_model.mrr_duration[action])
+
+				# Finding the next conidtion
+				next_condition = self.asset.mrr_model.effectiveness.get(previous_condition, action)
+
 				# Adding the agency costs
 				elements_costs[element_idx] += self.mrr_costs[element_idx][action][self.step]
 
-		return elements_costs, self.step
+				# Adding the utility of the action on the element at the year
+				elements_utils[element_idx] += element.utility_model.get(previous_condition,
+																							next_condition)
+
+		user_costs = self.asset.user_cost_model.predict_series(max_duration, self.random)[self.step]
+
+		return elements_costs, user_costs, self.step
 
 	def take_one_step(self, mrr, is_hazard = True):
 		'''Get one instance of simulation in the life cycle'''
@@ -180,6 +194,6 @@ class EnvSimulator(BaseSimulator):
 			'elements_conds' : elements_conds,
 			'elements_age' : elements_age,
 			'deviation': deviation,
-			'done': self.step == (self.settings.n_steps - 1)
+			'done': (self.step == self.settings.n_steps)
 		}
 
