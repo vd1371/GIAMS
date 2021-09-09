@@ -36,10 +36,10 @@ class IndianaEnv(BaseEnv):
 	def reset_network_budget(self):
 
 		self.network.set_current_budget_limit(10000)
-		self.network.set_annual_budget_limit_model(Power(X0 = 30000,
+		self.network.set_annual_budget_limit_model(Power(X0 = 10000,
 												growth_rate = 0.03,
 												settings = self.settings))
-		self.network.set_npv_budget_limit(3000)
+		self.network.set_npv_budget_limit(10000)
 
 
 		self.remaining_npv_budget = self.network.npv_budget_limit
@@ -54,7 +54,9 @@ class IndianaEnv(BaseEnv):
 
 		for asset in self.network.assets:
 
-			self.simulators[asset.ID] = EnvSimulator(asset = asset, settings = self.settings)
+			self.simulators[asset.ID] = EnvSimulator(asset = asset,
+													settings = self.settings,
+													random = True)
 			s_a_rs[asset.ID] = self.simulators[asset.ID].reset()
 
 			# Adding the remaining budget
@@ -66,7 +68,7 @@ class IndianaEnv(BaseEnv):
 		total_costs = 0
 
 		for asset in self.network.assets:
-			costs, _, step = self.simulators[asset.ID].cost_of(actions[asset.ID])
+			costs, _, _, step = self.simulators[asset.ID].cost_of(actions[asset.ID])
 			total_costs += np.sum(costs) * \
 							 np.exp(-self.settings.discount_rate * self.settings.dt * step)
 
@@ -76,7 +78,7 @@ class IndianaEnv(BaseEnv):
 		total_costs = 0
 
 		for asset in self.network.assets:
-			costs, _, step = self.simulators[asset.ID].cost_of(actions[asset.ID])
+			costs, _, _, step = self.simulators[asset.ID].cost_of(actions[asset.ID])
 			total_costs += np.sum(costs)
 
 		return total_costs <= self.annual_budget_limit[step]
@@ -91,7 +93,12 @@ class IndianaEnv(BaseEnv):
 			total_costs += npv_costs
 
 		# This will never be less than zero because the enough_budget MUST be checked before it
-		self.remaining_npv_budget = max(self.remaining_npv_budget - total_costs, 0)
+		if total_costs < self.remaining_npv_budget:
+			self.remaining_npv_budget -= total_costs
+		else:
+			self.remaining_npv_budget = -self.network.npv_budget_limit
+
+		# self.remaining_npv_budget = max(self.remaining_npv_budget - total_costs, 0)
 
 	def step(self, actions):
 		'''Simulation for all assets in a network
@@ -101,11 +108,10 @@ class IndianaEnv(BaseEnv):
 		s_a_rs = {}
 
 		for asset in self.network.assets:
-			s_a_rs[asset.ID] = self.simulators[asset.ID].take_one_step(actions[asset.ID])
+			s_a_rs[asset.ID] = self.simulators[asset.ID].take_one_step(actions[asset.ID], is_hazard = True)
 
 		# Let's deduct the budget
 		self._deduct_npv_budget(s_a_rs)
-
 
 		# Adding feature based on network information
 		for asset in self.network.assets:
