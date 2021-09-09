@@ -10,7 +10,7 @@ class EnvSimulator(BaseSimulator):
 		super().__init__(**params)
 
 		self.asset = params.pop('asset')
-		self.random = True
+		self.random = params.pop("random")
 
 	def reset(self):
 
@@ -56,12 +56,11 @@ class EnvSimulator(BaseSimulator):
 		elements_utils = np.zeros(self.settings.n_elements)
 
 		# Max duration will be used for the user cost
-		max_duration = 0
+		user_costs = 0
 		recovery_action = None
 
 		for element_idx, element in enumerate (self.asset.elements):
 			
-			got_recovery = False
 			# Finding the current condition, before taking any actions
 			if self.step == 0:
 				previous_condition = element.initial_condition
@@ -78,7 +77,7 @@ class EnvSimulator(BaseSimulator):
 			if not action == DONOT:
 
 				# Updating the max duration
-				max_duration = max(max_duration, self.asset.mrr_model.mrr_duration[action])
+				max_duration = self.asset.mrr_model.mrr_duration[action]
 
 				# Finding the next conidtion
 				next_condition = self.asset.mrr_model.effectiveness.get(previous_condition, action)
@@ -90,9 +89,9 @@ class EnvSimulator(BaseSimulator):
 				elements_utils[element_idx] += element.utility_model.get(previous_condition,
 																							next_condition)
 
-		user_costs = self.asset.user_cost_model.predict_series(max_duration, self.random)[self.step]
+				user_costs = self.asset.user_cost_model.predict_series(max_duration, self.random)[self.step]
 
-		return elements_costs, user_costs, self.step
+		return elements_costs, user_costs, elements_utils, self.step
 
 	def take_one_step(self, mrr, is_hazard = True):
 		'''Get one instance of simulation in the life cycle'''
@@ -168,10 +167,11 @@ class EnvSimulator(BaseSimulator):
 			if element_idx == self.settings.n_elements - 1:
 
 				# Add the user cost to the asset_cost
-				deviation = 1- (self.asset.user_cost_model.predict_series(1, True)[self.step]/ \
-								self.asset.user_cost_model.predict_series(1, False)[self.step])
+				uc = self.asset.user_cost_model.predict_series(max_duration, self.random)[self.step]
+				uc_linear = self.asset.user_cost_model.predict_series(max_duration, False)[self.step]
+				deviation = 1 - uc/uc_linear if uc > 0 else 0
 
-				user_costs += self.asset.user_cost_model.predict_series(max_duration, self.random)[self.step]
+				user_costs += uc
 
 			# Updating the age of the element
 			if action == RECON or recovery_action == RECON:

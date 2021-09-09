@@ -14,7 +14,7 @@ class HazusBridgeResponse(BaseResponse):
 		'''Hazus bridge reposne class'''
 		
 		self.damage_state_dic = damage_state_dic_generator(self.asset.hazus_class)
-		self.k_skew = np.sqrt(np.sin((90-self.asset.skew_angle)*np.pi/180))
+		self.k_skew = k_skew_calculator(self.asset.skew_angle)
 		self.k_3d = k3d_calculator(self.asset.hazus_class, self.asset.n_spans)
 
 		self.mapped_conditions = []
@@ -39,13 +39,24 @@ class HazusBridgeResponse(BaseResponse):
 			# Page 305 HAZUS
 			for ds in self.damage_state_dic.keys():
 				prob = norm.cdf(1/self.damage_state_dic[ds][BETA]*np.log(sa_long/self.damage_state_dic[ds][MEDIAN]))
-				probs.append(previous_prob - prob)
+				'''
+				IMPORTANT TIP: for some special assets, the median of moderate
+				damage state is larger than that of the Slight damage state. As
+				a result, the probability of next damage state is bigger than the
+				previous one. To overcome this issue, we replace the value by 0
+				and finally normalize the vector or probabilities.
+				'''
+				probs.append(max(previous_prob - prob, 0))
 				previous_prob = prob
-			probs.append(prob)
+			probs.append(prob * (probs[-1] != 0))
+
+		# Normalizing for those special cases talked above
+		probs = np.array(probs) / (np.sum(probs) + np.finfo(np.float64).tiny)
 
 		# Finding the mapped condition
 		conds = [previous_condition] + self.mapped_conditions
 		mapped_condition = np.random.choice(conds, p = probs)
+
 
 		# Finding the corresponding damage state
 		idx = conds.index(mapped_condition)
@@ -55,6 +66,11 @@ class HazusBridgeResponse(BaseResponse):
 			return mapped_condition, ds
 		else:
 			return previous_condition, 'ds1'
+
+def k_skew_calculator(angle):
+	if angle < 90:
+		return np.sqrt(np.sin((90-angle)*np.pi/180))
+	return 1
 
 
 def long_period_modifier(sa_long, soil_type):
@@ -114,7 +130,8 @@ def short_period_modifier(sa_short, soil_type):
 			return 12.857 * sa_short**2 - 11.714 * sa_short + 3.54
 
 def k3d_calculator(bridge_type, n_spans):
-	if bridge_type in ['HWB1', 'HWB2', 'HWB3', 'HWB4', 'HWB5', 'HWB6', 'HWB7', 'HWB14', 'HWB17', 'HWB18', 'HWB19']:
+	if bridge_type in ['HWB1', 'HWB2', 'HWB3', 'HWB4', 'HWB5', 'HWB6',
+						'HWB7', 'HWB14', 'HWB17', 'HWB18', 'HWB19']:
 		A, B = 0.25, 1
 	elif bridge_type in ['HWB8', 'HWB10', 'HWB20', 'HWB22']:
 		A, B = 0.33, 0
@@ -132,7 +149,8 @@ def k3d_calculator(bridge_type, n_spans):
 	return 1 + A / max(n_spans - B, 1)
 
 def i_shape_calculator(bridge_type):
-	if bridge_type in ['HWB3', 'HWB4', 'HWB10', 'HWB11', 'HWB15', 'HWB16', 'HWB22', 'HWB23', 'HWB26', 'HWB27']:
+	if bridge_type in ['HWB3', 'HWB4', 'HWB10', 'HWB11', 'HWB15', 'HWB16',
+						'HWB22', 'HWB23', 'HWB26', 'HWB27']:
 		return 1
 	return 0
 
