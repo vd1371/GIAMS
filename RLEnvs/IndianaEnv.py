@@ -39,8 +39,7 @@ class IndianaEnv(BaseEnv):
 		self.network.set_annual_budget_limit_model(Power(X0 = 10000,
 												growth_rate = 0.03,
 												settings = self.settings))
-		self.network.set_npv_budget_limit(10000)
-
+		self.network.set_npv_budget_limit(1000)
 
 		self.remaining_npv_budget = self.network.npv_budget_limit
 		self.annual_budget_limit = self.network.annual_budget_model.predict_series()
@@ -56,7 +55,7 @@ class IndianaEnv(BaseEnv):
 
 			self.simulators[asset.ID] = EnvSimulator(asset = asset,
 													settings = self.settings,
-													random = True)
+													random = False)
 			s_a_rs[asset.ID] = self.simulators[asset.ID].reset()
 
 			# Adding the remaining budget
@@ -92,7 +91,6 @@ class IndianaEnv(BaseEnv):
 							np.exp(-self.settings.discount_rate * self.settings.dt * (s_a_rs[id_]['step']-1))
 			total_costs += npv_costs
 
-		# This will never be less than zero because the enough_budget MUST be checked before it
 		if total_costs < self.remaining_npv_budget:
 			self.remaining_npv_budget -= total_costs
 		else:

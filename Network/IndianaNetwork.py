@@ -42,6 +42,7 @@ class IndianaNetwork(BaseNetwork):
         
         # Setting MRR durations and effectiveness models
         maint_duration, rehab_duration, recon_duration = asset_info[13:16]
+
         mrr = MRRFourActions(maint_duration = maint_duration,
                                 rehab_duration = rehab_duration,
                                 recon_duration = recon_duration,

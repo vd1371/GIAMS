@@ -12,8 +12,10 @@ class TexasDOTUserCostWithVolatility(BaseUserCost):
 		self.speed_before = params.pop('speed_before', 60)
 		self.speed_after = params.pop('speed_after', 30)
 		self.detour_usage_percentage = params.pop('detour_usage_percentage', 0.1)
-		volatility = params.pop('volatility', 0.01)
-		drift = params.pop('drift', 0.1)
+		volatility = params.pop('volatility', 0)
+		drift = params.pop('drift', 0)
+
+		print ("Using TexasDOTUserCostWithVolatility")
 
 		val = 30.12
 		self.vehicle_value_of_time = WienerDrift(val, val*drift, val*volatility, settings = self.settings)

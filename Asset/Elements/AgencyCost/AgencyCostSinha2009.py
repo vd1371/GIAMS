@@ -108,13 +108,25 @@ class SuperstructureCosts(BaseAgencyCost):
 		return unit_cost * self.linear_model.predict_series(random, "super_maint") / 1000 * 10
 
 	def rehabilitation_costs(self, random):
-		A, B, C, D = 1, 1, 30, 0.0001
-		L, W = meter_to_feet(self.element.asset.length), meter_to_feet(self.element.asset.width)
+		
+		rehab_base_rate, _ = self._base_rate()
 
-		return L**A * W**B * (C - D*L*W) * \
-					self.linear_model.predict_series(random, "super_rehab") / 1000
+		return rehab_base_rate * \
+				self.linear_model.predict_series(random, "super_rehab")
 
 	def reconstruction_costs(self, random):
+		
+		_, recon_base_rate = self._base_rate()
+
+		return recon_base_rate * \
+					self.linear_model.predict_series(random, "super_recon")
+
+	def _base_rate(self):
+
+		A, B, C, D = 1, 1, 30, 0.0001
+		L, W = meter_to_feet(self.element.asset.length), meter_to_feet(self.element.asset.width)
+		base_rate1 = L**A * W**B * (C - D*L*W) / 1000
+
 		# If RC Slab
 		if self.element.asset.material in [5, 6]:
 			A, B, C = [0.04888, 0.899, 1.000]
@@ -124,10 +136,10 @@ class SuperstructureCosts(BaseAgencyCost):
 			A, B, C = [0.123, 1.00, 0.519]
 		elif self.element.asset.material in [4]:
 			A, B, C = [0.0885, 0.906, 0.747]
+		base_rate2 = A * meter_to_feet(self.element.asset.length)**B * \
+						meter_to_feet(self.element.asset.width) **C
 
-		return A * meter_to_feet(self.element.asset.length)**B * \
-						meter_to_feet(self.element.asset.width) **C * \
-							self.linear_model.predict_series(random, "super_recon")
+		return min(base_rate1, base_rate2), max(base_rate1, base_rate2)
 
 	def predict_series(self, random):
 		assert isinstance(random, bool), 'random must be boolean'
