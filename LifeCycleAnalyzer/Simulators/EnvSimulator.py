@@ -11,6 +11,7 @@ class EnvSimulator(BaseSimulator):
 
 		self.asset = params.pop('asset')
 		self.random = params.pop("random")
+		self.is_hazard = params.pop("is_hazard")
 
 	def reset(self):
 
@@ -23,7 +24,8 @@ class EnvSimulator(BaseSimulator):
 		self.elements_conds_stepwise = [np.zeros(self.settings.n_steps, dtype = int) for _ in range(self.settings.n_elements)]
 
 		# Generate hazards
-		self.hazard = self.asset.hazard_model.generator.generate_one_lifecycle(horizon = self.settings.horizon,
+		if self.is_hazard:
+			self.hazard = self.asset.hazard_model.generator.generate_one_lifecycle(horizon = self.settings.horizon,
 																	dt = self.settings.dt)
 
 		# Find the MRR costs to be used later, for each element in the horizon
@@ -50,7 +52,7 @@ class EnvSimulator(BaseSimulator):
 			'done': False
 		}
 
-	def cost_of(self, mrr, is_hazard = True):
+	def cost_of(self, mrr):
 		'''Getting the costs of actions for managing the budget in RL'''
 		elements_costs = np.zeros(self.settings.n_elements)
 		elements_utils = np.zeros(self.settings.n_elements)
@@ -93,7 +95,7 @@ class EnvSimulator(BaseSimulator):
 
 		return elements_costs, user_costs, elements_utils, self.step
 
-	def take_one_step(self, mrr, is_hazard = True):
+	def take_one_step(self, mrr):
 		'''Get one instance of simulation in the life cycle'''
 		user_costs = 0
 		elements_costs = np.zeros(self.settings.n_elements)
@@ -119,7 +121,7 @@ class EnvSimulator(BaseSimulator):
 
 			# If there is an earthquake in that year, 
 			iter_year = self.step*self.settings.dt
-			if iter_year in self.hazard and is_hazard:
+			if self.is_hazard and iter_year in self.hazard:
 				after_hazard_condition, ds = self.asset.hazard_model.response.get(previous_condition = previous_condition,
 																		pga = self.hazard[iter_year])
 				

@@ -37,11 +37,12 @@ class IndianaEnv(BaseEnv):
 
 		self.network.set_current_budget_limit(10000)
 		self.network.set_annual_budget_limit_model(Power(X0 = 10000,
-												growth_rate = 0.03,
+												growth_rate = 0.00,
 												settings = self.settings))
-		self.network.set_npv_budget_limit(1000)
+		self.network.set_npv_budget_limit(1e+20)
 
 		self.remaining_npv_budget = self.network.npv_budget_limit
+
 		self.annual_budget_limit = self.network.annual_budget_model.predict_series()
 
 	def reset(self):
@@ -55,7 +56,8 @@ class IndianaEnv(BaseEnv):
 
 			self.simulators[asset.ID] = EnvSimulator(asset = asset,
 													settings = self.settings,
-													random = False)
+													random = False,
+													is_hazard = False)
 			s_a_rs[asset.ID] = self.simulators[asset.ID].reset()
 
 			# Adding the remaining budget
@@ -73,15 +75,14 @@ class IndianaEnv(BaseEnv):
 
 		return total_costs <= self.remaining_npv_budget
 
-	def enough_annual_budget(self, actions, step):
+	def enough_annual_budget(self, s_a_rs):
 		total_costs = 0
 
-		for asset in self.network.assets:
-			costs, _, _, step = self.simulators[asset.ID].cost_of(actions[asset.ID])
-			total_costs += np.sum(costs)
+		for id_ in s_a_rs:
+			total_costs += np.sum(s_a_rs[id_]['elements_costs'])
+		step = s_a_rs[self.network.assets[0].ID]['step'] - 1
 
 		return total_costs <= self.annual_budget_limit[step]
-
 
 	def _deduct_npv_budget(self, s_a_rs):
 		total_costs = 0
@@ -96,7 +97,6 @@ class IndianaEnv(BaseEnv):
 		else:
 			self.remaining_npv_budget = -self.network.npv_budget_limit
 
-		# self.remaining_npv_budget = max(self.remaining_npv_budget - total_costs, 0)
 
 	def step(self, actions):
 		'''Simulation for all assets in a network
@@ -106,14 +106,15 @@ class IndianaEnv(BaseEnv):
 		s_a_rs = {}
 
 		for asset in self.network.assets:
-			s_a_rs[asset.ID] = self.simulators[asset.ID].take_one_step(actions[asset.ID], is_hazard = True)
+			s_a_rs[asset.ID] = self.simulators[asset.ID].take_one_step(actions[asset.ID])
 
 		# Let's deduct the budget
 		self._deduct_npv_budget(s_a_rs)
+		enough_annual_budget = self.enough_annual_budget(s_a_rs)
 
 		# Adding feature based on network information
 		for asset in self.network.assets:
 			s_a_rs[asset.ID]['remaining_budget'] = self.remaining_npv_budget / self.network.npv_budget_limit
+			s_a_rs[asset.ID]['remaining_budget'] = enough_annual_budget
 
-
-		return s_a_rs
+		return s_a_rs, enough_annual_budget
