@@ -36,7 +36,7 @@ class IndianaEnv(BaseEnv):
 	def reset_network_budget(self):
 
 		self.network.set_current_budget_limit(10000)
-		self.network.set_annual_budget_limit_model(Power(X0 = 10000,
+		self.network.set_annual_budget_limit_model(Power(X0 = 2000,
 												growth_rate = 0.00,
 												settings = self.settings))
 		self.network.set_npv_budget_limit(1e+20)
@@ -56,8 +56,8 @@ class IndianaEnv(BaseEnv):
 
 			self.simulators[asset.ID] = EnvSimulator(asset = asset,
 													settings = self.settings,
-													random = False,
-													is_hazard = False)
+													random = True,
+													is_hazard = True)
 			s_a_rs[asset.ID] = self.simulators[asset.ID].reset()
 
 			# Adding the remaining budget
@@ -75,7 +75,16 @@ class IndianaEnv(BaseEnv):
 
 		return total_costs <= self.remaining_npv_budget
 
-	def enough_annual_budget(self, s_a_rs):
+	def enough_annual_budget_given(self, A, step):
+		total_costs = 0
+		for asset in self.network.assets:
+			costs, _, _, step = self.simulators[asset.ID].cost_of(A[asset.ID])
+			total_costs += np.sum(costs)
+
+		return total_costs < self.annual_budget_limit[step]
+
+
+	def _enough_annual_budget(self, s_a_rs):
 		total_costs = 0
 
 		for id_ in s_a_rs:
@@ -108,11 +117,9 @@ class IndianaEnv(BaseEnv):
 		for asset in self.network.assets:
 			s_a_rs[asset.ID] = self.simulators[asset.ID].take_one_step(actions[asset.ID])
 
-		# Let's deduct the budget
-		self._deduct_npv_budget(s_a_rs)
-		enough_annual_budget = self.enough_annual_budget(s_a_rs)
+		# self._deduct_npv_budget(s_a_rs)
+		enough_annual_budget = self._enough_annual_budget(s_a_rs)
 
-		# Adding feature based on network information
 		for asset in self.network.assets:
 			s_a_rs[asset.ID]['remaining_budget'] = self.remaining_npv_budget / self.network.npv_budget_limit
 			s_a_rs[asset.ID]['remaining_budget'] = enough_annual_budget

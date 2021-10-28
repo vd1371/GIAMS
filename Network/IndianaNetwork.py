@@ -118,6 +118,9 @@ class IndianaNetwork(BaseNetwork):
             substructure.set_utility_model(SubstructureUtility())
             substructure.set_agency_costs_model(SubstructureCosts(settings = self.settings))
             asset.add_element(substructure)
+
+        if ADT < 100000 or age <= 25:
+            return None
  
         return asset
 

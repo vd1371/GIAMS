@@ -59,61 +59,62 @@ from utils.Distributions.Gamma import Gamma
 from utils.Distributions.Binomial import Binomial
 
 class BaseNetwork:
-    def __init__(self, **params):
-        super().__init__()
-        '''Constructor of the base network'''
-        self.file_name = params.pop('file_name', None)
-        self.n_assets = params.pop('n_assets', 0)
-        self.settings = params.pop('settings')
-        
+	def __init__(self, **params):
+		super().__init__()
+		'''Constructor of the base network'''
+		self.file_name = params.pop('file_name', None)
+		self.n_assets = params.pop('n_assets', 0)
+		self.settings = params.pop('settings')
+		
 
-        if not self.file_name is None:
-            script_path = os.path.dirname(__file__)
-            direc = os.path.join(script_path, f'Networks/{self.file_name}.csv')
-            self.assets_df = pd.read_csv(direc, index_col = 0).iloc[:self.n_assets, :]
-        
-    def load_asset(self, *args, **kwargs):
-        raise NotImplementedError ("load_asset in Loader is not implemented yet")
+		if not self.file_name is None:
+			script_path = os.path.dirname(__file__)
+			direc = os.path.join(script_path, f'Networks/{self.file_name}.csv')
+			self.assets_df = pd.read_csv(direc, index_col = 0).iloc[:, :]
+		
+	def load_asset(self, *args, **kwargs):
+		raise NotImplementedError ("load_asset in Loader is not implemented yet")
 
-    def set_network_mrr(self, network_mrr):
-        '''Setting the mrr of the network to each asset'''
-        for asset, mrr in zip (self.assets, network_mrr):
-            asset.mrr_model.set_mrr(mrr)
-    
-    def load_network(self):
-        '''Loading the network
-        
-        If the file_name is None, it is assumed that the network will be randomized
-        Else, the netwotk will be loaded from a datafile
-        '''
-        self.assets = []
-        if self.file_name is None:
-            # For generated networks
-            for i in range (self.n_assets):
-                self.assets.append(self.load_asset())
-        else:
-            for idx in self.assets_df.index:
-                # For loding data from file
-                self.assets.append(self.load_asset(idx))
+	def set_network_mrr(self, network_mrr):
+		'''Setting the mrr of the network to each asset'''
+		for asset, mrr in zip (self.assets, network_mrr):
+			asset.mrr_model.set_mrr(mrr)
+	
+	def load_network(self):
+		'''Loading the network
+		
+		If the file_name is None, it is assumed that the network will be randomized
+		Else, the netwotk will be loaded from a datafile
+		'''
+		self.assets = []
 
-        return self.assets
+		for idx in self.assets_df.index:
+			# For loding data from file
+			asset = self.load_asset(idx)
+			if not asset == None:
+				self.assets.append(asset)
 
-    def set_current_budget_limit(self, val):
-        '''Setting the current budget limit'''
-        self.current_budget_limit = val
+			if len(self.assets) >= self.n_assets:
+				break
 
-    def set_annual_budget_limit_model(self, model):
-        '''Setting the budget limit in time'''
-        self.annual_budget_model = model
-        
-    def set_npv_budget_limit(self, val):
-        '''Set the npv of the budget limit'''
-        self.npv_budget_limit = val
+		return self.assets
 
-    def objective1(self):
-        return np.random.random()
+	def set_current_budget_limit(self, val):
+		'''Setting the current budget limit'''
+		self.current_budget_limit = val
 
-    def objective2(self):
-        return np.random.random()
-    
-    
+	def set_annual_budget_limit_model(self, model):
+		'''Setting the budget limit in time'''
+		self.annual_budget_model = model
+		
+	def set_npv_budget_limit(self, val):
+		'''Set the npv of the budget limit'''
+		self.npv_budget_limit = val
+
+	def objective1(self):
+		return np.random.random()
+
+	def objective2(self):
+		return np.random.random()
+	
+	
