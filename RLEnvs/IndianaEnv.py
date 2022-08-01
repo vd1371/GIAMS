@@ -36,7 +36,7 @@ class IndianaEnv(BaseEnv):
 	def reset_network_budget(self):
 
 		self.network.set_current_budget_limit(10000)
-		self.network.set_annual_budget_limit_model(Power(X0 = 2000,
+		self.network.set_annual_budget_limit_model(Power(X0 = 10000,
 												growth_rate = 0.00,
 												settings = self.settings))
 		self.network.set_npv_budget_limit(1e+20)
