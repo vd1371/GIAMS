@@ -1,7 +1,14 @@
 __pycache__*
+*.py[cod]
+.venv/
+venv/
 reports/
 .project
 .pydevproject
 MindMap.eddx
 report.log
-run.py
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
