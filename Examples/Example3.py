@@ -24,163 +24,160 @@ from utils.AwesomeTimeIt import timeit
 from utils.GeneralSettings import *
 
 
-def lca(mrr = None):
+def lca(mrr=None):
 
-	session_name = 'Indiana'
-	
-	mynetwork = IndianaNetwork("INDIANA2019",
-								n_assets = 1,
-								is_deck = False,
-				                is_superstructure = True,
-				                is_substructure = False)
-	mynetwork.load_network()
+    session_name = "Indiana"
 
-	if not mrr is None:
-		mynetwork.assets[0].mrr_model.set_mrr(mrr)
+    mynetwork = IndianaNetwork(
+        "INDIANA2019", n_assets=1, is_deck=False, is_superstructure=True, is_substructure=False
+    )
+    mynetwork.load_network()
 
-	mynetwork.set_current_budget_limit(100000)
-	mynetwork.set_budget_limit_model(Linear(X0 = 100000, drift = 0))
-	mynetwork.set_npv_budget_limit(10000)
+    if not mrr is None:
+        mynetwork.assets[0].mrr_model.set_mrr(mrr)
 
-	simulator = MainSimulator()
-	lca = LCA(network = mynetwork,
-			lca_name = session_name,
-			simulator = simulator,
-			random = False,
-			is_hazard = False,
-			n_simulations = 500)
+    mynetwork.set_current_budget_limit(100000)
+    mynetwork.set_budget_limit_model(Linear(X0=100000, drift=0))
+    mynetwork.set_npv_budget_limit(10000)
 
-	return lca
+    simulator = MainSimulator()
+    lca = LCA(
+        network=mynetwork,
+        lca_name=session_name,
+        simulator=simulator,
+        random=False,
+        is_hazard=False,
+        n_simulations=500,
+    )
+
+    return lca
 
 
 def GA_test(obj):
 
-	optimizer = GA(obj)
-	optimizer.set_ga_chars(crossver_prob = 0.75,
-							mutation_prob = 0.1,
-							population_size = 50,
-							n_generations = 100,
-							n_elites = 5,
-							optimzition_type = 'max',
-							n_jobs = -1)
-	optimizer.optimize()
+    optimizer = GA(obj)
+    optimizer.set_ga_chars(
+        crossover_prob=0.75,
+        mutation_prob=0.1,
+        population_size=50,
+        n_generations=100,
+        n_elites=5,
+        optimization_type="max",
+        n_jobs=-1,
+    )
+    optimizer.optimize()
+
 
 @timeit
 def example():
 
-	mylca = lca()
-	mylca.run()
-	# GA_test(lca)
+    mylca = lca()
+    mylca.run()
+    # GA_test(lca)
+
 
 # ---------------------------- #
 # For the parallel section     #
 def lca_for_validation(mrrs, q_out):
-	
 
-	for mrr in mrrs:
+    for mrr in mrrs:
+        session_name = "Indiana"
+        mynetwork = IndianaNetwork(
+            "INDIANA2019", n_assets=1, is_deck=False, is_superstructure=True, is_substructure=False
+        )
+        mynetwork.load_network()
+        mynetwork.set_current_budget_limit(100000)
+        mynetwork.set_budget_limit_model(Linear(X0=100000, drift=0))
+        mynetwork.set_npv_budget_limit(10000)
 
-		session_name = 'Indiana'
-		mynetwork = IndianaNetwork("INDIANA2019",
-									n_assets = 1,
-									is_deck = False,
-					                is_superstructure = True,
-					                is_substructure = False)
-		mynetwork.load_network()
-		mynetwork.set_current_budget_limit(100000)
-		mynetwork.set_budget_limit_model(Linear(X0 = 100000, drift = 0))
-		mynetwork.set_npv_budget_limit(10000)
+        mynetwork.assets[0].mrr_model.set_mrr(np.atleast_2d(mrr))
 
-		mynetwork.assets[0].mrr_model.set_mrr(np.atleast_2d(mrr))
+        simulator = MainSimulator()
+        lca = LCA(
+            network=mynetwork,
+            lca_name=session_name,
+            simulator=simulator,
+            random=False,
+            is_hazard=False,
+            n_simulations=1000,
+        )
 
-		simulator = MainSimulator()
-		lca = LCA(network = mynetwork,
-				lca_name = session_name,
-				simulator = simulator,
-				random = False,
-				is_hazard = False,
-				n_simulations = 1000)
-		
-		lca.run()
-		results = lca.get_network_npv()
+        lca.run()
+        results = lca.get_network_npv()
 
-		q_out.put(mrr + results)
+        q_out.put(mrr + results)
 
 
-def validate_ga(N = None, batch_size = 20000):
+def validate_ga(N=None, batch_size=20000):
 
-	results_queue = Queue()
-	n_cores = mp.cpu_count()-2
+    results_queue = Queue()
+    n_cores = mp.cpu_count() - 2
 
-	genset = GenSet()
-	combs = list(itertools.product([0, 1], repeat = genset.n_steps * genset.dt * genset.n_elements))
-	if not N is None:
-		combs = combs[:N]
+    genset = GenSet()
+    combs = list(itertools.product([0, 1], repeat=genset.n_steps * genset.dt * genset.n_elements))
+    if not N is None:
+        combs = combs[:N]
 
-	slicer = int(len(combs)/n_cores) + 1
+    slicer = int(len(combs) / n_cores) + 1
 
-	# Creating and filling the pool
-	pool = []
-	for j in range (n_cores):
-		init_idx = j * slicer
-		last_idx = (j + 1) * slicer if j < n_cores-1 else len(combs)
-		worker = Process(target = lca_for_validation, args = (combs[init_idx: last_idx], results_queue,))
-		pool.append(worker)
+    # Creating and filling the pool
+    pool = []
+    for j in range(n_cores):
+        init_idx = j * slicer
+        last_idx = (j + 1) * slicer if j < n_cores - 1 else len(combs)
+        worker = Process(
+            target=lca_for_validation,
+            args=(
+                combs[init_idx:last_idx],
+                results_queue,
+            ),
+        )
+        pool.append(worker)
 
-	print('starting processes...')
-	for worker in pool:
-		worker.start()
+    print("starting processes...")
+    for worker in pool:
+        worker.start()
 
-	all_samples = []
-	done_workers = 0
-	batch_number = 0
+    all_samples = []
+    done_workers = 0
+    batch_number = 0
 
+    cols = []
+    for elem_number in range(genset.n_elements):
+        for i in range(genset.dt * genset.n_steps):
+            cols.append(f"Eelem{elem_number}-{i}")
+    cols += ["UserCost", "AgencyCost", "Utility"]
 
-	cols = []
-	for elem_number in range(genset.n_elements):
-		for i in range (genset.dt*genset.n_steps):
-			cols.append(f'Eelem{elem_number}-{i}')
-	cols += ['UserCost', 'AgencyCost', 'Utility']
+    def save_batch(all_samples, cols, batch_number, batch_size=batch_size):
 
-	def save_batch(all_samples, cols, batch_number, batch_size = batch_size):
-		
-		batch_number += 1
-		df = pd.DataFrame(all_samples[:batch_size], columns = cols)
-		df.to_csv(f"./reports/GA-Validation-{batch_number}.csv")
-		print (f'Batch number {batch_number} is done')
+        batch_number += 1
+        df = pd.DataFrame(all_samples[:batch_size], columns=cols)
+        df.to_csv(f"./reports/GA-Validation-{batch_number}.csv")
+        print(f"Batch number {batch_number} is done")
 
-		return batch_number, all_samples[batch_size:]
+        return batch_number, all_samples[batch_size:]
 
+    while any(worker.is_alive() for worker in pool):
+        while not results_queue.empty():
+            sample = results_queue.get()
 
-	while any(worker.is_alive() for worker in pool):
+            if not sample is None:
+                all_samples.append(sample)
 
-		while not results_queue.empty():
+            if len(all_samples) > batch_size:
+                batch_number, all_samples = save_batch(all_samples, cols, batch_number)
 
-			sample = results_queue.get()
+    print("waiting for workers to join...")
+    for worker in pool:
+        worker.join()
+    print("all workers are joined.\n")
 
-			if not sample is None:
-				all_samples.append(sample)
+    if len(all_samples) > 0:
+        batch_number, all_samples = save_batch(all_samples, cols, batch_number)
 
-			if len(all_samples) > batch_size:
-				batch_number, all_samples = save_batch(all_samples, cols, batch_number)
-
-				
-
-	print('waiting for workers to join...')
-	for worker in pool:
-		worker.join()
-	print('all workers are joined.\n')
-
-	if len(all_samples) > 0:
-		batch_number, all_samples = save_batch(all_samples, cols, batch_number)
-
-	print (f'Done')
+    print(f"Done")
 
 
 if __name__ == "__main__":
-
-	# example1()
-	validate_ga()
-
-
-
-
+    # example1()
+    validate_ga()
