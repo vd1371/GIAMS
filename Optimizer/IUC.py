@@ -1,136 +1,151 @@
-#Loading dependencies
+# Loading dependencies
 import time
-import numpy as np
-import pandas as pd
 from itertools import product
 
+import numpy as np
+import pandas as pd
+
+
 class IUC:
-	def __init__(self, **params):
-		'''Incremental utility cost heuristic
+    def __init__(self, **params):
+        """Incremental utility cost heuristic
 
-		This implementation of IUC optimiztion is built on the
-		premise that we have 4 different types of actions
-		Do nothing, maintenance, rehabiliation, reconstruction
-		It also works with the BridgeLCA and AccumulatorThree
-		'''	
-		self.lca = params.pop('lca')()
-		self.settings = params.pop('settings')
+        This implementation of IUC optimization is built on the
+        premise that we have 4 different types of actions:
+        Do nothing, maintenance, rehabilitation, reconstruction
+        It also works with the BridgeLCA and AccumulatorThree
+        """
+        self.lca = params.pop("lca")()
+        self.settings = params.pop("settings")
 
-		n_assets = len(self.lca.network.assets)
-		self.asset_mrr_shape = self.lca.network.assets[0].mrr_model.mrr.shape
-		self.network_mrr_shape = (n_assets, self.asset_mrr_shape[0], self.asset_mrr_shape[1])
+        n_assets = len(self.lca.network.assets)
+        self.asset_mrr_shape = self.lca.network.assets[0].mrr_model.mrr.shape
+        self.network_mrr_shape = (n_assets, self.asset_mrr_shape[0], self.asset_mrr_shape[1])
 
-		self.possible_mrrs = list(product([0,1], repeat=self.settings.n_elements * 2))
+        self.possible_mrrs = list(product([0, 1], repeat=self.settings.n_elements * 2))
 
-	def optimize(self):
+    def optimize(self):
 
-		network_mrr = np.zeros(self.network_mrr_shape)
+        network_mrr = np.zeros(self.network_mrr_shape)
 
-		for step in range(self.settings.n_steps):
+        for step in range(self.settings.n_steps):
+            start = time.time()
+            assessment_dic = {}
+            for asset_idx, asset in enumerate(self.lca.network.assets):
+                print(
+                    f"Asset {asset_idx + 1} is about to be processed at step {step + 1} / {self.settings.n_steps}"
+                )
 
-			start = time.time()
-			assessment_dic = {}
-			for asset_idx, asset in enumerate(self.lca.network.assets):
+                mrr = np.copy(network_mrr[asset_idx])
 
-				print (f"Asset {asset_idx + 1} is about to be processed at step {step+1} / {self.settings.n_steps}")
+                for possible_mrr_idx, possible_mrr in enumerate(self.possible_mrrs):
+                    # Assigning a possible mrr plan
+                    for elem_idx, element in enumerate(asset.elements):
+                        mrr[elem_idx][step * self.settings.dt] = possible_mrr[
+                            elem_idx * self.settings.dt
+                        ]
+                        mrr[elem_idx][step * self.settings.dt + 1] = possible_mrr[
+                            elem_idx * self.settings.dt + 1
+                        ]
 
-				mrr = np.copy(network_mrr[asset_idx])
+                    # Assigning it to the
+                    asset.mrr_model.set_mrr(mrr)
 
-				for possible_mrr_idx, possible_mrr in enumerate(self.possible_mrrs):
+                    # Running the simulation
+                    self.lca.run_for_one_asset(asset)
 
-					# Assigning a possible mrr plan
-					for elem_idx, element in enumerate(asset.elements):
-						mrr[elem_idx][step*self.settings.dt] = possible_mrr[elem_idx*self.settings.dt]
-						mrr[elem_idx][step*self.settings.dt + 1] = possible_mrr[elem_idx*self.settings.dt + 1]
+                    # Let's get the costs
+                    user_costs = asset.accumulator.meta_data["user_costs"].at_year(
+                        step * self.settings.dt
+                    )
+                    agency_costs = asset.accumulator.meta_data["agency_costs"].at_year(
+                        step * self.settings.dt
+                    )
+                    asset_utils = asset.accumulator.meta_data["asset_utils"].at_year(
+                        step * self.settings.dt
+                    )
 
-					# Assigning it to the
-					asset.mrr_model.set_mrr(mrr)
+                    # Find the utiliti/cost and agency costs
+                    U_C = asset_utils / (user_costs + agency_costs) if agency_costs != 0 else 0
 
-					# Running the simulation
-					self.lca.run_for_one_asset(asset)
+                    # Adding the results to the assessment dic
+                    hash_key = hash(str(asset.ID) + str(step) + str(possible_mrr))
+                    assessment_dic[hash_key] = [
+                        asset.ID,
+                        asset_idx,
+                        U_C,
+                        agency_costs,
+                        np.copy(possible_mrr),
+                        user_costs,
+                    ]
 
-					# Let's get the costs
-					user_costs = asset.accumulator.meta_data['user_costs'].at_year(step*self.settings.dt)
-					agency_costs = asset.accumulator.meta_data['agency_costs'].at_year(step*self.settings.dt)
-					asset_utils = asset.accumulator.meta_data['asset_utils'].at_year(step*self.settings.dt)
+            # Sorting the actions based on U/C
+            # item [1][1] refers to the values of the dictionary and U_C
+            assessment_dic = {
+                k: v
+                for k, v in sorted(
+                    assessment_dic.items(), key=lambda item: item[1][2], reverse=True
+                )
+            }
 
-					# Find the utiliti/cost and agency costs
-					U_C = asset_utils/(user_costs + agency_costs) if agency_costs != 0 else 0
+            # Finding the budget at the step
+            remaining_budget = self.lca.network.budget_model.predict_series(random=False)[step]
+            planned_assets = []
 
-					# Adding the results to the assessment dic
-					hash_key = hash(str(asset.ID) + str(step) + str(possible_mrr)) 
-					assessment_dic[hash_key] = [asset.ID, asset_idx, U_C, agency_costs, np.copy(possible_mrr), user_costs]
+            # Update the network_mrr based on the budget and the assessment dic
+            temp_dic = {}
+            for k, v in assessment_dic.items():
+                asset_id, asset_idx, U_C, agency_costs, temp_mrr, user_costs = v
 
-			# Sorting the actions based on U/C
-			# item [1][1] refers to the values of the dictionary and U_C
-			assessment_dic = {k: v for k, v in sorted(assessment_dic.items(), key=lambda item: item[1][2], reverse = True)}
+                # If the asset is not in the planned_assets
+                # and if its agency costs is less than the remaining budget (to meet the budget limitations)
+                # and if the U_C > 0 (To prevent working on an intanct object)
+                if asset_id not in planned_assets and agency_costs < remaining_budget and U_C > 0:
+                    # Add the asset to the planned_assets holder
+                    planned_assets.append(asset_id)
 
-			# Finding the budget at the step
-			remaining_budget = self.lca.network.budget_model.predict_series(random = False)[step]
-			planned_assets = []
+                    # Deduct the cost from the remaining budget
+                    remaining_budget -= agency_costs
 
-			# Update the network_mrr based on the budget and the assessment dic
-			temp_dic = {}
-			for k, v in assessment_dic.items():
+                    # Set the corresponding mrr to the network mrr
+                    for elem_idx, element in enumerate(asset.elements):
+                        network_mrr[asset_idx][elem_idx][step * self.settings.dt] = temp_mrr[
+                            elem_idx * self.settings.dt
+                        ]
+                        network_mrr[asset_idx][elem_idx][step * self.settings.dt + 1] = temp_mrr[
+                            elem_idx * self.settings.dt + 1
+                        ]
 
-				asset_id, asset_idx, U_C, agency_costs, temp_mrr, user_costs = v
+                    temp_dic[asset_id] = list(network_mrr[asset_idx].reshape(1, -1)[0]) + [
+                        U_C,
+                        agency_costs,
+                        user_costs,
+                    ]
 
-				# If the asset is not in the planned_assets
-				# and if its agency costs is less than the remaining budget (to meet the budget limitations)
-				# and if the U_C > 0 (To prevent working on an intanct object)
-				if not asset_id in planned_assets and agency_costs < remaining_budget and U_C > 0:
+            print(f"Step {step} is analyzed and optimized in {time.time() - start:.2f} seconds")
 
-					# Add the asset to the planned_assets holder
-					planned_assets.append(asset_id)
-					
-					# Deduct the cost from the remaining budget
-					remaining_budget -= agency_costs
+        # Turning temp_dic to a dataframe
+        cols = []
+        for i in range(self.settings.n_elements):
+            for j in range(2):
+                cols.append(f"Elem{i}-{j}")
+        cols += ["U_C", "AgencyCosts", "UserCosts"]
+        df = pd.DataFrame.from_dict(temp_dic, orient="index", columns=cols)
+        df.index.rename("ID")
+        df.iloc[:, :6] = df.iloc[:, :6].astype(int)
+        df.to_csv(self.lca.directory + f"/{self.lca.lca_name}.csv")
 
-					# Set the corresponding mrr to the network mrr
-					for elem_idx, element in enumerate(asset.elements):
-						network_mrr[asset_idx][elem_idx][step*self.settings.dt] = temp_mrr[elem_idx*self.settings.dt]
-						network_mrr[asset_idx][elem_idx][step*self.settings.dt + 1] = temp_mrr[elem_idx*self.settings.dt + 1]
-
-					temp_dic[asset_id] = list(network_mrr[asset_idx].reshape(1, -1)[0]) + [U_C, agency_costs, user_costs]
-
-			print (f"Step {step} is analyzed and optimized in {time.time() - start:.2f} seconds")
-
-		# Turning temp_dic to a dataframe
-		cols = []
-		for i in range (self.settings.n_elements):
-			for j in range (2):
-				cols.append(f'Elem{i}-{j}')
-		cols += ['U_C', 'AgencyCosts', 'UserCosts']
-		df = pd.DataFrame.from_dict(temp_dic, orient='index', columns = cols)
-		df.index.rename('ID')
-		df.iloc[:, :6] = df.iloc[:, :6].astype(int)
-		df.to_csv(self.lca.directory + f"/{self.lca.lca_name}.csv")
-
-		print ("IUC optimization is done")
-
-
+        print("IUC optimization is done")
 
 
 def to_binary(actions):
-	elements_mrr = []
-	for val in actions:
-		if val == 0:
-			elements_mrr += [[0, 0]]
-		elif val == 1:
-			elements_mrr += [[0, 1]]
-		elif val == 2:
-			elements_mrr += [[1, 0]]
-		elif val == 3:
-			elements_mrr += [[1, 1]]
-
-
-
-
-				
-
-
-
-
-
-
-
+    elements_mrr = []
+    for val in actions:
+        if val == 0:
+            elements_mrr += [[0, 0]]
+        elif val == 1:
+            elements_mrr += [[0, 1]]
+        elif val == 2:
+            elements_mrr += [[1, 0]]
+        elif val == 3:
+            elements_mrr += [[1, 1]]
